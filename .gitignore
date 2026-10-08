@@ -1,0 +1,35 @@
+# Real lead data (contains personal/business contact details) — never commit.
+# See AGENTS.md "Non-negotiable product rules" and the scope spec section 9.
+data/
+*.local.csv
+imports/
+exports/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node / frontend
+node_modules/
+dist/
+build/
+.vite/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
