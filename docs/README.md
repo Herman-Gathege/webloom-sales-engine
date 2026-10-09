@@ -8,6 +8,7 @@ Start with the document that matches what you are about to do.
 | what we are building **now** | [delivery plan](delivery/2026-10-09-delivery-plan.md) |
 | the full long-term destination | [product roadmap](delivery/product-roadmap.md) |
 | what your piece of the current block is | [homework — Epic 1](homework/epic-1/README.md) |
+| what is done, verified, and still left in the current block | [Epic 1 status](homework/epic-1/status.md) |
 | how we branch, review, and merge | [how we work](team/how-we-work.md) |
 | what we verified about FikaTu | [FikaTu integration notes](research/2026-10-08-fikatu-integration-notes.md) |
 | the exact Lead shape the API and UI agree on | [Epic 1 lead API contract](delivery/epic-1-lead-contract.md) |

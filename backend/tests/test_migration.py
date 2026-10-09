@@ -18,7 +18,9 @@ def migration_database_url() -> Iterator[str]:
     base_url = make_url(require_test_database_url())
     database_name = f"{base_url.database}_migration_test"
     admin_url = base_url.set(database="postgres")
-    migration_url = str(base_url.set(database=database_name))
+    # render_as_string(hide_password=False), not str(): SQLAlchemy's URL.__str__ masks the
+    # password as "***", which only works where PostgreSQL does not ask for one.
+    migration_url = base_url.set(database=database_name).render_as_string(hide_password=False)
 
     admin = create_engine(admin_url, isolation_level="AUTOCOMMIT")
     with admin.connect() as connection:
