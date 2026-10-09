@@ -1,5 +1,9 @@
 # Herman — Epic 1
 
+> **Status: done, in review.** The shell is in [`frontend/`](../../../../frontend/README.md) and
+> runs with `npm run dev`. The agreed shape is written up in
+> [`docs/delivery/epic-1-lead-contract.md`](../../../delivery/epic-1-lead-contract.md).
+
 ## Your mission
 
 Get the first visible product shell working and make sure everyone's work has somewhere
@@ -18,15 +22,20 @@ to land.
 
 ## Done means
 
-- [ ] The app starts with one command.
-- [ ] Navigation exists and moves between the list and a lead.
-- [ ] Lead List renders.
-- [ ] Lead Detail renders.
-- [ ] The UI can display a Lead in the agreed shape.
-- [ ] The PR is small and reviewable.
+- [x] The app starts with one command — `cd frontend && npm run dev`. Needs Node 22; Vite 8
+      will not run on Node 21, which is now pinned in `.nvmrc`.
+- [x] Navigation exists and moves between the list and a lead.
+- [x] Lead List renders — a row per lead, with sector, area, phone, website and status.
+- [x] Lead Detail renders, including the lead's activity history.
+- [x] The UI can display a Lead in the agreed shape.
+- [x] The PR is reviewable, with a caveat: 43 files, but ~4,600 of those lines are
+      `package-lock.json` and ~350 are generated shadcn components. The hand-written part is
+      ~900 lines across 12 files.
 
 ## Bring back
 
-- The working UI.
+- The working UI — `frontend/`, on the `feat/epic-1-frontend-shell` branch.
 - Your pull request.
-- One short note: "What should the backend give me?"
+- The note "what should the backend give me?", written up as the agreed Lead contract.
+- The thing worth saying out loud: the shell runs on sample data until the API answers, and
+  says so on screen. That is what lets Sharon build in parallel without either side waiting.

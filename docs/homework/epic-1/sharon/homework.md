@@ -1,5 +1,9 @@
 # Sharon — Epic 1
 
+> **Status: yours to pick up, and unblocked.** Herman's UI is already built against the
+> contract and runs on sample data with a visible banner. Your API is the thing that
+> replaces that banner with real leads — nothing is waiting on you to be designed first.
+
 ## Your mission
 
 Make a real Lead travel from the database to the API.
