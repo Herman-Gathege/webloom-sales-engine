@@ -69,7 +69,8 @@ apart.
 
 ## Current state
 
-Epic 1 — the first Lego block, half built.
+Epic 1 — the first Lego block. Both halves are merged; the rails that start them together
+are not. The one-page picture is `docs/homework/epic-1/status.md`.
 
 - **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
@@ -77,14 +78,18 @@ Epic 1 — the first Lego block, half built.
 - **Built:** `backend/` — the Lead and Activity model, the Alembic migration, an idempotent
   synthetic seed, `GET /api/v1/leads` and `GET /api/v1/leads/{id}`, and a pytest suite.
   Commands are in `backend/README.md`.
-- **Not built:** the rails around it — Docker Compose, the API and worker containers, and
-  Nginx. That is Mark's piece.
+- **Verified:** 34/34 tests green against PostgreSQL 17 and Python 3.12, and the list
+  endpoint answers through Vite's dev proxy, which is what flips the UI from sample data to
+  live data.
+- **Not built:** the rails around it — Docker Compose, the API container, and the database
+  bootstrap. That is Mark's piece. Until it lands, start the two halves by hand.
+- **Not done:** nobody who would use this as a seller has looked at it. That is Anne's piece.
 - The shapes the two halves must agree on are frozen in
   `docs/delivery/epic-1-lead-contract.md`. Change that document and
   `frontend/src/api/types.ts` in the same PR, or neither.
 - FikaTu integration is **not** in Epic 1 — the seam is a small fake adapter. There is no
   auth, no sending, and none of the other eleven screens yet. The intended layout below is
-  the target; the backend half does not exist.
+  the target; the parts of it Epic 1 does not need yet do not exist.
 
 ## The boundary rule
 
@@ -166,7 +171,7 @@ ADR in `docs/decisions/`.
 
 ## Commands
 
-The frontend exists; the backend does not. Keep this section honest — correct it in the same
+Both halves exist; the containers do not. Keep this section honest — correct it in the same
 PR that changes a command.
 
 ```bash
@@ -179,7 +184,7 @@ cd backend && .venv/bin/python -m app.seed     # load the synthetic sample leads
 cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000   # the API the SPA proxies to
 cd backend && .venv/bin/python -m pytest -v    # needs TEST_DATABASE_URL; see backend/README.md
 
-docker compose up --build                      # api, worker, postgres, redis, frontend — not built yet
+docker compose up --build                      # api + postgres — Mark's piece, not built yet
 docker compose exec api pytest tests/ -v       # not built yet
 ```
 
