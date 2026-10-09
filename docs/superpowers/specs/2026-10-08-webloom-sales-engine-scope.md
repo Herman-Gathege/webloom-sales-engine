@@ -83,7 +83,7 @@ proposal — swap freely, the point is that nobody is idle and nobody is a bottl
 | Person | Primary contribution | Also owns |
 |---|---|---|
 | **Mark Mwenesi** (lead, most skilled) | Architecture, backend + infrastructure, code review, hardest integration work, unblocking others | Technical decisions, ADRs, deployment, security review |
-| **Herman Gathege** | Product scope, backlog and prioritisation, user stories and acceptance criteria, sprint ceremonies, stakeholder communication | Frontend delivery, documentation, demo/pilot coordination |
+| **Herman Gathege** | Product scope, backlog and prioritisation, user stories and acceptance criteria, team ceremonies, stakeholder communication | Frontend delivery, documentation, demo/pilot coordination |
 | **Anne** | Sales workflow design, message copy and templates, lead-list curation, qualification criteria, handoff playbook, pilot campaign execution | Definition of the funnel metrics, feedback loop from real conversations |
 | **Sharon Kendi** (co-intern) | Backend features end-to-end (models, services, APIs), tests, migrations, integration work | Documentation of what she builds, paired work with Mark on hard tasks |
 
@@ -255,7 +255,7 @@ the seam testable with a fake.
 
 ### 6.4 Data model sketch
 
-Indicative tables — final schema is a design task in Sprint 0.
+Indicative tables — the final schema is agreed block by block, as the blocks need it.
 
 | Table | Purpose | Key fields |
 |---|---|---|
@@ -359,30 +359,35 @@ Anne owns the definitions; the Reports screen owns the display.
 
 ## 8. Delivery approach
 
-Agile, four people, two-week sprints, all four as developers. The detailed backlog,
-epics, stories, task assignments, and per-sprint goals live in
-`docs/delivery/2026-10-08-agile-delivery-plan.md`.
+Four people, all developers, working part-time alongside demanding day jobs. We deliver this
+scope as small vertical slices — "Lego blocks" — rather than layer-by-layer sprints. Every
+block runs the same loop:
 
-Shape of the plan:
+```text
+Agree → Build → PR → Review → Merge → Run → Demo → Next block
+```
 
-| Sprint | Theme | Milestone |
-|---|---|---|
-| Sprint 0 (1 week) | Alignment, scaffold, environments, schema review, FikaTu app registration | Everyone can run the stack locally |
-| Sprint 1 | Lead Desk: auth, users, leads, CSV import, lead detail, activity log | The 52-lead list is in the system |
-| Sprint 2 | Offers, templates, campaigns, draft generation, approval queue | Real personalised drafts, reviewed by a human |
-| Sprint 3 | FikaTu integration, sending, delivery status sync | **M1: first live emails/SMS to a small slice** |
-| Sprint 4 | Replies, qualification, handoff, follow-up tasks | **M2: a real conversation handed to Anne** |
-| Sprint 5 | Pipeline, deals, reports v1 | **M3: funnel visible end to end** |
-| Sprint 6 | Hardening, onboarding, full pilot on the lead list | **M4: pilot campaign executed and reviewed** |
+The block we are building now, the next few blocks, and what is deliberately not being built
+yet live in [`docs/delivery/2026-10-09-delivery-plan.md`](../../delivery/2026-10-09-delivery-plan.md).
+The full long-term destination — the epics that make up the whole Sales Engine — is in
+[`docs/delivery/product-roadmap.md`](../../delivery/product-roadmap.md). That roadmap is not a
+commitment, and its estimates are rough guidance only.
 
-**Definition of Done (every story):** code reviewed by one other person, tests written and
-passing, runs in Docker locally, docs/README updated if behaviour changed, and the story is
-demoed in the sprint review.
+**Epic 1 — First Lego Block** is the first slice: seed data → Lead → PostgreSQL → FastAPI →
+React → Lead List → Lead Detail → activity/history. Roughly 5–7 focused days end to end,
+with each person's piece sized at about one normal workday. It is deliberately much smaller
+than the MVP, and its purpose is as much to establish how the four of us work together as to
+produce the feature.
 
-**Working agreements:** trunk-based with short-lived branches (`feat/…`, `fix/…`),
-conventional commits, PR required before merge, Mark reviews auth/sending/schema changes.
-Daily 15-minute standup; sprint review + retrospective at sprint end. Decisions that are
-hard to reverse get an ADR in `docs/decisions/`.
+**Definition of Done (every piece):** someone other than the author can pull it and run it,
+its acceptance criteria are demonstrated, its tests pass, migrations are reversible, and no
+real lead data or secret is in the diff. The short version of our working agreements —
+branching, PRs, review, disagreements — is in
+[`docs/team/how-we-work.md`](../../team/how-we-work.md).
+
+**Milestones are unchanged:** **M1** first live sends to a small slice, **M2** a real
+conversation handed to a person, **M3** the funnel visible end to end, **M4** the pilot
+campaign executed and reviewed. Which block reaches each one is decided one block at a time.
 
 ## 9. Guardrails and compliance
 
@@ -414,14 +419,14 @@ reputation or a provider account is worse than no sales engine.
 | Cold outreach damages the Webloom brand | High | Tight targeting, human approval, opt-out, small pilot first |
 | Website sales stall before the engine proves itself | High | The engine's first job is to expose higher-value needs; keep selling manually in parallel |
 | FikaTu cannot deliver what we assume (status, inbound) | Medium | Research note above; design the seam so it can be swapped or supplemented |
-| Scope creep into a full CRM | High | The out-of-scope list in §4.2 is enforced at sprint planning |
-| Four people, other commitments, exam/iteration periods | Medium | Sprint 0 is small; stories are bite-sized; no story depends on one person finishing late |
-| Team is learning Scrum and the stack simultaneously | Medium | Small sprints, visible demo, Mark pairs with Sharon |
+| Scope creep into a full CRM | High | The out-of-scope list in §4.2 is enforced at block planning |
+| Four people, other commitments, exam/iteration periods | Medium | The first block is small; pieces are bite-sized; no piece depends on one person finishing late |
+| The team is learning the stack and a new way of working at the same time | Medium | Small slice, visible demo, Mark pairs with Sharon |
 | Personal data mishandled | High | §9 rules, gitignored data, access control, audit log |
 
 ## 11. Open questions
 
-To be resolved during Sprint 0 or as they arise. Each has an owner and a default so we are
+To be resolved as they arise. Each has an owner and a default so we are
 never blocked.
 
 | # | Question | Default we will assume | Owner |
@@ -437,6 +442,7 @@ never blocked.
 
 ## 12. Approval
 
-This spec is the gate. Once the four of us agree on it, we write the implementation plan
-(`docs/superpowers/plans/…`) and start Sprint 0. Changes after approval are proposed as
-edits to this file, so the written scope stays the single source of truth.
+This spec is the gate. Once the four of us agree on it, the delivery plan splits the first
+block into the four pieces in `docs/homework/epic-1/` and we start building. Changes after
+approval are proposed as edits to this file, so the written scope stays the single source of
+truth.
