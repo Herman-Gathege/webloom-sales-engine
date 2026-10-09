@@ -10,5 +10,6 @@ is [Epic 1 — First Lego Block](../homework/epic-1/README.md).
 | Document | What it is |
 |---|---|
 | [Delivery plan](2026-10-09-delivery-plan.md) | Now / Next / Later. The plan we act on. |
+| [Epic 1 lead API contract](epic-1-lead-contract.md) | The exact Lead and Activity shapes the frontend and backend agree on. |
 | [Product roadmap](product-roadmap.md) | The full destination (R1–R13). Not a commitment. |
 | [Homework — Epic 1](../homework/epic-1/README.md) | The current block, split into four pieces. |

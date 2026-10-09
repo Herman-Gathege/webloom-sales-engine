@@ -10,6 +10,7 @@ Start with the document that matches what you are about to do.
 | what your piece of the current block is | [homework — Epic 1](homework/epic-1/README.md) |
 | how we branch, review, and merge | [how we work](team/how-we-work.md) |
 | what we verified about FikaTu | [FikaTu integration notes](research/2026-10-08-fikatu-integration-notes.md) |
+| the exact Lead shape the API and UI agree on | [Epic 1 lead API contract](delivery/epic-1-lead-contract.md) |
 | what the first lead list actually contains | [lead list audit](research/2026-10-08-lead-list-audit.md) |
 | why a decision was made | [decision records](decisions/) |
 
