@@ -42,7 +42,7 @@ record properly from the first touch.
 Nine sectors over 52 leads is roughly six leads per sector. That is enough to *start*
 learning sector-level conversion, not enough to conclude anything from a single campaign.
 The importer should treat `Sector` as free text now and normalise it into a controlled
-vocabulary during Sprint 1.
+vocabulary in a later block.
 
 ## 4. Data quality findings
 
@@ -82,10 +82,10 @@ vocabulary during Sprint 1.
 
 | Finding | What it changes |
 |---|---|
-| Free-text sector and website status | Sprint 1 importer must accept free text and map it into structured columns, with an unmapped-value report |
+| Free-text sector and website status | The importer must accept free text and map it into structured columns, with an unmapped-value report |
 | Landlines mixed with mobiles | Channel eligibility must be computed per lead, not per campaign |
 | No email addresses | Pilot channel decision (scope §11 Q1) will be SMS/WhatsApp, not email |
-| Social-only leads | Template variants are needed in Sprint 2, not a single template |
+| Social-only leads | Template variants are needed for the pilot, not a single template |
 | No warm/referral leads yet | Anne should add a handful of referral leads before the pilot so the comparison has two sides |
 | No source URL or consent basis | Two extra fields in the `leads` table from the first migration |
 | Raw opening messages are high quality | Use them as the seed content for the first template and as the quality bar for generated drafts |
@@ -98,4 +98,4 @@ vocabulary during Sprint 1.
 3. Extend the list with `source_url`, `reviews_count`, `has_website`, `social_presence`,
    and `consent_basis` before or during import (Herman).
 4. Preserve `Opening message` verbatim in the import as the first draft, and use it to
-   validate that the template renderer reproduces it (Sharon, Sprint 2).
+   validate that the template renderer reproduces it (Sharon, in a later block).

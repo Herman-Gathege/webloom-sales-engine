@@ -10,6 +10,41 @@ approval, send, record replies, qualify, and hand the interested ones to a perso
 Websites are the entry offer, not the ceiling. Automation creates the opportunity; a human
 converts it. FikaTu, our existing notification platform, handles delivery underneath.
 
+## How we work — read this first
+
+We build the product like Lego: build one small working piece, bring everyone's pieces
+together, test it, learn how we worked, then build the next piece. The full working
+agreement is [`docs/team/how-we-work.md`](docs/team/how-we-work.md). The short version:
+
+- **Small vertical slices, not silos.** Nobody disappears for a week to reappear with a layer.
+- **Short-lived branches, small PRs, frequent integration.** `main` is the latest integrated
+  working state.
+- **The first version of everything is small.** Extra abstraction is a cost we pay now for a
+  guess about later; we do not pay it.
+- **Human team agrees on the contract/decision. AI helps implement it. Human reviews the
+  result.** That order is not optional.
+
+## Use subagents on every prompt
+
+This project is built by four people and their AI assistants in parallel. **Use subagents on
+every prompt** — split the work so no single agent (or person) carries the whole load, and so
+the four of us move as one. Skip delegation only when a prompt genuinely has nothing to
+split: a single file, or a single decision on its own.
+
+Rules for doing it safely:
+
+- **One writer per file.** Before delegating, name the files each agent owns. Two agents
+  never edit the same file at the same time.
+- **Give every subagent the shared contract:** the slice it is building, the exact paths it
+  owns, the conventions in `docs/team/how-we-work.md`, and the instruction *do not commit —
+  leave the working tree for the coordinator*.
+- **The coordinator integrates.** Review each subagent's output, reconcile cross-references,
+  run the checks, and make the commit.
+- **Verify, do not trust.** A subagent that reports success has not proven it. The
+  coordinator runs the link check, the tests, or the demo before calling anything done.
+- **Flag ambiguity, do not invent it.** If a subagent would have to guess a requirement, it
+  stops and reports the question instead of filling the gap.
+
 ## Where the truth lives
 
 Read the pointed-to document before acting in that area. Each is the single source of truth
@@ -18,10 +53,14 @@ for its subject — edit the document, not a copy of it.
 | Subject | Document |
 |---|---|
 | What we are building, and what is out of scope | `docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md` |
-| What to build in which order, who owns it | `docs/delivery/2026-10-08-agile-delivery-plan.md` |
+| What we build now, and the next few Lego blocks | `docs/delivery/2026-10-09-delivery-plan.md` |
+| The full long-term product roadmap (roadmap areas R1–R13) | `docs/delivery/product-roadmap.md` |
+| The current block, split into four homework cards | `docs/homework/epic-1/` |
+| Branching, PRs, review, definition of done, disagreements | `docs/team/how-we-work.md` |
 | How to talk to FikaTu (endpoints, events, token flow, gaps) | `docs/research/2026-10-08-fikatu-integration-notes.md` |
 | What the current lead list actually contains | `docs/research/2026-10-08-lead-list-audit.md` |
 | Decisions that are expensive to reverse | `docs/decisions/` (ADRs) |
+| Everything above, indexed | `docs/README.md` |
 
 When a document and the code disagree, the code is the current state and the document is the
 intent. Say which you found, then fix the document or fix the code — never leave the two
@@ -29,9 +68,12 @@ apart.
 
 ## Current state
 
-Pre-MVP and docs-first. The repository contains documentation only; there is no application
-scaffold, no schema, no CI, and no deployment yet. The intended layout below is a target,
-not a description of what exists.
+Epic 1 — the first Lego block. The repository is documentation plus the first vertical slice
+being built. The slice is: seed data → Lead → PostgreSQL → FastAPI → React → Lead List →
+Lead Detail → Activity/Event. FikaTu integration is **not** in Epic 1 — the seam is a small
+fake adapter. There is no auth, no sending, and none of the other eleven screens yet. The
+intended layout below is a target; correct the "Commands" section in the same PR that creates
+the scaffold.
 
 ## The boundary rule
 
@@ -50,8 +92,8 @@ wrong regardless of how well it is written.
    UI: the send path is reachable only from `approved`.
 2. **Opt-out is terminal.** An opted-out lead is excluded from every future send, checked at
    send time.
-3. **Targeted outreach with a clear opt-out path.** Each channel has a sanctioned,
-   templated path; pacing keeps a campaign from bursting.
+3. **Targeted outreach with a clear opt-out path.** Each channel has a sanctioned, templated
+   path; pacing keeps a campaign from bursting.
 4. **Real lead data stays out of git.** Contact details live in the gitignored `data/`
    directory. Committed fixtures and examples use synthetic values only.
 5. **Every lead records its source and the basis on which we hold it.** Provenance is a
@@ -86,7 +128,7 @@ backend/app/
 ├── database/        # session, base
 └── integrations/    # fikatu/ — the only code that knows FikaTu's API exists
 frontend/            # React SPA
-docs/                # specs, delivery plan, research, ADRs
+docs/                # scope, delivery plan, roadmap, homework, research, ADRs
 docker/              # nginx, postgres, redis, worker configuration
 ```
 
@@ -105,14 +147,11 @@ Auth is JWT (python-jose) with bcrypt password hashing and four roles: `owner`, 
 
 ## Working agreements
 
-- Branches: `feat/<name>`, `fix/<name>`, `chore/<name>`. Nothing is pushed directly to `main`.
-- Commits: conventional (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`).
-- Every change lands through a PR with one approval; Mark approves anything touching auth,
-  sending, schema, or the FikaTu integration.
-- A story is done when its acceptance criteria are demonstrated, its tests pass, it runs in
-  Docker locally, migrations are reversible, and docs are updated. The full definition is in
-  the delivery plan.
-- Decisions that are expensive to reverse get an ADR in `docs/decisions/`.
+Branching, PRs, review, the definition of done, and how we handle disagreements all live in
+`docs/team/how-we-work.md` — that file is the source of truth, so do not restate it here.
+Two extras that belong to this repo specifically: commits are conventional (`feat:`, `fix:`,
+`docs:`, `refactor:`, `test:`, `chore:`), and decisions that are expensive to reverse get an
+ADR in `docs/decisions/`.
 
 ## Commands
 
@@ -127,7 +166,7 @@ cd frontend && npm run lint && npm run build
 
 ## Before you write code
 
-1. Read the scope spec section that covers this work, and the delivery plan story that owns it.
+1. Read the scope spec section that covers this work, and the delivery plan block that owns it.
 2. Check whether FikaTu already does it — the integration research note says what it offers.
 3. Put the rule in a service, the query in a repository, and the wiring in the API layer.
 4. Write the test for the failure path as well as the happy path, especially for anything
