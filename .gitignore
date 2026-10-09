@@ -1,5 +1,5 @@
 # Real lead data (contains personal/business contact details) — never commit.
-# See AGENTS.md "Non-negotiable product rules" and the scope spec section 9.
+# See AGENTS.md "Non-negotiables" and the scope spec section 9.
 data/
 *.local.csv
 imports/

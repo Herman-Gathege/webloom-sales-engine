@@ -120,7 +120,7 @@ Two token types, both JWTs issued by the same service:
 
 **How the Sales Engine gets its key and secret:** register once as an application
 (`POST /api/v1/applications`, authenticated with a user token), then store the returned
-`api_key` and `secret` in the Sales Engine's environment. That is Sprint 0 task E1-S5.
+`api_key` and `secret` in the Sales Engine's environment. That is roadmap story R1.5.
 Neither value is ever committed.
 
 ---
@@ -149,7 +149,7 @@ Adding an event type is a change in the **FikaTu** repository:
 3. Add a template for it (see below).
 4. Ship it through FikaTu's own review process.
 
-This is a cross-repository dependency: the Sales Engine's Sprint 3 cannot complete before a
+This is a cross-repository dependency: the Sales Engine's send block cannot complete before a
 corresponding FikaTu change ships. Sequence it deliberately — see "Gaps".
 
 ## Templates
@@ -207,7 +207,7 @@ or SMS reply back into FikaTu.
 The Sales Engine therefore treats reply detection as its own problem:
 
 - **Pilot approach:** a human records the reply in the Sales Engine UI against the lead and
-  the outreach (story E8-S1). Honest and workable at pilot scale.
+  the outreach (story R8.1). Honest and workable at pilot scale.
 - **Later:** a WhatsApp Business API webhook (or an SMS gateway callback) received by the
   Sales Engine, or by a future FikaTu inbound module, would automate it. That is a separate
   scope decision, listed in the delivery plan as explicitly deferred.
@@ -241,7 +241,7 @@ docker compose exec notification-api python -m pytest tests/ -v
 1. **No matching event type exists.** Every send needs a new registered event type in FikaTu
    (`EVENT_REGISTRY`) with a payload model declaring the recipient field and the message body.
    Until it ships, the Sales Engine cannot send at all.
-   *Workaround:* land the FikaTu event type before the Sales Engine's Sprint 3, as a dated
+   *Workaround:* land the FikaTu event type before the Sales Engine's send block, as a dated
    dependency owned by Mark.
 2. **WhatsApp cannot deliver.** The provider file is empty.
    *Workaround:* run the pilot on email or SMS; treat WhatsApp as a later milestone with its
@@ -264,9 +264,9 @@ docker compose exec notification-api python -m pytest tests/ -v
    *Workaround:* the Sales Engine keeps its own outreach timeline and polls FikaTu for the
    latest status; it never tries to reconstruct history from FikaTu.
 8. **Automatic retry is not established.** Retry exists only as an explicit API call.
-   *Workaround:* idempotent sends (story E7-S3) plus an explicit Sales Engine retry policy.
+   *Workaround:* idempotent sends (story R7.3) plus an explicit Sales Engine retry policy.
 9. **Cross-repository release dependency.** A FikaTu change is required mid-project.
-   *Workaround:* plan it as a dated dependency rather than discovering it in Sprint 3.
+   *Workaround:* plan it as a dated dependency rather than discovering it mid-project.
 
 ## Recommended Sales Engine usage
 
