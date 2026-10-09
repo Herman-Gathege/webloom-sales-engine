@@ -10,8 +10,8 @@ A short everyday name for the Webloom Sales Engine — the tool that does the re
 
 | Name | Meaning/idea | Why it fits | Main concern |
 |---|---|---|---|
-| **Jicho** | Swahili: eye (*macho* = eyes) | The "extra eyes on the market" story, and it maps to handoff — automation looks, a person looks closer | *Jicho Pevu*, KTN's investigative strand, is the local association; singular is *jicho*, plural *macho* |
-| **Fursa** | Swahili: opportunity — "a chance for advancement, progress or profit" | Names the product's output, not its method, so it survives past lead-gen; short and natural to say | A common noun, so un-ownable in search; a few small Kenyan orgs already use it (Fursa Insurance Agency, Fursa Africa) |
+| **Jicho** | Swahili: eye (*macho* = eyes) | The "extra eyes on the market" story, and it maps to handoff — automation looks, a person looks closer | The local association is *Jicho Pevu*, a Kenyan investigative TV strand (we could not verify this from here — check it locally); singular is *jicho*, plural *macho* |
+| **Fursa** | Swahili: opportunity — "a chance for advancement, progress or profit" | Names the product's output, not its method, so it survives past lead-gen; short and natural to say | A common noun, so un-ownable in search; "Fursa – Buy & Sell Anything" is already in the Kenyan App Store |
 | **Lenga** | Swahili: to aim (at), to strive for | Targeting, and the root of *lengo* — so the product's own vocabulary can grow later (*malengo* = objectives) | Least distinctive: a Kenyan surname, a Patagonian tree genus, and Occitan for "language" |
 | **Nia** | Swahili: intention, purpose | Warm, two syllables, and it names what the engine acts on — intent, not broadcast | Un-ownable: an npm library, a PyPI package, "Nia Payments" in the Kenyan App Store, dozens of NIA acronyms |
 | **Kibali** | Swahili: approval, consent (plural *vibali*) | Names our loudest rule — a human approves every send — and it is the cleanest namespace we found (56 GitHub matches) | Three syllables; Kibali Awards and Kibali Africa Tours are in Nairobi; Kibali is also a DRC gold mine |
@@ -23,7 +23,9 @@ A short everyday name for the Webloom Sales Engine — the tool that does the re
 | **Chagua** | Swahili: to choose, elect | Names the qualification step — choosing which leads deserve a human | Effectively owned by Kenyan voter education (chagua.co.ke, "Chagua Kenya 2027"); politically loaded |
 | **Weft** | the crosswise thread woven through the warp | The weave metaphor lines up with *Webloom* itself | Worst namespace of the set: an AI-orchestration language (2k★) and an agent-infrastructure package use it |
 
-Confirmed crowded and dropped after local checks: **Songa** (Safaricom's music service), **Dira** (Kenyan consultancies), **Lengo** (Old Mutual's Lengo Digital Savings), **Vuna** (Radio Vuna, VunaPay, VunaFlow), **Kua**, **Pata**, **Kuna**.
+Confirmed in local use and dropped: **Songa** (a Kenyan music brand — "Songa Play" is in the Kenyan App Store and `songa.co.ke` is registered), **Dira**, **Lengo**, **Vuna**, **Kua**, **Pata**, **Kuna**.
+
+Two honest gaps. We could not independently confirm the owner behind every dropped name, so read that list as "already in use locally", not a verified register. And nothing here captures Nairobi slang or street connotations — say each shortlisted name out loud in a sentence at the meeting before deciding.
 
 The conceptual English family came up empty: all fourteen candidates tested (sift, sieve, riffle, trawl, winnow, baton, relay, bearing, vane, azimuth, keel, weft, kestrel, spyglass) are already registered on **both** npm and PyPI, and most are established products. The English-metaphor direction is mined out.
 
