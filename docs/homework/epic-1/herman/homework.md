@@ -1,8 +1,10 @@
 # Herman — Epic 1
 
-> **Status: done, in review.** The shell is in [`frontend/`](../../../../frontend/README.md) and
-> runs with `npm run dev`. The agreed shape is written up in
-> [`docs/delivery/epic-1-lead-contract.md`](../../../delivery/epic-1-lead-contract.md).
+> **Status: done and merged** (PR #5). The shell is in
+> [`frontend/`](../../../../frontend/README.md) and runs with `npm run dev`. The agreed shape
+> is written up in
+> [`docs/delivery/epic-1-lead-contract.md`](../../../delivery/epic-1-lead-contract.md), and
+> Sharon's API now implements it.
 
 ## Your mission
 
@@ -31,6 +33,11 @@ to land.
 - [x] The PR is reviewable, with a caveat: 43 files, but ~4,600 of those lines are
       `package-lock.json` and ~350 are generated shadcn components. The hand-written part is
       ~900 lines across 12 files.
+
+One follow-up he still owes, found by Sharon: `.env.example` set
+`VITE_API_BASE_URL=http://localhost:8000`, but the client appends `/leads` to that base, so
+following the file literally would miss the `/api/v1` prefix. Fixed on
+`docs/epic-1-standings`.
 
 ## Bring back
 

@@ -1,8 +1,9 @@
 # Sharon — Epic 1
 
-> **Status: yours to pick up, and unblocked.** Herman's UI is already built against the
-> contract and runs on sample data with a visible banner. Your API is the thing that
-> replaces that banner with real leads — nothing is waiting on you to be designed first.
+> **Status: done and merged** (PR #7). The API is in
+> [`backend/`](../../../../backend/README.md): the two tables, the migration, an idempotent
+> seed, the two read endpoints, and a suite that runs against a real PostgreSQL. Two gaps
+> she deliberately left are now Mark's and Anne's — see the note at the bottom.
 
 ## Your mission
 
@@ -25,17 +26,37 @@ Do not build campaigns, messaging, qualification, or the whole data model. Just 
 
 ## Done means
 
-- [ ] The database starts.
-- [ ] The migration runs.
-- [ ] Lead exists.
-- [ ] The API returns leads, and one lead by id.
-- [ ] Each lead has a little activity/history behind it.
-- [ ] Tests pass.
-- [ ] Herman has an example response he can connect to.
+- [x] The migration runs — and reverses, tested from empty.
+- [x] Lead exists, with `activities` behind it.
+- [x] The API returns leads, and one lead by id, in exactly the agreed shape.
+- [x] Each lead has its activity behind it, oldest first.
+- [x] Tests pass — `ruff` clean, and 34 of 34 green once the one real defect was fixed. The
+      red test was in her own test file, not in the migration: it built the throwaway
+      database URL with `str(url)`, and SQLAlchemy's `URL.__str__` masks the password as
+      `***`, so it could only pass where PostgreSQL does not ask for one. Fixed on
+      `docs/epic-1-standings` with `render_as_string(hide_password=False)`; the migration
+      itself was never wrong.
+- [x] Herman has an example response to connect to — and the contract held, so he needed no
+      frontend change at all.
+
+Verified independently against a throwaway PostgreSQL 17 and Python 3.12: 34/34 tests pass
+and the migration reverses; the seed is idempotent (8 leads, then `0 created, 8 already
+present`); the pagination respects `limit`/`offset` and caps `limit` at 200; the detail
+endpoint returns activity oldest-first and `[]` rather than `null`; an unknown or malformed
+id is a 404 rather than a 500. Started through Vite, `GET /api/v1/leads` comes back through
+the dev proxy, so the screen switches to **Live data** with no frontend change.
 
 ## Bring back
 
-- Your pull request.
-- The API endpoint.
+- Her pull request.
+- The API endpoints.
 - An example response.
-- Anything Herman needs to connect the frontend.
+- Anything Herman needs — the answer was "nothing".
+
+Two things she left behind on purpose, and they now belong to other people:
+
+- **Nothing creates the databases.** A fresh PostgreSQL has neither
+  `webloom_sales_engine` nor `webloom_sales_engine_test`, so the suite cannot run until
+  someone makes them. **Mark**, with the containers.
+- **The seller's view is still untested.** The screens have never been looked at by the
+  person who would use them. **Anne.**

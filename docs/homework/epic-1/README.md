@@ -6,14 +6,18 @@ Get one tiny piece of the Sales Engine working together.
 
 ## Where we are right now
 
-- **Herman — done.** The frontend shell is in [`frontend/`](../../../frontend/README.md):
-  Lead List, Lead Detail with activity, and a client that runs on sample data until the API
-  answers. Branch `feat/epic-1-frontend-shell`.
-- **Sharon — next.** The Lead model, migration, seed data, API and tests. The exact shapes
-  are already agreed, so she can start without waiting on anyone.
-- **Mark — open.** The backend rails and Docker Compose, plus a review of the frontend
-  structure. `backend/` does not exist yet.
-- **Anne — can start now.** The two screens exist to click through and give feedback on.
+- **Herman — done.** The frontend shell is merged: Lead List, Lead Detail with activity, and
+  a client that runs on sample data until the API answers.
+- **Sharon — done.** The Lead backend is merged: the two tables, the migration, the seed,
+  the two read endpoints and their tests.
+- **Mark — next.** Containerise the system so one command starts the database and the API
+  together, on a port that is not already taken. Branch `chore/epic-1-docker`.
+- **Anne — next.** Use the two screens as a salesperson, give feedback, and land her example
+  lead in the seed data. Branch `docs/epic-1-seller-review`.
+
+Both halves are on `main` and the slice works when started by hand, but nothing starts them
+together yet, and nobody has used it as a seller. The full picture — what is done, what is
+verified, what is left — is in [status.md](status.md).
 
 The agreed Lead and Activity shapes live in
 [`docs/delivery/epic-1-lead-contract.md`](../../delivery/epic-1-lead-contract.md).
