@@ -1,0 +1,17 @@
+# Tooling configuration only — dependencies live in requirements*.txt.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+# So `pytest` and `python -m pytest` both find the `app` package.
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# FastAPI's dependency injection is expressed as a call in a default argument.
+"app/api/**" = ["B008"]
