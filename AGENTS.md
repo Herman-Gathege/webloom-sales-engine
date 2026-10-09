@@ -54,6 +54,7 @@ for its subject — edit the document, not a copy of it.
 |---|---|
 | What we are building, and what is out of scope | `docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md` |
 | What we build now, and the next few Lego blocks | `docs/delivery/2026-10-09-delivery-plan.md` |
+| The exact Lead and Activity shapes the frontend and backend agree on | `docs/delivery/epic-1-lead-contract.md` |
 | The full long-term product roadmap (roadmap areas R1–R13) | `docs/delivery/product-roadmap.md` |
 | The current block, split into four homework cards | `docs/homework/epic-1/` |
 | Branching, PRs, review, definition of done, disagreements | `docs/team/how-we-work.md` |
@@ -68,12 +69,19 @@ apart.
 
 ## Current state
 
-Epic 1 — the first Lego block. The repository is documentation plus the first vertical slice
-being built. The slice is: seed data → Lead → PostgreSQL → FastAPI → React → Lead List →
-Lead Detail → Activity/Event. FikaTu integration is **not** in Epic 1 — the seam is a small
-fake adapter. There is no auth, no sending, and none of the other eleven screens yet. The
-intended layout below is a target; correct the "Commands" section in the same PR that creates
-the scaffold.
+Epic 1 — the first Lego block, half built.
+
+- **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
+  Lead List → Lead Detail with activity history, and a client that falls back to bundled
+  sample data until the API answers. It runs from a clean clone; see `frontend/README.md`.
+- **Not built:** everything behind the API — the Lead model, the migration, seed data, and
+  the two endpoints (`backend/`), plus Docker Compose. That is Sharon's and Mark's pieces.
+- The shapes the two halves must agree on are frozen in
+  `docs/delivery/epic-1-lead-contract.md`. Change that document and
+  `frontend/src/api/types.ts` in the same PR, or neither.
+- FikaTu integration is **not** in Epic 1 — the seam is a small fake adapter. There is no
+  auth, no sending, and none of the other eleven screens yet. The intended layout below is
+  the target; the backend half does not exist.
 
 ## The boundary rule
 
@@ -155,14 +163,21 @@ ADR in `docs/decisions/`.
 
 ## Commands
 
-The scaffold does not exist yet, so these are the intended commands. Correct this section
-in the same PR that creates the scaffold.
+The frontend exists; the backend does not. Keep this section honest — correct it in the same
+PR that changes a command.
 
 ```bash
-docker compose up --build              # api, worker, postgres, redis, frontend
-docker compose exec api pytest tests/ -v
-cd frontend && npm run lint && npm run build
+cd frontend && npm install && npm run dev      # the SPA on sample data, http://localhost:5173
+cd frontend && npm run lint && npm run build && npm test
+
+docker compose up --build                      # api, worker, postgres, redis, frontend — not built yet
+docker compose exec api pytest tests/ -v       # not built yet
 ```
+
+**Node 22.12 or newer is required**, pinned in `.nvmrc`. Vite 8 will not run on Node 21: it
+fails to load its rolldown native binding (`Cannot find module
+'../rolldown-binding.linux-x64-gnu.node'`), which reads like a broken install but is only an
+unsupported version. `frontend/package.json` declares the same range in `engines`.
 
 ## Before you write code
 

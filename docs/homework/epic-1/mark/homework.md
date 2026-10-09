@@ -1,5 +1,13 @@
 # Mark — Epic 1
 
+> **Status: ready, and the frontend half now exists.** `frontend/` is on the
+> `feat/epic-1-frontend-shell` branch — Vite + React 19 + TS + Tailwind v4 + shadcn/ui, with
+> a Lead List, a Lead Detail, and an API client that falls back to sample data. The shapes
+> the two halves must agree on are frozen in
+> [`docs/delivery/epic-1-lead-contract.md`](../../../delivery/epic-1-lead-contract.md). The
+> backend half — `backend/` and Docker Compose — is still empty, which is the piece nobody
+> else is filling.
+
 ## Your mission
 
 Make sure the first Lego block is built on solid technical rails.

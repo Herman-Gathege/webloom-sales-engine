@@ -1,5 +1,10 @@
 # Anne — Epic 1
 
+> **Status: ready, and the screens now exist to review.** Run `cd frontend && npm run dev`
+> and you get a Lead List and a Lead Detail you can click through. They run on synthetic
+> sample leads (the app says "Sample data" on screen) until Sharon's API lands, so the
+> businesses you see are invented — nothing here is a real contact.
+
 ## Your mission
 
 Make sure the first version actually makes sense to the person who will use it.

@@ -9,9 +9,15 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP, docs-first. No application code yet. The first code arrives in **Epic 1 — First
-Lego Block**: an app shell, a Lead model, a Lead API, a Lead List, a Lead Detail screen, and
-basic activity/history. Deliberately small. See the [delivery plan](docs/delivery/2026-10-09-delivery-plan.md).
+Pre-MVP. **Epic 1 — First Lego Block is half built.** The frontend shell exists in
+[`frontend/`](frontend/): a Lead List, a Lead Detail with activity history, navigation, and
+a client that shows bundled sample data until the API answers. It runs from a clean clone
+with `npm run dev`.
+
+Still to come in this block: the Lead model, the migration, and the Lead API — plus the
+backend rails and Docker Compose. See the
+[delivery plan](docs/delivery/2026-10-09-delivery-plan.md) for the pieces, and the
+[lead API contract](docs/delivery/epic-1-lead-contract.md) for the shape they must agree on.
 
 ## If you are one of the four of us
 
@@ -45,6 +51,7 @@ implement it; a human reviews the result.** The short version is in
 | [Scope spec](docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) | What we are building, what is out of scope, and the design |
 | [Delivery plan](docs/delivery/2026-10-09-delivery-plan.md) | What we are building now, and the next few blocks |
 | [Product roadmap](docs/delivery/product-roadmap.md) | The full long-term destination. Not a commitment |
+| [Lead API contract](docs/delivery/epic-1-lead-contract.md) | The exact Lead and Activity shapes the API and UI agree on |
 | [Homework — Epic 1](docs/homework/epic-1/README.md) | The current block, split into four pieces |
 | [How we work](docs/team/how-we-work.md) | Branching, PRs, review, what "done" means |
 | [FikaTu integration notes](docs/research/2026-10-08-fikatu-integration-notes.md) | Endpoints, events, and the gaps we must work around |
@@ -59,6 +66,6 @@ matches FikaTu so the two systems share one set of conventions.
 
 ## Not built yet
 
-Everything below `docs/` is documentation. Epic 1 creates the first working slice — seed
-fixture → Lead → PostgreSQL → FastAPI → React → Lead List → Lead Detail → activity/history.
-CI, deployment, auth, the CSV importer, and FikaTu delivery come in later blocks.
+The frontend is real; the backend is not. There is no `backend/` directory, no database,
+and no API yet, so the UI runs on synthetic sample data and says so on screen. CI,
+deployment, auth, the CSV importer, and FikaTu delivery all come in later blocks.
