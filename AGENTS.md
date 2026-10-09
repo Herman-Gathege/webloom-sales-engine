@@ -74,8 +74,11 @@ Epic 1 — the first Lego block, half built.
 - **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
   sample data until the API answers. It runs from a clean clone; see `frontend/README.md`.
-- **Not built:** everything behind the API — the Lead model, the migration, seed data, and
-  the two endpoints (`backend/`), plus Docker Compose. That is Sharon's and Mark's pieces.
+- **Built:** `backend/` — the Lead and Activity model, the Alembic migration, an idempotent
+  synthetic seed, `GET /api/v1/leads` and `GET /api/v1/leads/{id}`, and a pytest suite.
+  Commands are in `backend/README.md`.
+- **Not built:** the rails around it — Docker Compose, the API and worker containers, and
+  Nginx. That is Mark's piece.
 - The shapes the two halves must agree on are frozen in
   `docs/delivery/epic-1-lead-contract.md`. Change that document and
   `frontend/src/api/types.ts` in the same PR, or neither.
@@ -169,6 +172,12 @@ PR that changes a command.
 ```bash
 cd frontend && npm install && npm run dev      # the SPA on sample data, http://localhost:5173
 cd frontend && npm run lint && npm run build && npm test
+
+cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+cd backend && .venv/bin/alembic upgrade head   # create the leads and activities tables
+cd backend && .venv/bin/python -m app.seed     # load the synthetic sample leads (repeatable)
+cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000   # the API the SPA proxies to
+cd backend && .venv/bin/python -m pytest -v    # needs TEST_DATABASE_URL; see backend/README.md
 
 docker compose up --build                      # api, worker, postgres, redis, frontend — not built yet
 docker compose exec api pytest tests/ -v       # not built yet

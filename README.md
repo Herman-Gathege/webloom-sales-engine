@@ -14,8 +14,13 @@ Pre-MVP. **Epic 1 — First Lego Block is half built.** The frontend shell exist
 a client that shows bundled sample data until the API answers. It runs from a clean clone
 with `npm run dev`.
 
-Still to come in this block: the Lead model, the migration, and the Lead API — plus the
-backend rails and Docker Compose. See the
+The Lead backend now exists in [`backend/`](backend/README.md): the Lead and Activity
+tables, the Alembic migration, a repeatable synthetic seed, `GET /api/v1/leads` and
+`GET /api/v1/leads/{id}`, and a pytest suite. Start it and the frontend's **"Sample data"**
+banner becomes **"Live data"** with no frontend change.
+
+Still to come in this block: the backend rails and Docker Compose (Mark), the frontend
+and backend demoed together, and the first demo. See the
 [delivery plan](docs/delivery/2026-10-09-delivery-plan.md) for the pieces, and the
 [lead API contract](docs/delivery/epic-1-lead-contract.md) for the shape they must agree on.
 
@@ -66,6 +71,7 @@ matches FikaTu so the two systems share one set of conventions.
 
 ## Not built yet
 
-The frontend is real; the backend is not. There is no `backend/` directory, no database,
-and no API yet, so the UI runs on synthetic sample data and says so on screen. CI,
-deployment, auth, the CSV importer, and FikaTu delivery all come in later blocks.
+Epic 1 is one thin slice: two screens, backed by leads and their activity. Docker Compose,
+the API and worker containers, and Nginx are still to come, so the API is started by hand
+for now. CI, deployment, auth, the CSV importer, campaigns, sending, and FikaTu delivery
+all come in later blocks.
