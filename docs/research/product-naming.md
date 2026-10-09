@@ -27,11 +27,11 @@ Confirmed in local use and dropped: **Songa** (a Kenyan music brand — "Songa P
 
 Two honest gaps. We could not independently confirm the owner behind every dropped name, so read that list as "already in use locally", not a verified register. And nothing here captures Nairobi slang or street connotations — say each shortlisted name out loud in a sentence at the meeting before deciding.
 
-The conceptual English family came up empty: all fourteen candidates tested (sift, sieve, riffle, trawl, winnow, baton, relay, bearing, vane, azimuth, keel, weft, kestrel, spyglass) are already registered on **both** npm and PyPI, and most are established products. The English-metaphor direction is mined out.
+The conceptual English family came up nearly empty. Of the fourteen candidates tested (sift, sieve, riffle, trawl, winnow, baton, relay, bearing, vane, azimuth, keel, weft, kestrel, spyglass), most are established products and the rest sit in already-crowded npm/PyPI/GitHub namespaces. It was the most crowded direction we tested, which is why this shortlist is East-African-weighted.
 
 ## Top 5
 
-1. **Jicho** — the cleanest name checked: no Kenyan app, no Wikipedia entity, ~60 harmless GitHub matches. The one local association is Jicho Pevu, KTN's investigative strand, which arguably *helps* the "extra eyes" story — but decide whether it sounds like a news brand.
+1. **Jicho** — the cleanest name checked: zero hits in the Kenyan App Store, no Wikipedia entity, ~60 harmless GitHub matches. Its one local association is *Jicho Pevu*, a Kenyan investigative TV strand (verify locally), which arguably *helps* the "extra eyes" story — but decide whether it sounds like a news brand.
 2. **Fursa** — the best meaning fit: it names what the tool produces (opportunity) rather than how it works, so it will not date when the product learns new tricks. It is free on npm and PyPI; accept that as a common noun you will never own it in search.
 3. **Lenga** — "to aim" is short, active, free on both npm and PyPI, and unused by any Kenyan business. Being the least distinctive of the five is its only real flaw.
 4. **Nia** — the nicest word to say and the closest to the pitch; choose it with your eyes open that npm, PyPI, an App Store payments app and dozens of NIA acronyms already use it, so it always needs "Webloom" beside it.
