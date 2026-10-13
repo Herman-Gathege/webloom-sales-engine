@@ -24,8 +24,9 @@ Give the Lead Desk a seller's opinion, and leave it in writing this time.
   you want in three clicks?
 - Do not spend your evening on Docker. If the app will not start, ask in the group.
 
-This is deliberately the lightest card of the four, and it is not a favour — review is the one
-thing here nobody else can do.
+This is review work because you are the only person who can do it. Nobody else on the team can
+tell whether a screen makes sense to a seller, and the sprint is only worth anything if the
+list it produces is one you would actually work.
 
 ## Done means
 
