@@ -1,4 +1,4 @@
-# Sharon — Epic 1
+# Sharon — Sprint 1
 
 > **Status: done and merged** (PR #7). The API is in
 > [`backend/`](../../../../backend/README.md): the two tables, the migration, an idempotent
@@ -20,7 +20,7 @@ Make a real Lead travel from the database to the API.
 - Keep the response simple and frontend-friendly.
 
 The exact field names and shapes are already agreed — build against
-`docs/delivery/epic-1-lead-contract.md`, don't invent a different shape.
+`docs/delivery/sprint-1-lead-contract.md`, don't invent a different shape.
 
 Do not build campaigns, messaging, qualification, or the whole data model. Just the Lead.
 

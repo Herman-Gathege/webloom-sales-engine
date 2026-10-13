@@ -1,10 +1,10 @@
 # Backend — Webloom Sales Engine
 
-The Epic 1 Lead backend: the Lead and Activity tables, the Alembic migration, a repeatable
+The Sprint 1 Lead backend: the Lead and Activity tables, the Alembic migration, a repeatable
 synthetic seed, two read endpoints, and their tests. It is the piece that replaces the
 frontend's **"Sample data"** banner with real leads.
 
-Deliberately **not** in this block: authentication and roles, sending, campaigns, the CSV
+Deliberately **not** in this sprint: authentication and roles, sending, campaigns, the CSV
 importer, exports, background jobs, and FikaTu delivery. There is no Docker Compose here —
 Mark owns the rails and the containers.
 
@@ -24,7 +24,7 @@ Requests flow one way: `api` → `schemas` → `services` → `repositories` →
 | `app/seed/` | Synthetic sample leads, and the idempotent runner |
 | `alembic/` | Migration environment and versions |
 | `tests/` | pytest suite, against a real PostgreSQL test database |
-| `app/integrations/` | Reserved for the FikaTu seam — not part of Epic 1 |
+| `app/integrations/` | Reserved for the FikaTu seam — not part of Sprint 1 |
 
 ## Prerequisites
 
@@ -186,7 +186,7 @@ database.
 | `limit < 1`, `offset < 0` | `422` with FastAPI's validation body |
 
 The field names, nullability, and shapes are frozen in
-[`docs/delivery/epic-1-lead-contract.md`](../docs/delivery/epic-1-lead-contract.md). That
+[`docs/delivery/sprint-1-lead-contract.md`](../docs/delivery/sprint-1-lead-contract.md). That
 document and `frontend/src/api/types.ts` move together; this backend follows them.
 
 ## Seed data
@@ -240,10 +240,10 @@ by itself.
 ## Known limitations
 
 - **Nothing moves a lead off `new`.** Nothing sends yet, so status is always `new` in this
-  block; the long-term rule that status is derived from evidence is not implemented.
-- **No auth.** Every caller sees contact details. Epic 1 runs locally for the four of us;
-  the role-gating rule starts applying in the login block.
+  sprint; the long-term rule that status is derived from evidence is not implemented.
+- **No auth.** Every caller sees contact details. Sprint 1 runs locally for the four of us;
+  the role-gating rule starts applying in the login sprint.
 - **`activities` is not `activity_events`.** This is the per-lead timeline the detail screen
-  shows; the scope spec's `activity_events` is the wider audit feed for a later block.
+  shows; the scope spec's `activity_events` is the wider audit feed for a later sprint.
 - **Not the final schema.** The contract is a small subset of the scope spec's data model —
   no campaigns, outreaches, replies, or deals.

@@ -1,10 +1,10 @@
-# Anne — Epic 1
+# Anne — Sprint 1
 
 > **Status: done, verbally.** You ran the app as a seller, walked the Lead List and the Lead
-> Detail, and agreed the direction is right — so Epic 1 closed on your sign-off. The written
+> Detail, and agreed the direction is right — so Sprint 1 closed on your sign-off. The written
 > half of this card (notes, recommendations, and your example lead in the seed) did **not**
-> land as a PR; it is the first story of Epic 2 instead, because it changes the Lead Desk,
-> which is what Epic 2 is for.
+> land as a PR; it is the first story of Sprint 2 instead, because it changes the Lead Desk,
+> which is what Sprint 2 is for.
 
 ## Your mission
 
@@ -26,11 +26,11 @@ Keep it practical. No big spec, no long report, no architecture unless you want 
 ## Done means
 
 - [x] You used the two screens as a seller and confirmed the direction.
-- [ ] The seller journey is written down and clear. *(moves to Epic 2)*
-- [ ] You have listed what the Lead List must show. *(moves to Epic 2)*
-- [ ] You have listed what the Lead Detail must show. *(moves to Epic 2)*
-- [ ] You have 3–5 concrete recommendations. *(moves to Epic 2)*
-- [ ] Your example lead is in the seed data and shows up in the app. *(moves to Epic 2)*
+- [ ] The seller journey is written down and clear. *(moves to Sprint 2)*
+- [ ] You have listed what the Lead List must show. *(moves to Sprint 2)*
+- [ ] You have listed what the Lead Detail must show. *(moves to Sprint 2)*
+- [ ] You have 3–5 concrete recommendations. *(moves to Sprint 2)*
+- [ ] Your example lead is in the seed data and shows up in the app. *(moves to Sprint 2)*
 
 ## Bring back
 

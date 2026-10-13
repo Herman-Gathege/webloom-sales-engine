@@ -1,4 +1,4 @@
-# Docker — Epic 1
+# Docker — Sprint 1
 
 This directory holds the container wiring for the first slice. One command starts the whole
 slice — database, API and UI — from a clean clone:
@@ -83,4 +83,4 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 2. Keep one local image with runtime and test dependencies for now, and split it when a real
    deploy exists.
 3. Keep the built SPA in Compose rather than the Vite dev server, so "one command" means the
-   same thing on every machine. *(Agreed in the Epic 1 close-out.)*
+   same thing on every machine. *(Agreed in the Sprint 1 close-out.)*

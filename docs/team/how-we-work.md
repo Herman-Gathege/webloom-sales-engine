@@ -65,7 +65,7 @@ Writing the code is not done.
 - A piece should fit in one normal workday. Bigger than that, cut it in half.
 - Prefer a thin working slice over a complete layer.
 - No unnecessary abstraction. Build it for now, not for an imagined later.
-- Stuck or unsure? Ask on the block, not after a week of work.
+- Stuck or unsure? Ask early — not after a week of work.
 
 ## Disagreements
 
@@ -75,9 +75,9 @@ Writing the code is not done.
 - Expensive to reverse: bring it to the team, then record the choice as an ADR in
   `docs/decisions/`.
 - If you still disagree, the owner of that area decides and notes the dissent. We move, and
-  we can revisit it next block.
+  we can revisit it next sprint.
 
 ## What we change as we go
 
-At the end of every block we write down one thing to keep and one thing to change, and that
-note travels into the next block's homework.
+At the end of every sprint we write down one thing to keep and one thing to change, and that
+note travels into the next sprint's homework.

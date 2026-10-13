@@ -255,7 +255,7 @@ the seam testable with a fake.
 
 ### 6.4 Data model sketch
 
-Indicative tables — the final schema is agreed block by block, as the blocks need it.
+Indicative tables — the final schema is agreed sprint by sprint, as the sprints need it.
 
 | Table | Purpose | Key fields |
 |---|---|---|
@@ -360,24 +360,24 @@ Anne owns the definitions; the Reports screen owns the display.
 ## 8. Delivery approach
 
 Four people, all developers, working part-time alongside demanding day jobs. We deliver this
-scope as small vertical slices — "Lego blocks" — rather than layer-by-layer sprints. Every
-block runs the same loop:
+scope as small vertical slices — we build the product like Lego — rather than layer by layer.
+Every sprint runs the same loop:
 
 ```text
-Agree → Build → PR → Review → Merge → Run → Demo → Next block
+Agree → Build → PR → Review → Merge → Run → Demo → Next sprint
 ```
 
-The epics we are building, in what order, and who owns each are in
-[`docs/delivery/epic-plan.md`](../../delivery/epic-plan.md). The full long-term destination —
-the roadmap areas and stories that make up the whole Sales Engine — is in
-[`docs/delivery/product-roadmap.md`](../../delivery/product-roadmap.md). That roadmap is not a
-commitment, and its estimates are rough guidance only.
+The sprints we are building, in what order, and who leads each are in
+[`docs/delivery/sprint-plan.md`](../../delivery/sprint-plan.md). The detail behind them — the
+individual pieces of work in each sprint, with their acceptance criteria — is in
+[`docs/delivery/sprint-detail.md`](../../delivery/sprint-detail.md). That backlog is
+reference material, and its estimates are rough guidance only.
 
-**Epic 1 — First Lego Block is closed.** It was the first slice: seed data → Lead →
+**Sprint 1 is done.** It was the first slice: seed data → Lead →
 PostgreSQL → FastAPI → React → Lead List → Lead Detail → activity/history, sized at roughly
 5–7 focused days with each person's piece about one normal workday. Its purpose was as much
 to establish how the four of us work together as to produce the feature; what it shipped and
-what we learned is in [`docs/homework/epic-1/status.md`](../../homework/epic-1/status.md).
+what we learned is in [`docs/homework/sprint-1/status.md`](../../homework/sprint-1/status.md).
 
 **Definition of Done (every piece):** someone other than the author can pull it and run it,
 its acceptance criteria are demonstrated, its tests pass, migrations are reversible, and no
@@ -387,7 +387,7 @@ branching, PRs, review, disagreements — is in
 
 **Milestones are unchanged:** **M1** first live sends to a small slice, **M2** a real
 conversation handed to a person, **M3** the funnel visible end to end, **M4** the pilot
-campaign executed and reviewed. Which block reaches each one is decided one block at a time.
+campaign executed and reviewed. Which sprint reaches each one is decided one sprint at a time.
 
 ## 9. Guardrails and compliance
 
@@ -419,8 +419,8 @@ reputation or a provider account is worse than no sales engine.
 | Cold outreach damages the Webloom brand | High | Tight targeting, human approval, opt-out, small pilot first |
 | Website sales stall before the engine proves itself | High | The engine's first job is to expose higher-value needs; keep selling manually in parallel |
 | FikaTu cannot deliver what we assume (status, inbound) | Medium | Research note above; design the seam so it can be swapped or supplemented |
-| Scope creep into a full CRM | High | The out-of-scope list in §4.2 is enforced at block planning |
-| Four people, other commitments, exam/iteration periods | Medium | The first block is small; pieces are bite-sized; no piece depends on one person finishing late |
+| Scope creep into a full CRM | High | The out-of-scope list in §4.2 is enforced at sprint planning |
+| Four people, other commitments, exam/iteration periods | Medium | The first sprint is small; pieces are bite-sized; no piece depends on one person finishing late |
 | The team is learning the stack and a new way of working at the same time | Medium | Small slice, visible demo, Mark pairs with Sharon |
 | Personal data mishandled | High | §9 rules, gitignored data, access control, audit log |
 
@@ -431,7 +431,7 @@ never blocked.
 
 | # | Question | Default we will assume | Owner |
 |---|---|---|---|
-| 1 | Do we run the first pilot on email, SMS, or WhatsApp? | **SMS.** The current list has phone numbers and no email addresses, and FikaTu's WhatsApp provider is an empty file, so SMS is the only channel that is both available and addressed today. Email becomes viable once addresses are sourced. | Anne |
+| 1 | Do we run the first pilot on email, SMS, or WhatsApp? | **Decided: SMS and email only.** SMS goes through Africa's Talking in FikaTu's sandbox; email through FikaTu's existing provider. The list is phone-only today, so SMS leads. No WhatsApp: FikaTu's WhatsApp provider is an empty file. Revisit after the pilot. | Anne |
 | 2 | Is the lead list data legal for cold outreach, and what is our stated basis? | Publicly listed business contact details, B2B, opt-out honoured | Herman |
 | 3 | Do we need multi-channel within one campaign in v1? | No — one channel per campaign | Mark |
 | 4 | Where do we host for the pilot? | Docker Compose on the existing VPS, same box family as FikaTu | Mark |
@@ -443,6 +443,6 @@ never blocked.
 ## 12. Approval
 
 This spec is the gate. Once the four of us agree on it, the
-[epic plan](../../delivery/epic-plan.md) decides the order and who owns each piece. Changes
+[sprint plan](../../delivery/sprint-plan.md) decides the order and who owns each piece. Changes
 after approval are proposed as edits to this file, so the written scope stays the single
 source of truth.

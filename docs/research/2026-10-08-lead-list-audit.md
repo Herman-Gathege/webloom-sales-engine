@@ -42,7 +42,7 @@ record properly from the first touch.
 Nine sectors over 52 leads is roughly six leads per sector. That is enough to *start*
 learning sector-level conversion, not enough to conclude anything from a single campaign.
 The importer should treat `Sector` as free text now and normalise it into a controlled
-vocabulary in a later block.
+vocabulary in a later sprint.
 
 ## 4. Data quality findings
 
@@ -98,4 +98,4 @@ vocabulary in a later block.
 3. Extend the list with `source_url`, `reviews_count`, `has_website`, `social_presence`,
    and `consent_basis` before or during import (Herman).
 4. Preserve `Opening message` verbatim in the import as the first draft, and use it to
-   validate that the template renderer reproduces it (Sharon, in a later block).
+   validate that the template renderer reproduces it (Sharon, in a later sprint).
