@@ -19,10 +19,41 @@ tables, the Alembic migration, a repeatable synthetic seed, `GET /api/v1/leads` 
 `GET /api/v1/leads/{id}`, and a pytest suite. Start it and the frontend's **"Sample data"**
 banner becomes **"Live data"** with no frontend change.
 
-Still to come in this block: the backend rails and Docker Compose (Mark), the frontend
-and backend demoed together, and the first demo. See the
+Docker Compose now starts PostgreSQL and the API together: one `docker compose up` from a
+clean clone creates both databases, runs the migration, and loads the sample leads. Still
+to come in this block: the frontend and backend demoed together, and the first demo. See the
 [delivery plan](docs/delivery/2026-10-09-delivery-plan.md) for the pieces, and the
 [lead API contract](docs/delivery/epic-1-lead-contract.md) for the shape they must agree on.
+
+## Run it
+
+From a clean clone, one command starts PostgreSQL and the API:
+
+```bash
+docker compose up --build
+```
+
+On first boot it creates both databases (`webloom_sales_engine` and
+`webloom_sales_engine_test`), runs the migration, and loads the eight sample leads. The API
+answers at <http://localhost:8001> — deliberately not 8000, which is taken on at least one
+machine. `GET /api/v1/leads` should return rows immediately.
+
+In a second terminal, start the frontend against it:
+
+```bash
+cd frontend && npm install && npm run dev
+```
+
+The dev server proxies `/api` to the API on `8001`, so the Lead List switches from
+**Sample data** to **Live data** with no further setup. Run the backend tests inside the
+container with:
+
+```bash
+docker compose run --rm api-test
+```
+
+The traps we hit, and the decisions to agree before the next block, are in the
+[Docker note](docker/README.md).
 
 ## If you are one of the four of us
 
@@ -71,7 +102,7 @@ matches FikaTu so the two systems share one set of conventions.
 
 ## Not built yet
 
-Epic 1 is one thin slice: two screens, backed by leads and their activity. Docker Compose,
-the API and worker containers, and Nginx are still to come, so the API is started by hand
-for now. CI, deployment, auth, the CSV importer, campaigns, sending, and FikaTu delivery
-all come in later blocks.
+Epic 1 is one thin slice: two screens, backed by leads and their activity. Docker Compose and
+the API container now start the backend; the worker container, Nginx, and CI are still to
+come. CI, deployment, auth, the CSV importer, campaigns, sending, and FikaTu delivery all
+come in later blocks.
