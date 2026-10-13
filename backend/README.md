@@ -29,9 +29,10 @@ Requests flow one way: `api` → `schemas` → `services` → `repositories` →
 ## Prerequisites
 
 - **Python 3.12** (the version the stack is pinned to).
-- **PostgreSQL.** The project targets PostgreSQL 17; any 13+ works locally. Docker Compose
-  is Mark's piece and is not defined here, so until it lands you need a database you can
-  reach with a connection string — a local Postgres, or
+- **PostgreSQL.** The project targets PostgreSQL 17; any 13+ works locally. The easiest way
+  to get one is the repo-root `docker compose up`, which starts the database and the API
+  together — see [the Docker section](#docker) below. To run the backend by hand, point it
+  at a local PostgreSQL, or use a throwaway
   `docker run --name webloom-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:17`.
 
 ## Setup
@@ -52,6 +53,33 @@ Settings come from the environment, or from `backend/.env` if it exists:
 | `ENVIRONMENT` | `development` | `production` makes the seed refuse to run. |
 | `SQL_ECHO` | `false` | Log every SQL statement. |
 
+## Docker
+
+The repo root has a `docker-compose.yml` that starts PostgreSQL 17 and this API together.
+From a clean clone:
+
+```bash
+docker compose up --build
+```
+
+- Creates both databases on first boot: `webloom_sales_engine` and
+  `webloom_sales_engine_test` (via `docker/postgres/init/01-create-databases.sql`).
+- Runs `alembic upgrade head` and `python -m app.seed` automatically, so the API serves the
+  eight sample leads on first boot.
+- Serves the API on host port **8001** (container port 8000). 8000 is not used because
+  another project already owns it on some machines.
+- Keeps the database internal (no host port) to avoid clashing with a local PostgreSQL.
+  Reach it with `docker compose exec db psql -U postgres -d webloom_sales_engine`.
+
+Run the test suite inside the container:
+
+```bash
+docker compose run --rm api-test
+```
+
+The traps and open decisions are in
+[`docker/README.md`](../docker/README.md).
+
 ## Commands
 
 Run everything from `backend/`.
@@ -61,11 +89,11 @@ Run everything from `backend/`.
 .venv/bin/alembic downgrade base    # reverse the migration — it is not one-way
 .venv/bin/alembic check             # fail if the models and the migration have drifted
 .venv/bin/python -m app.seed        # load the synthetic sample leads (safe to re-run)
-.venv/bin/uvicorn app.main:app --reload --port 8000   # the API the frontend proxies to
+.venv/bin/uvicorn app.main:app --reload --port 8001   # the API the frontend proxies to
 .venv/bin/python -m pytest -v       # the test suite (needs TEST_DATABASE_URL)
 ```
 
-Interactive docs are at <http://localhost:8000/docs> once the server is running.
+Interactive docs are at <http://localhost:8001/docs> once the server is running.
 
 ## The API
 
@@ -199,21 +227,15 @@ One test creates a separate `_migration_test` database to prove `upgrade` → `d
 ## Frontend integration
 
 Nothing in the frontend needs to change. In development, Vite proxies `/api` to
-`http://localhost:8000` (`frontend/vite.config.ts`), and the client's default base URL is
+`http://localhost:8001` (`frontend/vite.config.ts`), and the client's default base URL is
 `/api/v1`, so the app calls `GET /api/v1/leads` and `GET /api/v1/leads/{id}` as soon as the
-API is running on port 8000 — the banner switches from **"Sample data"** to **"Live data"**
+API is running on port 8001 — the banner switches from **"Sample data"** to **"Live data"**
 by itself.
 
 - `VITE_API_BASE_URL` overrides the base URL (default `/api/v1`)
 - `VITE_USE_MOCK=1` skips the API entirely and always uses the bundled fixtures
 - if the API is unreachable, the client waits 4 seconds and falls back to fixtures, saying
   so on screen; a reachable API that answers `404` is a real result and is not hidden
-
-One inconsistency to be aware of, in Herman's files rather than here: `frontend/.env.example`
-sets `VITE_API_BASE_URL=http://localhost:8000`, while the client appends `/leads` to that
-base — so following that file literally would call `http://localhost:8000/leads` and miss
-the `/api/v1` prefix. The default (`/api/v1`, through the proxy) is correct; whether to
-change the example belongs to Herman.
 
 ## Known limitations
 
@@ -225,4 +247,3 @@ change the example belongs to Herman.
   shows; the scope spec's `activity_events` is the wider audit feed for a later block.
 - **Not the final schema.** The contract is a small subset of the scope spec's data model —
   no campaigns, outreaches, replies, or deals.
-- **No Docker Compose.** Mark owns it; this README does not define the containers.

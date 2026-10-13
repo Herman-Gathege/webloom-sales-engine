@@ -4,7 +4,9 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
 // Dev proxies /api to the FastAPI service so the browser never needs CORS.
-const apiTarget = process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:8000'
+// The Docker setup serves the API on 8001 (not 8000 — that port is already
+// taken on some machines; see the top-level README).
+const apiTarget = process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:8001'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
