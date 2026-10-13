@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [{ to: "/leads", label: "Leads", icon: Users }];
 
-/** Screens that exist in the roadmap but deliberately not in Epic 1. */
+/** Screens that exist in the roadmap but deliberately not in Sprint 1. */
 const LATER_ITEMS = ["Campaigns", "Replies", "Pipeline"];
 
 export function AppLayout() {
@@ -52,7 +52,7 @@ export function AppLayout() {
         </div>
 
         <div className="mt-auto px-5 py-5 text-xs text-muted-foreground">
-          Epic 1 · first Lego block
+          Sprint 1 · first Lego block
         </div>
       </aside>
 

@@ -40,7 +40,7 @@ def test_seeded_leads_follow_the_contract(session: Session) -> None:
     seed_sample_leads(session)
     leads = session.scalars(select(Lead)).all()
 
-    # Nothing in Epic 1 moves a lead off "new" — nothing sends yet.
+    # Nothing in Sprint 1 moves a lead off "new" — nothing sends yet.
     assert {lead.status for lead in leads} == {LeadStatus.NEW}
     assert all(lead.source.strip() for lead in leads)
     assert all(lead.business_name.strip() for lead in leads)

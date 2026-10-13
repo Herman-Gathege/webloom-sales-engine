@@ -1,10 +1,10 @@
-# Mark — Epic 1
+# Mark — Sprint 1
 
 > **Status: done and merged** (PR #10, `chore/epic-1-docker`). One
 > `docker compose up --build` now starts PostgreSQL 17, the API and the UI together. Ports,
 > commands and watch-outs are in [`docker/README.md`](../../../../docker/README.md).
 > The one thing this card deliberately left out — the frontend inside Compose — was picked up
-> in the Epic 1 close-out, so the demo really is one command now.
+> in the Sprint 1 close-out, so the demo really is one command now.
 
 ## Your mission
 

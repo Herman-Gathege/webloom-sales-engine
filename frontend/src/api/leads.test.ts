@@ -41,7 +41,7 @@ describe("getLead", () => {
 
 describe("the Lead contract", () => {
   // If this fails, either the fixtures drifted or the agreed contract changed.
-  // The contract lives in docs/delivery/epic-1-lead-contract.md.
+  // The contract lives in docs/delivery/sprint-1-lead-contract.md.
   it("exposes exactly the agreed Lead and Activity fields", async () => {
     const loaded = await getLead(sampleLeads[0].id);
     const activity = loaded.data.activity[0];

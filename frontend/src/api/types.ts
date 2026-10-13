@@ -1,7 +1,7 @@
 /**
- * The Lead contract for Epic 1.
+ * The Lead contract for Sprint 1.
  *
- * This is the frontend's copy of `docs/delivery/epic-1-lead-contract.md`. That
+ * This is the frontend's copy of `docs/delivery/sprint-1-lead-contract.md`. That
  * document is the source of truth — if a field changes, change both in the same
  * pull request. Field names are snake_case so there is never a mapping layer to
  * get out of step with FastAPI.
@@ -28,7 +28,7 @@ export interface Lead {
   /** UUID. */
   id: string;
   business_name: string;
-  /** Free text in Epic 1; normalised into a controlled vocabulary later. */
+  /** Free text in Sprint 1; normalised into a controlled vocabulary later. */
   sector: string | null;
   area: string | null;
   /** E.164, e.g. "+254709709000". */

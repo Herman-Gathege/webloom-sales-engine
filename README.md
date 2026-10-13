@@ -9,8 +9,8 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Epic 1 — First Lego Block is closed.** One thin vertical slice runs end to end:
-sample leads in PostgreSQL, served by FastAPI, shown in a React Lead List and Lead Detail
+Pre-MVP. **Sprint 1 is done; Sprint 2 has just started.** One thin vertical slice runs end to
+end: sample leads in PostgreSQL, served by FastAPI, shown in a React lead list and lead detail
 with activity history.
 
 - [`frontend/`](frontend/) — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui.
@@ -18,9 +18,10 @@ with activity history.
   reversible migration, an idempotent seed, and two read endpoints.
 - [`docker-compose.yml`](docker-compose.yml) — one command starts all three.
 
-There is no auth, no sending, and no CSV importer yet. What the block was and how it went is
-in the [Epic 1 closure record](docs/homework/epic-1/status.md); what comes next, and who owns
-it, is the [epic plan](docs/delivery/epic-plan.md).
+There is no auth, no sending, and no importer yet. What Sprint 1 was and how it went is in
+the [Sprint 1 record](docs/homework/sprint-1/status.md); what we are building now, and who
+leads it, is the [sprint plan](docs/delivery/sprint-plan.md) and
+[Sprint 2](docs/homework/sprint-2/README.md).
 
 ## Run it
 
@@ -56,16 +57,18 @@ tests inside the container with:
 docker compose run --rm api-test
 ```
 
-The traps we hit, and the decisions to agree before the next block, are in the
+The traps we hit, and the decisions to agree before the next sprint, are in the
 [Docker note](docker/README.md).
 
 ## If you are one of the four of us
 
-Epic 1 is closed. The next block is **Epic 2 — the Lead Desk is real**, owned by Sharon.
-Start with the [epic plan](docs/delivery/epic-plan.md) to see what we are building and who
-owns what; the Epic 1 cards live on in
-[`docs/homework/epic-1/`](docs/homework/epic-1/README.md) as the record of how the first block
-went.
+We are in **Sprint 2 — the real leads**, led by Sharon. Open your own card in
+[`docs/homework/sprint-2/`](docs/homework/sprint-2/README.md): it is short and it tells you
+everything you need, without reading anything else. The whole plan, if you want it, is the
+[sprint plan](docs/delivery/sprint-plan.md).
+
+Sprint 1's cards are kept in [`docs/homework/sprint-1/`](docs/homework/sprint-1/README.md) as
+the record of how the first sprint went.
 
 ## How we work
 
@@ -89,10 +92,11 @@ implement it; a human reviews the result.** The short version is in
 | Read this | For |
 |---|---|
 | [Scope spec](docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) | What we are building, what is out of scope, and the design |
-| [Epic plan](docs/delivery/epic-plan.md) | What we build next, who owns it, and in what order |
-| [Product roadmap](docs/delivery/product-roadmap.md) | The full long-term destination. Not a commitment |
-| [Lead API contract](docs/delivery/epic-1-lead-contract.md) | The exact Lead and Activity shapes the API and UI agree on |
-| [Epic 1 closure](docs/homework/epic-1/status.md) | What the first block shipped, and what we learned |
+| [Sprint plan](docs/delivery/sprint-plan.md) | The nine sprints, what each delivers, and who leads it. Read this one |
+| [Homework — Sprint 2](docs/homework/sprint-2/README.md) | What each of us is doing right now |
+| [Sprint 1 record](docs/homework/sprint-1/status.md) | What the first sprint shipped, and what we learned |
+| [Lead API contract](docs/delivery/sprint-1-lead-contract.md) | The exact Lead and Activity shapes the API and UI agree on |
+| [Sprint detail](docs/delivery/sprint-detail.md) | Deep detail on every piece of work, sprint by sprint. Reference only |
 | [How we work](docs/team/how-we-work.md) | Branching, PRs, review, what "done" means |
 | [FikaTu integration notes](docs/research/2026-10-08-fikatu-integration-notes.md) | Endpoints, events, and the gaps we must work around |
 | [Lead list audit](docs/research/2026-10-08-lead-list-audit.md) | What the first lead list contains and what it changes |
@@ -106,6 +110,6 @@ matches FikaTu so the two systems share one set of conventions.
 
 ## Not built yet
 
-Auth, the CSV importer, campaigns, drafts, approval, sending, replies, and reporting —
-Epics 2 to 9 in the [epic plan](docs/delivery/epic-plan.md). There is no CI yet either;
-Epic 2 adds it, because today a red test is only visible to whoever ran it.
+Auth, the real-list importer, campaigns, drafts, approval, sending, replies, and reporting —
+Sprints 3 to 9 in the [sprint plan](docs/delivery/sprint-plan.md). There is no CI yet either;
+Sprint 2 adds it, because today a red test is only visible to whoever ran it.
