@@ -53,10 +53,11 @@ for its subject — edit the document, not a copy of it.
 | Subject | Document |
 |---|---|
 | What we are building, and what is out of scope | `docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md` |
-| What we build next, and who owns it (Epics 2–9) | `docs/delivery/epic-plan.md` |
-| The exact Lead and Activity shapes the frontend and backend agree on | `docs/delivery/epic-1-lead-contract.md` |
-| The full long-term product roadmap (roadmap areas R1–R13) | `docs/delivery/product-roadmap.md` |
-| The first block, how it went, and how a block is run | `docs/homework/epic-1/` |
+| The whole plan: nine sprints, what each delivers, who leads it | `docs/delivery/sprint-plan.md` |
+| The exact Lead and Activity shapes the frontend and backend agree on | `docs/delivery/sprint-1-lead-contract.md` |
+| The detail behind each sprint: the pieces of work and their acceptance criteria | `docs/delivery/sprint-detail.md` |
+| What each of us is doing right now | `docs/homework/sprint-2/` |
+| The finished first sprint, and how a sprint is run | `docs/homework/sprint-1/` |
 | Branching, PRs, review, definition of done, disagreements | `docs/team/how-we-work.md` |
 | How to talk to FikaTu (endpoints, events, token flow, gaps) | `docs/research/2026-10-08-fikatu-integration-notes.md` |
 | What the current lead list actually contains | `docs/research/2026-10-08-lead-list-audit.md` |
@@ -69,9 +70,10 @@ apart.
 
 ## Current state
 
-**Epic 1 is closed.** Both halves and the containers are merged. What the block was and how
-it went is in `docs/homework/epic-1/status.md`; what comes next, and who owns it, is
-`docs/delivery/epic-plan.md`.
+**Sprint 1 is done; Sprint 2 has just started.** Both halves and the containers are merged.
+What the first sprint was and how it went is in `docs/homework/sprint-1/status.md`; the whole
+plan is `docs/delivery/sprint-plan.md`; what we are doing right now is
+`docs/homework/sprint-2/`.
 
 - **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
@@ -83,13 +85,15 @@ it went is in `docs/homework/epic-1/status.md`; what comes next, and who owns it
   the UI together from a clean clone. Ports and traps are in `docker/README.md`.
 - **Verified:** 34/34 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
   builds, lints and passes its tests on Node 22.
-- **Not built, and deliberately not in Epic 1:** auth, sending, the CSV importer, campaigns,
-  and the other eleven screens. `docs/delivery/epic-plan.md` says which epic brings each.
+- **Not built, and deliberately not in Sprint 1:** auth, sending, the real-list importer,
+  campaigns, and the other eleven screens. `docs/delivery/sprint-plan.md` says which sprint
+  brings each.
 - The shapes the two halves must agree on are frozen in
-  `docs/delivery/epic-1-lead-contract.md`. Change that document and
+  `docs/delivery/sprint-1-lead-contract.md`. Change that document and
   `frontend/src/api/types.ts` in the same PR, or neither.
-- FikaTu integration is not built yet; it arrives in Epic 6, and it needs a change in the
-  FikaTu repository first. The research note has the detail.
+- FikaTu integration is not built yet; it arrives in Sprint 6, and it needs a change in the
+  FikaTu repository first. FikaTu is in sandbox, and SMS (Africa's Talking) and email are the
+  only channels — WhatsApp is not implemented, so nothing plans around it.
 
 ## The boundary rule
 
@@ -126,7 +130,7 @@ wrong regardless of how well it is written.
 | Anne (sales) | The sales workflow, message copy, qualification criteria, pilot campaign | Copy, templates, funnel definitions |
 | Sharon Kendi (backend) | Backend features, migrations, tests | Backend features she did not write |
 
-The backlog is the epic plan. If a request is not in it, raise it with Herman before
+The backlog is the sprint plan. If a request is not in it, raise it with Herman before
 building.
 
 ## Intended layout
@@ -144,7 +148,7 @@ backend/app/
 ├── database/        # session, base
 └── integrations/    # fikatu/ — the only code that knows FikaTu's API exists
 frontend/            # React SPA
-docs/                # scope, epic plan, roadmap, homework, research, ADRs
+docs/                # scope, sprint plan, roadmap, homework, research, ADRs
 docker/              # nginx, postgres, redis, worker configuration
 ```
 
@@ -171,7 +175,7 @@ ADR in `docs/decisions/`.
 
 ## Commands
 
-Epic 1 is closed and the containers are the primary way to run it. Keep this section honest —
+Sprint 1 is done and the containers are the primary way to run it. Keep this section honest —
 correct it in the same PR that changes a command.
 
 ```bash
@@ -200,8 +204,8 @@ unsupported version. `frontend/package.json` declares the same range in `engines
 
 ## Before you write code
 
-1. Read the scope spec section that covers this work, and the epic that owns it in
-   `docs/delivery/epic-plan.md`.
+1. Read the scope spec section that covers this work, and the sprint that owns it in
+   `docs/delivery/sprint-plan.md`.
 2. Check whether FikaTu already does it — the integration research note says what it offers.
 3. Put the rule in a service, the query in a repository, and the wiring in the API layer.
 4. Write the test for the failure path as well as the happy path, especially for anything

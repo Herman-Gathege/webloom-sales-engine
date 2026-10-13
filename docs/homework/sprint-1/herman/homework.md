@@ -1,9 +1,9 @@
-# Herman — Epic 1
+# Herman — Sprint 1
 
 > **Status: done and merged** (PR #5). The shell is in
 > [`frontend/`](../../../../frontend/README.md) and runs with `npm run dev`. The agreed shape
 > is written up in
-> [`docs/delivery/epic-1-lead-contract.md`](../../../delivery/epic-1-lead-contract.md), and
+> [`docs/delivery/sprint-1-lead-contract.md`](../../../delivery/sprint-1-lead-contract.md), and
 > Sharon's API now implements it.
 
 ## Your mission

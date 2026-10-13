@@ -1,6 +1,6 @@
 # Frontend
 
-The React shell for the Sales Engine. Epic 1 has two screens: the Lead List and the
+The React shell for the Sales Engine. Sprint 1 has two screens: the Lead List and the
 Lead Detail (with the lead's activity history).
 
 ## Node version — read this first
@@ -48,5 +48,5 @@ only if the API has been moved.
 | `VITE_API_PROXY_TARGET` | `http://localhost:8001` | Where the dev server proxies `/api`. |
 
 The contract these fields follow is
-[`docs/delivery/epic-1-lead-contract.md`](../docs/delivery/epic-1-lead-contract.md), and
+[`docs/delivery/sprint-1-lead-contract.md`](../docs/delivery/sprint-1-lead-contract.md), and
 `src/api/types.ts` is its TypeScript copy.

@@ -12,7 +12,7 @@ from app.models.lead import Lead
 
 
 class Activity(Base):
-    """One thing that happened to one lead. Nothing in Epic 1 edits or deletes it."""
+    """One thing that happened to one lead. Nothing in Sprint 1 edits or deletes it."""
 
     __tablename__ = "activities"
 
