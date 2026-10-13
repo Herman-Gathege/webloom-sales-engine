@@ -367,17 +367,17 @@ block runs the same loop:
 Agree → Build → PR → Review → Merge → Run → Demo → Next block
 ```
 
-The block we are building now, the next few blocks, and what is deliberately not being built
-yet live in [`docs/delivery/2026-10-09-delivery-plan.md`](../../delivery/2026-10-09-delivery-plan.md).
-The full long-term destination — the epics that make up the whole Sales Engine — is in
+The epics we are building, in what order, and who owns each are in
+[`docs/delivery/epic-plan.md`](../../delivery/epic-plan.md). The full long-term destination —
+the roadmap areas and stories that make up the whole Sales Engine — is in
 [`docs/delivery/product-roadmap.md`](../../delivery/product-roadmap.md). That roadmap is not a
 commitment, and its estimates are rough guidance only.
 
-**Epic 1 — First Lego Block** is the first slice: seed data → Lead → PostgreSQL → FastAPI →
-React → Lead List → Lead Detail → activity/history. Roughly 5–7 focused days end to end,
-with each person's piece sized at about one normal workday. It is deliberately much smaller
-than the MVP, and its purpose is as much to establish how the four of us work together as to
-produce the feature.
+**Epic 1 — First Lego Block is closed.** It was the first slice: seed data → Lead →
+PostgreSQL → FastAPI → React → Lead List → Lead Detail → activity/history, sized at roughly
+5–7 focused days with each person's piece about one normal workday. Its purpose was as much
+to establish how the four of us work together as to produce the feature; what it shipped and
+what we learned is in [`docs/homework/epic-1/status.md`](../../homework/epic-1/status.md).
 
 **Definition of Done (every piece):** someone other than the author can pull it and run it,
 its acceptance criteria are demonstrated, its tests pass, migrations are reversible, and no
@@ -442,7 +442,7 @@ never blocked.
 
 ## 12. Approval
 
-This spec is the gate. Once the four of us agree on it, the delivery plan splits the first
-block into the four pieces in `docs/homework/epic-1/` and we start building. Changes after
-approval are proposed as edits to this file, so the written scope stays the single source of
-truth.
+This spec is the gate. Once the four of us agree on it, the
+[epic plan](../../delivery/epic-plan.md) decides the order and who owns each piece. Changes
+after approval are proposed as edits to this file, so the written scope stays the single
+source of truth.

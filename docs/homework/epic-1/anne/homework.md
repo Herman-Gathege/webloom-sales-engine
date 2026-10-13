@@ -1,9 +1,10 @@
 # Anne — Epic 1
 
-> **Status: ready to pick up, and the data is real now.** The screens exist and Sharon's API
-> is merged, so the app can show actual rows from the database instead of invented ones. The
-> businesses are still synthetic — nothing here is a real contact. Work on branch
-> `docs/epic-1-seller-review`.
+> **Status: done, verbally.** You ran the app as a seller, walked the Lead List and the Lead
+> Detail, and agreed the direction is right — so Epic 1 closed on your sign-off. The written
+> half of this card (notes, recommendations, and your example lead in the seed) did **not**
+> land as a PR; it is the first story of Epic 2 instead, because it changes the Lead Desk,
+> which is what Epic 2 is for.
 
 ## Your mission
 
@@ -24,11 +25,12 @@ Keep it practical. No big spec, no long report, no architecture unless you want 
 
 ## Done means
 
-- [ ] The seller journey is written down and clear.
-- [ ] You have listed what the Lead List must show.
-- [ ] You have listed what the Lead Detail must show.
-- [ ] You have 3–5 concrete recommendations.
-- [ ] Your example lead is in the seed data and shows up in the app.
+- [x] You used the two screens as a seller and confirmed the direction.
+- [ ] The seller journey is written down and clear. *(moves to Epic 2)*
+- [ ] You have listed what the Lead List must show. *(moves to Epic 2)*
+- [ ] You have listed what the Lead Detail must show. *(moves to Epic 2)*
+- [ ] You have 3–5 concrete recommendations. *(moves to Epic 2)*
+- [ ] Your example lead is in the seed data and shows up in the app. *(moves to Epic 2)*
 
 ## Bring back
 

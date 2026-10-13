@@ -53,10 +53,10 @@ for its subject — edit the document, not a copy of it.
 | Subject | Document |
 |---|---|
 | What we are building, and what is out of scope | `docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md` |
-| What we build now, and the next few Lego blocks | `docs/delivery/2026-10-09-delivery-plan.md` |
+| What we build next, and who owns it (Epics 2–9) | `docs/delivery/epic-plan.md` |
 | The exact Lead and Activity shapes the frontend and backend agree on | `docs/delivery/epic-1-lead-contract.md` |
 | The full long-term product roadmap (roadmap areas R1–R13) | `docs/delivery/product-roadmap.md` |
-| The current block, split into four homework cards | `docs/homework/epic-1/` |
+| The first block, how it went, and how a block is run | `docs/homework/epic-1/` |
 | Branching, PRs, review, definition of done, disagreements | `docs/team/how-we-work.md` |
 | How to talk to FikaTu (endpoints, events, token flow, gaps) | `docs/research/2026-10-08-fikatu-integration-notes.md` |
 | What the current lead list actually contains | `docs/research/2026-10-08-lead-list-audit.md` |
@@ -69,28 +69,27 @@ apart.
 
 ## Current state
 
-Epic 1 — the first Lego block. Both halves are merged; the rails that start them together
-are not. The one-page picture is `docs/homework/epic-1/status.md`.
+**Epic 1 is closed.** Both halves and the containers are merged. What the block was and how
+it went is in `docs/homework/epic-1/status.md`; what comes next, and who owns it, is
+`docs/delivery/epic-plan.md`.
 
 - **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
-  sample data until the API answers. It runs from a clean clone; see `frontend/README.md`.
+  sample data until the API answers. See `frontend/README.md`.
 - **Built:** `backend/` — the Lead and Activity model, the Alembic migration, an idempotent
   synthetic seed, `GET /api/v1/leads` and `GET /api/v1/leads/{id}`, and a pytest suite.
-  Commands are in `backend/README.md`.
-- **Verified:** 34/34 tests green against PostgreSQL 17 and Python 3.12, and the list
-  endpoint answers through Vite's dev proxy, which is what flips the UI from sample data to
-  live data.
-- **Built:** Docker Compose and the API container. One `docker compose up --build` starts
-  PostgreSQL 17 and the API together, creates both databases, runs the migration, and loads
-  the sample leads. The API answers on port 8001 (not 8000, which is taken on some machines).
-- **Not done:** nobody who would use this as a seller has looked at it. That is Anne's piece.
+  See `backend/README.md`.
+- **Built:** the containers — `docker compose up --build` starts the database, the API and
+  the UI together from a clean clone. Ports and traps are in `docker/README.md`.
+- **Verified:** 34/34 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
+  builds, lints and passes its tests on Node 22.
+- **Not built, and deliberately not in Epic 1:** auth, sending, the CSV importer, campaigns,
+  and the other eleven screens. `docs/delivery/epic-plan.md` says which epic brings each.
 - The shapes the two halves must agree on are frozen in
   `docs/delivery/epic-1-lead-contract.md`. Change that document and
   `frontend/src/api/types.ts` in the same PR, or neither.
-- FikaTu integration is **not** in Epic 1 — the seam is a small fake adapter. There is no
-  auth, no sending, and none of the other eleven screens yet. The intended layout below is
-  the target; the parts of it Epic 1 does not need yet do not exist.
+- FikaTu integration is not built yet; it arrives in Epic 6, and it needs a change in the
+  FikaTu repository first. The research note has the detail.
 
 ## The boundary rule
 
@@ -127,7 +126,7 @@ wrong regardless of how well it is written.
 | Anne (sales) | The sales workflow, message copy, qualification criteria, pilot campaign | Copy, templates, funnel definitions |
 | Sharon Kendi (backend) | Backend features, migrations, tests | Backend features she did not write |
 
-The backlog is the delivery plan. If a request is not in it, raise it with Herman before
+The backlog is the epic plan. If a request is not in it, raise it with Herman before
 building.
 
 ## Intended layout
@@ -145,7 +144,7 @@ backend/app/
 ├── database/        # session, base
 └── integrations/    # fikatu/ — the only code that knows FikaTu's API exists
 frontend/            # React SPA
-docs/                # scope, delivery plan, roadmap, homework, research, ADRs
+docs/                # scope, epic plan, roadmap, homework, research, ADRs
 docker/              # nginx, postgres, redis, worker configuration
 ```
 
@@ -172,10 +171,15 @@ ADR in `docs/decisions/`.
 
 ## Commands
 
-Both halves and the containers exist. Keep this section honest — correct it in the same PR
-that changes a command.
+Epic 1 is closed and the containers are the primary way to run it. Keep this section honest —
+correct it in the same PR that changes a command.
 
 ```bash
+docker compose up --build                      # ONE COMMAND: database + API + UI, http://localhost:5174
+docker compose run --rm api-test               # backend tests inside the container
+docker compose down -v                         # stop, and delete the data volume
+
+# Or by hand, without containers:
 cd frontend && npm install && npm run dev      # the SPA on sample data, http://localhost:5173
 cd frontend && npm run lint && npm run build && npm test
 
@@ -184,10 +188,10 @@ cd backend && .venv/bin/alembic upgrade head   # create the leads and activities
 cd backend && .venv/bin/python -m app.seed     # load the synthetic sample leads (repeatable)
 cd backend && .venv/bin/uvicorn app.main:app --reload --port 8001   # the API the SPA proxies to
 cd backend && .venv/bin/python -m pytest -v    # needs TEST_DATABASE_URL; see backend/README.md
-
-docker compose up --build                      # PostgreSQL 17 + the API, on http://localhost:8001
-docker compose run --rm api-test               # backend tests inside the container
 ```
+
+The API is on 8001, not 8000 — another project owns 8000 on at least one team machine. Ports
+and traps are in `docker/README.md`.
 
 **Node 22.12 or newer is required**, pinned in `.nvmrc`. Vite 8 will not run on Node 21: it
 fails to load its rolldown native binding (`Cannot find module
@@ -196,7 +200,8 @@ unsupported version. `frontend/package.json` declares the same range in `engines
 
 ## Before you write code
 
-1. Read the scope spec section that covers this work, and the delivery plan block that owns it.
+1. Read the scope spec section that covers this work, and the epic that owns it in
+   `docs/delivery/epic-plan.md`.
 2. Check whether FikaTu already does it — the integration research note says what it offers.
 3. Put the rule in a service, the query in a repository, and the wiring in the API layer.
 4. Write the test for the failure path as well as the happy path, especially for anything
