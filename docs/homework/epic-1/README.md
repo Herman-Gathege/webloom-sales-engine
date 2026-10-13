@@ -4,20 +4,21 @@
 
 Get one tiny piece of the Sales Engine working together.
 
-## Where we are right now
+## Where this block ended
 
-- **Herman — done.** The frontend shell is merged: Lead List, Lead Detail with activity, and
-  a client that runs on sample data until the API answers.
-- **Sharon — done.** The Lead backend is merged: the two tables, the migration, the seed,
-  the two read endpoints and their tests.
-- **Mark — next.** Containerise the system so one command starts the database and the API
-  together, on a port that is not already taken. Branch `chore/epic-1-docker`.
-- **Anne — next.** Use the two screens as a salesperson, give feedback, and land her example
-  lead in the seed data. Branch `docs/epic-1-seller-review`.
+**Closed on 2026-10-13.** All four pieces are in, and one command starts the slice.
 
-Both halves are on `main` and the slice works when started by hand, but nothing starts them
-together yet, and nobody has used it as a seller. The full picture — what is done, what is
-verified, what is left — is in [status.md](status.md).
+- **Herman — done** (PR #5). The frontend shell: Lead List, Lead Detail with activity, and a
+  client that runs on sample data until the API answers.
+- **Sharon — done** (PR #7). The Lead backend: the two tables, the migration, the idempotent
+  seed, the two read endpoints and their tests.
+- **Mark — done** (PR #10). One command: PostgreSQL, the API and the UI in Compose, on
+  <http://localhost:5174>.
+- **Anne — done, verbally.** She walked the screens as a seller and agreed the direction is
+  right. Her written notes and example lead are the first story of Epic 2.
+
+What shipped, what is verified, what we learned, and the one honest gap are in
+[status.md](status.md). What comes next is the [epic plan](../../delivery/epic-plan.md).
 
 The agreed Lead and Activity shapes live in
 [`docs/delivery/epic-1-lead-contract.md`](../../delivery/epic-1-lead-contract.md).
@@ -58,8 +59,8 @@ Nobody disappears for a week. Small pieces, small PRs, frequent integration.
 
 ## Epic 1 is done when
 
-- Everyone has contributed.
-- Everyone's work has been integrated into `main`.
-- The first vertical slice works.
-- Everyone understands how we want to work.
-- We know what to change before Epic 2.
+- [x] Everyone has contributed.
+- [x] Everyone's work has been integrated.
+- [x] The first vertical slice works, from one command.
+- [x] Everyone understands how we want to work.
+- [x] We wrote down what to change before Epic 2 — see [status.md](status.md).

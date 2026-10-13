@@ -1,7 +1,7 @@
 # Docker — Epic 1
 
-This directory holds the container wiring for the first slice. One command starts the
-database and the API from a clean clone:
+This directory holds the container wiring for the first slice. One command starts the whole
+slice — database, API and UI — from a clean clone:
 
 ```bash
 docker compose up --build
@@ -13,24 +13,50 @@ docker compose up --build
 |---|---|---|
 | `db` | `postgres:17` | PostgreSQL. On first boot it creates `webloom_sales_engine` and `webloom_sales_engine_test`. |
 | `api` | built from `backend/Dockerfile` | Runs `alembic upgrade head`, seeds the sample leads, then starts FastAPI. |
+| `frontend` | built from `frontend/Dockerfile` | Builds the SPA with Node 22 and serves it with Nginx, which also proxies `/api` to the API. |
 | `api-test` | same backend image, `test` profile | Runs the pytest suite inside the container. |
 
-The API container listens on port 8000 internally and is published on host port **8001**.
-Port 8000 is deliberately not used: another project owns it on at least one team machine,
-and a bad port silently leaves the frontend on sample data.
+The composed system answers on two host ports:
+
+| What | URL |
+|---|---|
+| The app (open this one) | <http://localhost:5174> |
+| The API directly | <http://localhost:8001> |
+
+Both are overridable: `FRONTEND_PORT` and `API_PORT`. Port 8000 is deliberately not used for
+the API — another project owns it on at least one team machine, and a bad port silently leaves
+the UI on sample data. 5173 is likewise skipped, because it is the Vite dev port and is taken
+on at least one machine.
+
+The UI talks to the API through the same origin: Nginx serves the app and proxies `/api` to
+the `api` container, so there is no CORS to configure and no API hostname is baked into the
+bundle.
 
 ## Commands
 
 ```bash
-docker compose up --build       # start db + api
+docker compose up --build       # start db + api + frontend; open http://localhost:5174
 docker compose run --rm api-test   # run the backend tests in a container
 docker compose exec db psql -U postgres -d webloom_sales_engine   # inspect the app db
 docker compose down             # stop containers, keep the data volume
 docker compose down -v          # stop and delete the data volume
 ```
 
+To work on the frontend with hot reload instead of the built image, run the containers for the
+backend only and use the dev server:
+
+```bash
+docker compose up -d db api     # backend only
+cd frontend && npm install && npm run dev   # http://localhost:5173
+```
+
 ## Watch-outs
 
+- **The first `up --build` is slow, and the database is unhealthy for the first ~90 seconds.**
+  That is PostgreSQL running `initdb` and the init scripts; `up` waits for it. Measured: about
+  eight minutes for the first build on one machine, under a minute afterwards. `db`'s
+  healthcheck has a 60s `start_period` and 30 retries precisely for this — with a tighter
+  budget, `up` aborts on a clean clone before the API is ever started.
 - **`down -v` deletes the seeded data.** The named volume outlives `down`; only `down -v`
   resets it.
 - **The init SQL runs only on a fresh volume.** `docker/postgres/init/` is executed the
@@ -47,6 +73,8 @@ docker compose down -v          # stop and delete the data volume
   test images before any non-local deployment.
 - **PostgreSQL has no host port.** That avoids colliding with a local PostgreSQL on 5432.
   Use `docker compose exec db psql` to inspect it.
+- **The frontend image is a production build, so it does not hot-reload.** That is deliberate:
+  the composed stack is what we demo. Use `npm run dev` while you are writing UI code.
 
 ## Decisions to agree before continuing
 
@@ -54,5 +82,5 @@ docker compose down -v          # stop and delete the data volume
    host access.
 2. Keep one local image with runtime and test dependencies for now, and split it when a real
    deploy exists.
-3. Add Nginx and the built frontend to Compose in the block that makes the demo a single
-   end-to-end command. It was deliberately out of scope for this card.
+3. Keep the built SPA in Compose rather than the Vite dev server, so "one command" means the
+   same thing on every machine. *(Agreed in the Epic 1 close-out.)*

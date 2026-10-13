@@ -210,7 +210,7 @@ The Sales Engine therefore treats reply detection as its own problem:
   the outreach (story R8.1). Honest and workable at pilot scale.
 - **Later:** a WhatsApp Business API webhook (or an SMS gateway callback) received by the
   Sales Engine, or by a future FikaTu inbound module, would automate it. That is a separate
-  scope decision, listed in the delivery plan as explicitly deferred.
+  scope decision, listed in the product roadmap as explicitly deferred.
 
 ## Running FikaTu locally
 

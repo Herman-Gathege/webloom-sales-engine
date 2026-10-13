@@ -1,15 +1,17 @@
 # Delivery
 
-Where we are going is the [product roadmap](product-roadmap.md). What we are building now is
-the [delivery plan](2026-10-09-delivery-plan.md).
+Read [epic-plan.md](epic-plan.md). That is the plan we act on: Epics 2–9, what each one is,
+who owns it, and what order they come in. It is deliberately short.
 
-We deliver in short Lego blocks, not layers: build one small working piece, bring everyone's
-pieces together, test it, learn how we worked, then build the next piece. The current block
-is [Epic 1 — First Lego Block](../homework/epic-1/README.md).
+[product-roadmap.md](product-roadmap.md) is the reference behind it — roadmap areas R1–R13
+and the 42 stories they contain. Look things up there when you need the detail; nobody reads
+it end to end.
+
+Epic 1 is closed. What it was and how it went is in
+[the closure record](../homework/epic-1/status.md).
 
 | Document | What it is |
 |---|---|
-| [Delivery plan](2026-10-09-delivery-plan.md) | Now / Next / Later. The plan we act on. |
-| [Epic 1 lead API contract](epic-1-lead-contract.md) | The exact Lead and Activity shapes the frontend and backend agree on. |
-| [Product roadmap](product-roadmap.md) | The full destination (R1–R13). Not a commitment. |
-| [Homework — Epic 1](../homework/epic-1/README.md) | The current block, split into four pieces. |
+| [Epic plan](epic-plan.md) | Now / Next / Later, and who owns what. The plan we act on. |
+| [Product roadmap](product-roadmap.md) | The destination in full (R1–R13). Reference, not a commitment. |
+| [Epic 1 lead API contract](epic-1-lead-contract.md) | The Lead and Activity shapes the API and UI agree on. |

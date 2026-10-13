@@ -9,44 +9,48 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Epic 1 — First Lego Block is half built.** The frontend shell exists in
-[`frontend/`](frontend/): a Lead List, a Lead Detail with activity history, navigation, and
-a client that shows bundled sample data until the API answers. It runs from a clean clone
-with `npm run dev`.
+Pre-MVP. **Epic 1 — First Lego Block is closed.** One thin vertical slice runs end to end:
+sample leads in PostgreSQL, served by FastAPI, shown in a React Lead List and Lead Detail
+with activity history.
 
-The Lead backend now exists in [`backend/`](backend/README.md): the Lead and Activity
-tables, the Alembic migration, a repeatable synthetic seed, `GET /api/v1/leads` and
-`GET /api/v1/leads/{id}`, and a pytest suite. Start it and the frontend's **"Sample data"**
-banner becomes **"Live data"** with no frontend change.
+- [`frontend/`](frontend/) — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui.
+- [`backend/`](backend/README.md) — FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL 17, with a
+  reversible migration, an idempotent seed, and two read endpoints.
+- [`docker-compose.yml`](docker-compose.yml) — one command starts all three.
 
-Docker Compose now starts PostgreSQL and the API together: one `docker compose up` from a
-clean clone creates both databases, runs the migration, and loads the sample leads. Still
-to come in this block: the frontend and backend demoed together, and the first demo. See the
-[delivery plan](docs/delivery/2026-10-09-delivery-plan.md) for the pieces, and the
-[lead API contract](docs/delivery/epic-1-lead-contract.md) for the shape they must agree on.
+There is no auth, no sending, and no CSV importer yet. What the block was and how it went is
+in the [Epic 1 closure record](docs/homework/epic-1/status.md); what comes next, and who owns
+it, is the [epic plan](docs/delivery/epic-plan.md).
 
 ## Run it
 
-From a clean clone, one command starts PostgreSQL and the API:
+From a clean clone, one command starts everything:
 
 ```bash
 docker compose up --build
 ```
 
+The first run is slow and that is normal: it builds both images and initialises PostgreSQL.
+On this machine that took about eight minutes the first time and under a minute after that.
+The database is unhealthy for roughly the first minute and a half while `initdb` runs, and
+`up` waits for it — so a long silence at the start is not a hang.
+
 On first boot it creates both databases (`webloom_sales_engine` and
-`webloom_sales_engine_test`), runs the migration, and loads the eight sample leads. The API
-answers at <http://localhost:8001> — deliberately not 8000, which is taken on at least one
-machine. `GET /api/v1/leads` should return rows immediately.
+`webloom_sales_engine_test`), runs the migration, loads the eight sample leads, and builds the
+UI. Then open:
 
-In a second terminal, start the frontend against it:
+| What | URL |
+|---|---|
+| The app | <http://localhost:5174> |
+| The API directly | <http://localhost:8001> — deliberately not 8000, which is taken on at least one machine |
 
-```bash
-cd frontend && npm install && npm run dev
-```
+Click **Leads**, open one, and you should see real rows from PostgreSQL with their activity
+history. The **Live data** badge confirms the UI is talking to the API rather than to its
+bundled sample leads.
 
-The dev server proxies `/api` to the API on `8001`, so the Lead List switches from
-**Sample data** to **Live data** with no further setup. Run the backend tests inside the
-container with:
+To write UI code with hot reload, run the backend in containers and the dev server by hand
+instead — `docker compose up -d db api` then `cd frontend && npm run dev`. Run the backend
+tests inside the container with:
 
 ```bash
 docker compose run --rm api-test
@@ -57,11 +61,11 @@ The traps we hit, and the decisions to agree before the next block, are in the
 
 ## If you are one of the four of us
 
-Open your homework card and start. It is one screen long and fits in a normal workday:
-[Herman](docs/homework/epic-1/herman/homework.md) ·
-[Mark](docs/homework/epic-1/mark/homework.md) ·
-[Sharon](docs/homework/epic-1/sharon/homework.md) ·
-[Anne](docs/homework/epic-1/anne/homework.md)
+Epic 1 is closed. The next block is **Epic 2 — the Lead Desk is real**, owned by Sharon.
+Start with the [epic plan](docs/delivery/epic-plan.md) to see what we are building and who
+owns what; the Epic 1 cards live on in
+[`docs/homework/epic-1/`](docs/homework/epic-1/README.md) as the record of how the first block
+went.
 
 ## How we work
 
@@ -85,10 +89,10 @@ implement it; a human reviews the result.** The short version is in
 | Read this | For |
 |---|---|
 | [Scope spec](docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) | What we are building, what is out of scope, and the design |
-| [Delivery plan](docs/delivery/2026-10-09-delivery-plan.md) | What we are building now, and the next few blocks |
+| [Epic plan](docs/delivery/epic-plan.md) | What we build next, who owns it, and in what order |
 | [Product roadmap](docs/delivery/product-roadmap.md) | The full long-term destination. Not a commitment |
 | [Lead API contract](docs/delivery/epic-1-lead-contract.md) | The exact Lead and Activity shapes the API and UI agree on |
-| [Homework — Epic 1](docs/homework/epic-1/README.md) | The current block, split into four pieces |
+| [Epic 1 closure](docs/homework/epic-1/status.md) | What the first block shipped, and what we learned |
 | [How we work](docs/team/how-we-work.md) | Branching, PRs, review, what "done" means |
 | [FikaTu integration notes](docs/research/2026-10-08-fikatu-integration-notes.md) | Endpoints, events, and the gaps we must work around |
 | [Lead list audit](docs/research/2026-10-08-lead-list-audit.md) | What the first lead list contains and what it changes |
@@ -102,7 +106,6 @@ matches FikaTu so the two systems share one set of conventions.
 
 ## Not built yet
 
-Epic 1 is one thin slice: two screens, backed by leads and their activity. Docker Compose and
-the API container now start the backend; the worker container, Nginx, and CI are still to
-come. CI, deployment, auth, the CSV importer, campaigns, sending, and FikaTu delivery all
-come in later blocks.
+Auth, the CSV importer, campaigns, drafts, approval, sending, replies, and reporting —
+Epics 2 to 9 in the [epic plan](docs/delivery/epic-plan.md). There is no CI yet either;
+Epic 2 adds it, because today a red test is only visible to whoever ran it.

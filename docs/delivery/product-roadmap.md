@@ -10,14 +10,14 @@
 The long-term product roadmap: the complete Sales Engine, split into **roadmap areas**
 (R1–R13) and their stories. It describes the destination.
 
-It is **not** the delivery plan, and nothing here is a commitment to a date. Delivery
+It is **not** the epic plan, and nothing here is a commitment to a date. Delivery
 happens in short Lego blocks — see `docs/delivery/README.md`. **"Epic 1" always means the
 first delivery block**, never a roadmap area. That is why roadmap areas are numbered
 `R1`–`R13` and their stories `R1.1`, `R4.2`, and so on: so the two cannot be confused.
 
 Read this file when you want to know where the project is going, what has already been
 decided, or where a new idea fits. If you are building right now, read
-`docs/delivery/2026-10-09-delivery-plan.md` and your homework card instead.
+`docs/delivery/epic-plan.md` and your homework card instead.
 
 ## How to read the estimates
 
@@ -608,24 +608,12 @@ Tasks: demo script and onboarding guide (Herman, 8h) · sales-user guide (Anne, 
 
 ---
 
-## 3. Suggested build order
+## 3. Build order
 
-Rough guidance only. It says what depends on what, so we can pick the next Lego block
-without re-arguing it. After each block we choose again; this is not a promise.
-
-| Stage | Roadmap areas involved | Milestone |
-|---|---|---|
-| 0 | **Epic 1 (now)** — a thin slice of R1, R2, R3 and R4 | From a clean clone: start the app, see leads, open a lead |
-| 1 | Finish R1–R4 (the Lead Desk) | The real lead list lives in the system, not a spreadsheet |
-| 2 | R5, R6 | Real personalised drafts, reviewed by a human before sending |
-| 3 | R7 | **M1** — first live sends |
-| 4 | R8, R9 | **M2** — a real conversation handed to Anne |
-| 5 | R10, R11 | **M3** — the funnel is visible end to end |
-| 6 | R12, R13 | **M4** — pilot run and reviewed |
-
-Epic 1 deliberately covers only the small piece of R1–R4 needed to prove the four of us can
-build together: from a clean clone, start the app, load sample leads, see the Lead List,
-open a Lead Detail, and see basic activity. Everything else in R1–R4 comes afterwards.
+The order we are actually building in — which roadmap areas each epic covers, who owns it,
+what it depends on and what it demonstrates — is in [`epic-plan.md`](epic-plan.md). Epic 1 is
+closed. This document deliberately does not repeat the order, so there is one plan and one
+place to change it.
 
 ---
 
