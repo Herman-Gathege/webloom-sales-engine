@@ -14,7 +14,7 @@ settings = get_settings()
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
-    description="Epic 1: leads, and the activity history behind them.",
+    description="Sprint 1: leads, and the activity history behind them.",
 )
 
 app.include_router(api_router, prefix=settings.api_v1_prefix)

@@ -33,8 +33,10 @@ Read only your own card. Each one tells you what you need.
 
 ## Two things to keep in mind
 
-- **This is a side project.** Every card here is about one normal workday, and nothing is due
-  overnight. If yours is turning into two days, say so in the group and we will cut it.
+- **This is a side project.** Nothing here is due overnight. The importer is the big piece —
+  give it two or three evenings, not one. CI is about half a day. The filters and the seller's
+  review are lighter. If your card is ballooning, say so in the group and we will cut it
+  rather than let it eat a week.
 - **Channels, decided:** we send on **SMS through Africa's Talking (FikaTu's sandbox)** and
   **email**. No WhatsApp. Nothing sends this sprint — that starts in Sprint 6.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# End-to-end check of the Epic 1 Lead slice: migration -> seed -> API.
+# End-to-end check of the Sprint 1 Lead slice: migration -> seed -> API.
 #
 # Run from the backend directory:  bash scripts/check_demo.sh
 # It drops and recreates the schema of the database in DATABASE_URL, so it

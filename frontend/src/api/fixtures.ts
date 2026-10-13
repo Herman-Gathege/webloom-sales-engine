@@ -1,5 +1,5 @@
 /**
- * Synthetic sample data for Epic 1.
+ * Synthetic sample data for Sprint 1.
  *
  * These are invented businesses with invented phone numbers. Real lead data
  * lives in the gitignored `data/` directory and must never be committed or

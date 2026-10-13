@@ -29,7 +29,7 @@ describe("LeadDetail", () => {
   it("renders the lead's activity history", async () => {
     renderDetail(lead.id);
 
-    // The last step of the Epic 1 demo: "See basic activity/history".
+    // The last step of the Sprint 1 demo: "See basic activity/history".
     expect(await screen.findByText("Activity")).toBeTruthy();
     for (const entry of lead.activity) {
       expect(screen.getByText(entry.summary)).toBeTruthy();

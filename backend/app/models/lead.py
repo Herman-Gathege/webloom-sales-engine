@@ -1,4 +1,4 @@
-"""The Lead model — the Epic 1 shape in docs/delivery/epic-1-lead-contract.md."""
+"""The Lead model — the Sprint 1 shape in docs/delivery/sprint-1-lead-contract.md."""
 
 import enum
 import uuid
@@ -57,7 +57,7 @@ class Lead(Base):
     whatsapp_capable: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default=text("true")
     )
-    # Kept verbatim from the research; not normalised in Epic 1.
+    # Kept verbatim from the research; not normalised in Sprint 1.
     website_status: Mapped[str | None] = mapped_column(Text)
     has_website: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=text("false")

@@ -1,4 +1,4 @@
-"""Synthetic sample leads for the Epic 1 demo.
+"""Synthetic sample leads for the Sprint 1 demo.
 
 Every value here is invented, including the phone numbers and business names.
 Real lead data lives in the gitignored `data/` directory and is never committed
@@ -138,7 +138,7 @@ def build_sample_leads() -> list[Lead]:
             website_status=website_status,
             has_website=has_website,
             source=SOURCE,
-            # Nothing in Epic 1 moves a lead off "new" — nothing sends yet.
+            # Nothing in Sprint 1 moves a lead off "new" — nothing sends yet.
             status=LeadStatus.NEW,
             created_at=created_at,
             updated_at=created_at,
