@@ -9,10 +9,19 @@ services:
       - db-data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      # Force TCP (-h 127.0.0.1). Without it, pg_isready answers over the unix
+      # socket that initdb's temporary server also listens on, so the container
+      # can report healthy while the real server is not up yet.
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres -h 127.0.0.1"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      # A first boot is not a normal boot: initdb, the init scripts, the temporary
+      # server's shutdown and the real server's start took ~85s on a developer
+      # laptop. Anything under that and `depends_on: service_healthy` aborts
+      # `docker compose up` on a clean clone. Failures during start_period do not
+      # count against retries, so being generous costs nothing.
+      retries: 30
+      start_period: 60s
 
   api:
     build:
@@ -36,6 +45,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      # 5173 is the Vite dev port and is taken on at least one team machine, so
+      # the container gets its own host port. Override with FRONTEND_PORT=...
+      - "${FRONTEND_PORT:-5174}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1/ || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
   api-test:
     profiles: ["test"]
