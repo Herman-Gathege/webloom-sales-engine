@@ -30,18 +30,22 @@ npm test         # vitest, jsdom
 
 ## Where the data comes from
 
-Sharon's Lead API is not built yet, so the app ships with synthetic sample leads in
-`src/api/fixtures.ts` and shows a **"Sample data"** banner while it uses them.
+The backend exists, but until it answers this app also ships with synthetic sample leads
+in `src/api/fixtures.ts` and shows a **"Sample data"** banner while it uses them.
 
 It calls the real API first. The moment `GET /api/v1/leads` answers, the banner switches
 to **"Live data"** and no frontend code changes. The dev server proxies `/api` to
-`http://localhost:8000`, so there is no CORS to configure in development.
+`http://localhost:8001`, so there is no CORS to configure in development.
+
+When the backend is running through the repo-root Docker Compose file, leave the proxy
+target alone: the API is served on port 8001 by default. Override `VITE_API_PROXY_TARGET`
+only if the API has been moved.
 
 | Variable | Default | Meaning |
 |---|---|---|
 | `VITE_API_BASE_URL` | `/api/v1` | Where the API lives. |
 | `VITE_USE_MOCK` | unset | Set to `1` to skip the API entirely and always use fixtures. |
-| `VITE_API_PROXY_TARGET` | `http://localhost:8000` | Where the dev server proxies `/api`. |
+| `VITE_API_PROXY_TARGET` | `http://localhost:8001` | Where the dev server proxies `/api`. |
 
 The contract these fields follow is
 [`docs/delivery/epic-1-lead-contract.md`](../docs/delivery/epic-1-lead-contract.md), and

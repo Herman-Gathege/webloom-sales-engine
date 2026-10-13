@@ -1,0 +1,2 @@
+CREATE DATABASE webloom_sales_engine;
+CREATE DATABASE webloom_sales_engine_test;

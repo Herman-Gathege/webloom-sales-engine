@@ -81,8 +81,9 @@ are not. The one-page picture is `docs/homework/epic-1/status.md`.
 - **Verified:** 34/34 tests green against PostgreSQL 17 and Python 3.12, and the list
   endpoint answers through Vite's dev proxy, which is what flips the UI from sample data to
   live data.
-- **Not built:** the rails around it — Docker Compose, the API container, and the database
-  bootstrap. That is Mark's piece. Until it lands, start the two halves by hand.
+- **Built:** Docker Compose and the API container. One `docker compose up --build` starts
+  PostgreSQL 17 and the API together, creates both databases, runs the migration, and loads
+  the sample leads. The API answers on port 8001 (not 8000, which is taken on some machines).
 - **Not done:** nobody who would use this as a seller has looked at it. That is Anne's piece.
 - The shapes the two halves must agree on are frozen in
   `docs/delivery/epic-1-lead-contract.md`. Change that document and
@@ -171,8 +172,8 @@ ADR in `docs/decisions/`.
 
 ## Commands
 
-Both halves exist; the containers do not. Keep this section honest — correct it in the same
-PR that changes a command.
+Both halves and the containers exist. Keep this section honest — correct it in the same PR
+that changes a command.
 
 ```bash
 cd frontend && npm install && npm run dev      # the SPA on sample data, http://localhost:5173
@@ -181,11 +182,11 @@ cd frontend && npm run lint && npm run build && npm test
 cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 cd backend && .venv/bin/alembic upgrade head   # create the leads and activities tables
 cd backend && .venv/bin/python -m app.seed     # load the synthetic sample leads (repeatable)
-cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000   # the API the SPA proxies to
+cd backend && .venv/bin/uvicorn app.main:app --reload --port 8001   # the API the SPA proxies to
 cd backend && .venv/bin/python -m pytest -v    # needs TEST_DATABASE_URL; see backend/README.md
 
-docker compose up --build                      # api + postgres — Mark's piece, not built yet
-docker compose exec api pytest tests/ -v       # not built yet
+docker compose up --build                      # PostgreSQL 17 + the API, on http://localhost:8001
+docker compose run --rm api-test               # backend tests inside the container
 ```
 
 **Node 22.12 or newer is required**, pinned in `.nvmrc`. Vite 8 will not run on Node 21: it
