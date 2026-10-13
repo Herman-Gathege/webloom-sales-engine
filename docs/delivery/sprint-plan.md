@@ -9,8 +9,12 @@ next, in what order, and who owns each sprint.
 
 We build like Lego. Each sprint is one small working piece — build it, bring everyone's
 pieces together, run it, demo it, then start the next one. **A sprint is not finished until
-someone other than the author can run its demo.** Roughly a week of part-time work, about one
-normal workday per person.
+someone other than the author can run its demo.**
+
+Sizes below compare sprints to each other; they are not a promise of one week. Sprint 1 fitted
+into about one normal workday each. **Sprint 2 is more like two or three per person, and
+Sprints 6 to 9 are bigger again** — so when we get to those we cut them into smaller pieces
+before we start, rather than after.
 
 ## Where we are
 
