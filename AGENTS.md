@@ -79,15 +79,15 @@ plan is `docs/delivery/sprint-plan.md`; what we are doing right now is
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
   sample data until the API answers. See `frontend/README.md`.
 - **Built:** `backend/` — the Lead and Activity model, the Alembic migration, an idempotent
-  synthetic seed, `GET /api/v1/leads` and `GET /api/v1/leads/{id}`, and a pytest suite.
-  See `backend/README.md`.
+  synthetic seed, `GET /api/v1/leads` and `GET /api/v1/leads/{id}`, the CSV importer that
+  brings the real research list in (`POST /api/v1/leads/import`), and a pytest suite.
+  See `backend/README.md` and `docs/delivery/sprint-2-import-contract.md`.
 - **Built:** the containers — `docker compose up --build` starts the database, the API and
   the UI together from a clean clone. Ports and traps are in `docker/README.md`.
-- **Verified:** 34/34 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
+- **Verified:** 118/118 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
   builds, lints and passes its tests on Node 22.
-- **Not built, and deliberately not in Sprint 1:** auth, sending, the real-list importer,
-  campaigns, and the other eleven screens. `docs/delivery/sprint-plan.md` says which sprint
-  brings each.
+- **Not built yet:** auth, sending, campaigns, filters and search on the lead list, and the
+  other eleven screens. `docs/delivery/sprint-plan.md` says which sprint brings each.
 - The shapes the two halves must agree on are frozen in
   `docs/delivery/sprint-1-lead-contract.md`. Change that document and
   `frontend/src/api/types.ts` in the same PR, or neither.

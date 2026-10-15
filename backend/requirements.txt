@@ -6,3 +6,6 @@ alembic==1.14.0
 pydantic==2.10.4
 pydantic-settings==2.7.0
 psycopg[binary]==3.2.3
+# Form and file uploads: the CSV importer takes the research list as a
+# multipart upload. FastAPI's floor is >=0.0.7.
+python-multipart==0.0.32

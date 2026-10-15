@@ -110,8 +110,8 @@ Each of these is a later sprint, not an oversight:
   user id on activity.
 - **A contacts table.** One phone per lead for now. `lead_contact_points` arrives when
   multi-channel contacts matter.
-- **The CSV importer.** Sprint 1 seeds a synthetic fixture; the real 52-row list is Sprint 2,
-  with rejected rows and a reason report.
+- **The CSV importer.** Sprint 1 seeds a synthetic fixture. The importer arrived in Sprint 2
+  and has its own document: [the Sprint 2 import contract](sprint-2-import-contract.md).
 - **Campaigns, templates, outreach, replies, qualification.** All deferred.
 
 ## One gap to agree before the importer lands

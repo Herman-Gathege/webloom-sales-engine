@@ -12,6 +12,7 @@ Start with the document that matches what you are about to do.
 | how we branch, review, and merge | [how we work](team/how-we-work.md) |
 | what we verified about FikaTu | [FikaTu integration notes](research/2026-10-08-fikatu-integration-notes.md) |
 | the exact Lead shape the API and UI agree on | [Sprint 1 lead contract](delivery/sprint-1-lead-contract.md) |
+| the shape of the CSV import, so the upload screen can call it | [Sprint 2 import contract](delivery/sprint-2-import-contract.md) |
 | what the first lead list actually contains | [lead list audit](research/2026-10-08-lead-list-audit.md) |
 | why a decision was made | [decision records](decisions/) |
 
