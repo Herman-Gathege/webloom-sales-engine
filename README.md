@@ -15,10 +15,10 @@ with activity history.
 
 - [`frontend/`](frontend/) — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui.
 - [`backend/`](backend/README.md) — FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL 17, with a
-  reversible migration, an idempotent seed, and two read endpoints.
+  reversible migration, an idempotent seed, two read endpoints, and the CSV importer.
 - [`docker-compose.yml`](docker-compose.yml) — one command starts all three.
 
-There is no auth, no sending, and no importer yet. What Sprint 1 was and how it went is in
+There is no auth and no sending yet. What Sprint 1 was and how it went is in
 the [Sprint 1 record](docs/homework/sprint-1/status.md); what we are building now, and who
 leads it, is the [sprint plan](docs/delivery/sprint-plan.md) and
 [Sprint 2](docs/homework/sprint-2/README.md).
@@ -110,6 +110,6 @@ matches FikaTu so the two systems share one set of conventions.
 
 ## Not built yet
 
-Auth, the real-list importer, campaigns, drafts, approval, sending, replies, and reporting —
+Auth, campaigns, drafts, approval, sending, replies, and reporting —
 Sprints 3 to 9 in the [sprint plan](docs/delivery/sprint-plan.md). There is no CI yet either;
 Sprint 2 adds it, because today a red test is only visible to whoever ran it.
