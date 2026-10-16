@@ -1,12 +1,26 @@
 """Lead routes. Parse, authorise (later), delegate — no business rules here."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.database import get_session
 from app.repositories import LeadRepository
-from app.schemas import LeadDetailRead, LeadListRead, LeadRead
-from app.services import LeadNotFoundError, LeadService
+from app.schemas import (
+    ImportSummary,
+    LeadDetailRead,
+    LeadListRead,
+    LeadRead,
+    RefusedRowRead,
+    RowWarningRead,
+)
+from app.services import (
+    MAX_UPLOAD_BYTES,
+    ImportFileError,
+    LeadImportService,
+    LeadNotFoundError,
+    LeadService,
+    refused_rows_csv,
+)
 from app.services.lead_service import DEFAULT_LIMIT
 
 router = APIRouter(prefix="/leads", tags=["leads"])
@@ -14,6 +28,10 @@ router = APIRouter(prefix="/leads", tags=["leads"])
 
 def get_lead_service(session: Session = Depends(get_session)) -> LeadService:
     return LeadService(LeadRepository(session))
+
+
+def get_import_service(session: Session = Depends(get_session)) -> LeadImportService:
+    return LeadImportService(LeadRepository(session))
 
 
 @router.get("", response_model=LeadListRead, summary="List leads, newest first")
@@ -32,6 +50,66 @@ def list_leads(
         total=page.total,
         limit=page.limit,
         offset=page.offset,
+    )
+
+
+@router.post(
+    "/import",
+    response_model=ImportSummary,
+    summary="Import a researched lead list from CSV",
+    responses={
+        200: {
+            "description": (
+                "What happened to every row. `format=csv` answers the refusals as a file."
+            ),
+            "content": {"text/csv": {"schema": {"type": "string"}}},
+        },
+        400: {"description": "The file is not UTF-8, or a column we read is missing."},
+        413: {"description": "The file is larger than 5 MB."},
+    },
+)
+def import_leads(
+    file: UploadFile = File(..., description="The research list, as a UTF-8 CSV."),
+    report_format: str = Query(
+        "json",
+        alias="format",
+        pattern="^(json|csv)$",
+        description="`json` for the summary, `csv` to download the refused rows.",
+    ),
+    service: LeadImportService = Depends(get_import_service),
+) -> ImportSummary | Response:
+    # Read one byte past the cap so an oversized upload is refused rather than
+    # held in memory; Starlette has already spooled the rest to a temporary file.
+    raw = file.file.read(MAX_UPLOAD_BYTES + 1)
+    if len(raw) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"The file is larger than {MAX_UPLOAD_BYTES // (1024 * 1024)} MB.",
+        )
+
+    try:
+        result = service.import_file(raw, file.filename or "upload.csv")
+    except ImportFileError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message
+        ) from None
+
+    if report_format == "csv":
+        return Response(
+            content=refused_rows_csv(result),
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": 'attachment; filename="rejected-rows.csv"',
+            },
+        )
+
+    return ImportSummary(
+        filename=result.filename,
+        row_count=result.row_count,
+        accepted=result.accepted,
+        rejected=result.rejected,
+        rejected_rows=[RefusedRowRead.model_validate(row) for row in result.refused],
+        warnings=[RowWarningRead.model_validate(warning) for warning in result.warnings],
     )
 
 

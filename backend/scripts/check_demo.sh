@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# End-to-end check of the Sprint 1 Lead slice: migration -> seed -> API.
+# End-to-end check of the Lead slice: migration -> seed -> API -> importer.
 #
 # Run from the backend directory:  bash scripts/check_demo.sh
 # It drops and recreates the schema of the database in DATABASE_URL, so it
@@ -108,6 +108,43 @@ if [[ "$malformed_status" == "404" ]]; then
   pass "a malformed id is 404, not 422"
 else
   fail "malformed id: HTTP $malformed_status (expected 404)"
+fi
+
+# The importer: a synthetic list in, a report out, and the good rows in the list.
+import_json="$(curl -sf -F "file=@tests/fixtures/import_mixed.csv" "${BASE_URL}/api/v1/leads/import")"
+counts="$("$PYTHON" -c 'import json,sys; b=json.load(sys.stdin); print(b["row_count"], b["accepted"], b["rejected"])' <<<"$import_json")"
+if [[ "$counts" == "7 3 4" ]]; then
+  pass "POST /api/v1/leads/import accounts for every row (7 rows: 3 accepted, 4 refused)"
+else
+  fail "import counts: got '$counts', expected '7 3 4'"
+fi
+
+# The report is a download of the refusals from the call that asks for it, and this
+# is the same file a second time: the three rows imported above are already in the
+# database, so their numbers are now refused too. Every one of the seven rows is
+# refused here, and the report is expected to say so — one line each.
+refused_csv="$(curl -sf -F "file=@tests/fixtures/import_mixed.csv" \
+  "${BASE_URL}/api/v1/leads/import?format=csv")"
+if grep -q "^row,business_name,code,reason" <<<"$refused_csv" &&
+  [[ "$(grep -c . <<<"$refused_csv")" == "8" ]]; then
+  pass "?format=csv downloads every refused row as a report (header plus seven)"
+else
+  fail "refused-rows download: $refused_csv"
+fi
+
+reimport="$(curl -sf -F "file=@tests/fixtures/import_mixed.csv" "${BASE_URL}/api/v1/leads/import")"
+if grep -q '"accepted":0,"rejected":7' <<<"$reimport"; then
+  pass "importing the same file twice creates no second copy (0 accepted, 7 refused)"
+else
+  fail "second import of the same file: $reimport"
+fi
+
+not_utf8_status="$(curl -s -o /dev/null -w '%{http_code}' \
+  -F "file=@tests/fixtures/import_not_utf8.csv" "${BASE_URL}/api/v1/leads/import")"
+if [[ "$not_utf8_status" == "400" ]]; then
+  pass "a file that is not UTF-8 is refused with a 400"
+else
+  fail "non-UTF-8 upload: HTTP $not_utf8_status (expected 400)"
 fi
 
 if [[ "$failures" -eq 0 ]]; then

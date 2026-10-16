@@ -1,12 +1,12 @@
 # Backend — Webloom Sales Engine
 
-The Sprint 1 Lead backend: the Lead and Activity tables, the Alembic migration, a repeatable
-synthetic seed, two read endpoints, and their tests. It is the piece that replaces the
-frontend's **"Sample data"** banner with real leads.
+The Lead backend: the Lead and Activity tables, the Alembic migration, a repeatable synthetic
+seed, the two read endpoints, the CSV importer that brings the real research list in, and their
+tests. It is the piece that replaces the frontend's **"Sample data"** banner with real leads.
 
-Deliberately **not** in this sprint: authentication and roles, sending, campaigns, the CSV
-importer, exports, background jobs, and FikaTu delivery. There is no Docker Compose here —
-Mark owns the rails and the containers.
+Deliberately **not** here yet: authentication and roles, sending, campaigns, exports,
+background jobs, and FikaTu delivery. The containers live at the repo root —
+see [`docker/README.md`](../docker/README.md).
 
 ## Layout
 
@@ -176,6 +176,25 @@ reads top to bottom, and it is `[]` — never `null` — when nothing has happen
 
 `{"status": "ok"}`. A liveness check for a container or a person; it says nothing about the
 database.
+
+### `POST /api/v1/leads/import`
+
+The importer: one multipart `file` part holding the research list as a UTF-8 CSV, answered with
+what happened to every row — accepted, refused with a reason, or warned about. Good rows import
+even when other rows are refused; `?format=csv` answers the refused rows as a downloadable
+report instead of JSON.
+
+```bash
+curl -F "file=@../data/webloom-lead-list.csv" http://localhost:8001/api/v1/leads/import
+```
+
+```json
+{"filename": "webloom-lead-list.csv", "row_count": 52, "accepted": 52, "rejected": 0,
+ "rejected_rows": [], "warnings": []}
+```
+
+Every code, every sentence a person reads, and the mapping rules are in
+[`docs/delivery/sprint-2-import-contract.md`](../docs/delivery/sprint-2-import-contract.md).
 
 ### Errors
 
