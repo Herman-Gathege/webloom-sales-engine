@@ -4,6 +4,9 @@
 screen lands, this document and its types move together in the same pull request — the same
 rule [the Sprint 1 contract](sprint-1-lead-contract.md) set for the Lead shape.
 
+The screen is `frontend/src/routes/LeadImport.tsx`; its types are in
+`frontend/src/api/types.ts`.
+
 The importer takes the researched list as it is, saves every good row, and hands back one
 reason for every row it refuses. It imports the good rows even when other rows are refused,
 because a row we cannot use must never cost us the rows beside it.

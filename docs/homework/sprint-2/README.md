@@ -18,7 +18,7 @@ start. One person works on it at a time, then the next person pulls it and adds 
 The sprint has one pull request to `main`; each hand-off updates it.
 
 **Right now:** Sharon is done (PRs #16 and #17), Anne is done (PR #19), Herman is done
-(PR #20, the filters), and Mark is next with CI.
+(PR #20 the filters, and PR #21 the import screen), and Mark is next with CI.
 
 ## What we are doing
 

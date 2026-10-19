@@ -1,9 +1,13 @@
-import { Sparkles, Users } from "lucide-react";
+import { Sparkles, Upload, Users } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [{ to: "/leads", label: "Leads", icon: Users }];
+const NAV_ITEMS = [
+  // `end` keeps "Leads" from staying lit while you are on the import screen.
+  { to: "/leads", label: "Leads", icon: Users, end: true },
+  { to: "/leads/import", label: "Import", icon: Upload, end: true },
+];
 
 /** Screens that exist in the roadmap but deliberately not in this sprint. */
 const LATER_ITEMS = ["Campaigns", "Replies", "Pipeline"];
@@ -21,10 +25,11 @@ export function AppLayout() {
         </div>
 
         <nav className="flex flex-col gap-1 px-3">
-          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
+              end={end}
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",

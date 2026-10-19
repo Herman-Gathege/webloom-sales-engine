@@ -1,7 +1,9 @@
 # Herman — Sprint 2
 
-> **Branch:** `sprint/2-lead-desk` · **Status:** done — PR #20 open. Mark is next.
+> **Branch:** `sprint/2-lead-desk` · **Status:** done — merged in PR #20. Mark is next.
 > The hand-off steps are in [the homework guide](../../README.md).
+> The stretch piece — the import screen, with upload, progress and the refused-rows report —
+> is on this branch too, in PR #21.
 
 > **Where we are:** the shell you built shows eight invented leads from Sharon's API.
 > **Your piece this sprint:** make that list answer a seller's questions.

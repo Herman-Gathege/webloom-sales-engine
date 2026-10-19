@@ -89,3 +89,31 @@ export interface Loaded<T> {
   /** Why we fell back to sample data. Shown in the banner when source is "sample". */
   reason?: string;
 }
+
+/** One row the importer refused, and the reason a person reads. */
+export interface RefusedRow {
+  /** Physical line in the file, with the header as line 1. */
+  row: number;
+  business_name: string;
+  code: string;
+  reason: string;
+}
+
+/** A value the importer kept but could not classify. Never reduces `accepted`. */
+export interface RowWarning {
+  row: number;
+  field: string;
+  value: string;
+  code: string;
+  message: string;
+}
+
+/** POST /api/v1/leads/import — what happened to the upload, row by row. */
+export interface ImportSummary {
+  filename: string;
+  row_count: number;
+  accepted: number;
+  rejected: number;
+  rejected_rows: RefusedRow[];
+  warnings: RowWarning[];
+}
