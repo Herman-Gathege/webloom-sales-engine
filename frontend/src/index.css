@@ -5,66 +5,86 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Wadi palette, inherited from webloomtechkenya.com:
+   * assets/css/system/tokens.css in the marketing site. */
+  --wadi-ink: #0b1f18;
+  --wadi-ink-soft: #3d5148;
+  --wadi-muted: #6a7b72;
+  --wadi-paper: #f8f8f5;
+  --wadi-surface: #ffffff;
+  --wadi-line: #e3e7e2;
+  --wadi-line-strong: #cbd3cd;
+  --wadi-brand: #084734;
+  --wadi-brand-deep: #063326;
+  --wadi-accent: #b4d665;
+  --wadi-accent-soft: #eff5e0;
+  --wadi-focus: #1c7d5c;
+  --wadi-sand: #d9c79a;
+  --wadi-teal: #1c7d5c;
+  --wadi-display: "Merriweather", Georgia, "Times New Roman", serif;
+  --wadi-body: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --background: var(--wadi-paper);
+  --foreground: var(--wadi-ink);
+  --card: var(--wadi-surface);
+  --card-foreground: var(--wadi-ink);
+  --popover: var(--wadi-surface);
+  --popover-foreground: var(--wadi-ink);
+  --primary: var(--wadi-brand);
+  --primary-foreground: #f7fdf8;
+  --secondary: var(--wadi-accent-soft);
+  --secondary-foreground: var(--wadi-brand-deep);
+  --muted: #eef2ee;
+  --muted-foreground: var(--wadi-muted);
+  --accent: var(--wadi-accent-soft);
+  --accent-foreground: var(--wadi-brand-deep);
+  --destructive: #b42318;
+  --border: var(--wadi-line);
+  --input: var(--wadi-line-strong);
+  --ring: var(--wadi-focus);
+  --chart-1: var(--wadi-brand);
+  --chart-2: var(--wadi-accent);
+  --chart-3: var(--wadi-teal);
+  --chart-4: var(--wadi-sand);
+  --chart-5: var(--wadi-muted);
+  --sidebar: var(--wadi-brand-deep);
+  --sidebar-foreground: #eaf3ec;
+  --sidebar-primary: var(--wadi-accent);
+  --sidebar-primary-foreground: var(--wadi-brand-deep);
+  --sidebar-accent: rgba(180, 214, 101, 0.16);
+  --sidebar-accent-foreground: #f4fbe9;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: var(--wadi-accent);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #06221a;
+  --foreground: #eaf3ec;
+  --card: #0b2b21;
+  --card-foreground: #eaf3ec;
+  --popover: #0b2b21;
+  --popover-foreground: #eaf3ec;
+  --primary: var(--wadi-accent);
+  --primary-foreground: var(--wadi-brand-deep);
+  --secondary: #123a2c;
+  --secondary-foreground: #eaf3ec;
+  --muted: #123a2c;
+  --muted-foreground: #a9c0b4;
+  --accent: #123a2c;
+  --accent-foreground: #eaf3ec;
+  --destructive: #ff9b8f;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.18);
+  --ring: var(--wadi-accent);
+  --sidebar: #04211a;
+  --sidebar-foreground: #eaf3ec;
+  --sidebar-primary: var(--wadi-accent);
+  --sidebar-primary-foreground: var(--wadi-brand-deep);
+  --sidebar-accent: rgba(180, 214, 101, 0.16);
+  --sidebar-accent-foreground: #f4fbe9;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: var(--wadi-accent);
 }
 
 @theme inline {
@@ -109,11 +129,48 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: var(--wadi-body);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2 {
+    font-family: var(--wadi-display);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+
+  [data-slot="card-title"] {
+    font-family: var(--wadi-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* Tables: a lime header band and a quiet hover, so a row reads as a row. */
+  [data-slot="table-header"] {
+    background: var(--wadi-accent-soft);
+  }
+
+  [data-slot="table-head"] {
+    color: var(--wadi-ink-soft);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  [data-slot="table-body"] [data-slot="table-row"]:hover {
+    background: var(--wadi-accent-soft);
+  }
+
+  ::selection {
+    background: var(--wadi-accent);
+    color: var(--wadi-brand-deep);
   }
 }

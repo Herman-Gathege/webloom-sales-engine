@@ -64,7 +64,7 @@ describe("LeadList", () => {
   it("says so when nothing matches", async () => {
     renderAt("/leads?q=zzzz-no-such-lead");
 
-    expect(await screen.findByText(/no leads match these filters/i)).toBeTruthy();
+    expect(await screen.findByText(/nothing down this path/i)).toBeTruthy();
   });
 
   it("filters by website status from the URL", async () => {
@@ -72,14 +72,14 @@ describe("LeadList", () => {
     // is applied rather than simply ignored.
     renderAt("/leads?website=yes");
 
-    expect(await screen.findByText(/no leads match these filters/i)).toBeTruthy();
+    expect(await screen.findByText(/nothing down this path/i)).toBeTruthy();
   });
 
   it("filters by lead status from the URL", async () => {
     // Nothing has moved off "new" yet, so a contacted filter must be empty.
     renderAt("/leads?status=contacted");
 
-    expect(await screen.findByText(/no leads match these filters/i)).toBeTruthy();
+    expect(await screen.findByText(/nothing down this path/i)).toBeTruthy();
   });
 
   it("filters as the seller types", async () => {

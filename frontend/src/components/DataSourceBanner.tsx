@@ -24,8 +24,8 @@ export function DataSourceBanner({
       className={cn(
         "mb-5 flex items-start gap-2 rounded-md border px-3 py-2 text-sm",
         isSample
-          ? "border-amber-300 bg-amber-50 text-amber-900"
-          : "bg-card text-muted-foreground",
+          ? "border-[#e3d6a8] bg-[#fbf6e6] text-[#6b5316]"
+          : "border-[#cfe3d4] bg-[#f1f7f2] text-[#0d4a3a]",
       )}
     >
       <Icon className="mt-0.5 size-4 shrink-0" />

@@ -1,0 +1,95 @@
+/* The Wadi scout. Small, cheap, and easy to switch off. */
+
+.scout {
+  --look-x: 0px;
+  --look-y: 0px;
+  display: block;
+  width: var(--scout-size, 56px);
+  height: auto;
+  overflow: visible;
+  transition: transform 300ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.scout-eyes {
+  transform: translate(var(--look-x), var(--look-y));
+  transition: transform 140ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transform-box: view-box;
+  transform-origin: 32px 26px;
+}
+
+.scout-eye {
+  animation: scout-blink 7.4s infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.scout-eye:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+/* Waiting: a squint, like reading the ground. */
+.scout[data-mood="loading"] .scout-eyes {
+  transform: translate(0, 0.5px) scaleY(0.42);
+}
+
+.scout[data-mood="loading"] .scout-eye,
+.scout[data-mood="error"] .scout-eye {
+  animation: none;
+}
+
+/* Something went wrong: the scout sags a little. */
+.scout[data-mood="error"] {
+  transform: rotate(-5deg) translateY(1px);
+}
+
+.scout[data-mood="error"] .scout-eyes {
+  transform: translate(0, 1.5px) scaleY(0.55);
+}
+
+/* Found something: one small hop, then still. */
+.scout[data-mood="success"] {
+  animation: scout-hop 620ms cubic-bezier(0.2, 0.7, 0.2, 1) 1;
+}
+
+.scout:hover .scout-scope {
+  transform: translateY(-1px) rotate(-7deg);
+}
+
+.scout-scope {
+  transform-box: view-box;
+  transform-origin: 46px 20px;
+  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes scout-blink {
+  0%,
+  91%,
+  100% {
+    transform: scaleY(1);
+  }
+  94% {
+    transform: scaleY(0.08);
+  }
+}
+
+@keyframes scout-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  35% {
+    transform: translateY(-5px) rotate(-2deg);
+  }
+  70% {
+    transform: translateY(0) rotate(1deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scout,
+  .scout * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
