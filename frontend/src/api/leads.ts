@@ -8,7 +8,13 @@
  */
 
 import { sampleLeadDetails, sampleLeads } from "./fixtures";
-import type { LeadDetail, LeadListParams, LeadListResponse, Loaded } from "./types";
+import type {
+  ImportSummary,
+  LeadDetail,
+  LeadListParams,
+  LeadListResponse,
+  Loaded,
+} from "./types";
 
 /** The dev server proxies /api to the FastAPI service (see vite.config.ts). */
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "/api/v1").replace(/\/+$/, "");
@@ -95,4 +101,83 @@ export async function getLead(id: string): Promise<Loaded<LeadDetail>> {
     if (cause instanceof ApiError && cause.status >= 400 && cause.status < 500) throw cause;
     return fromSample(cause instanceof Error ? cause.message : undefined);
   }
+}
+
+/**
+ * Upload the researched CSV and get back what happened to every row.
+ *
+ * Uses XMLHttpRequest rather than fetch for one reason: it reports upload
+ * progress, so the screen shows a real bar instead of a spinner that could mean
+ * anything. `onProgress` is called with 0-100.
+ *
+ * This is deliberately not wrapped in the sample-data fallback. Pretending an
+ * upload succeeded would be worse than failing.
+ */
+export function importLeads(
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<ImportSummary> {
+  return new Promise<ImportSummary>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_BASE_URL}/leads/import`);
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.responseType = "text";
+    xhr.timeout = 60_000;
+
+    xhr.upload.onprogress = (event) => {
+      if (onProgress && event.lengthComputable && event.total > 0) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText) as ImportSummary);
+        } catch {
+          reject(new ApiError("The API sent a response we could not read.", xhr.status));
+        }
+        return;
+      }
+
+      let detail = `The import failed (${xhr.status}).`;
+      try {
+        const parsed = JSON.parse(xhr.responseText) as { detail?: unknown };
+        if (typeof parsed.detail === "string") detail = parsed.detail;
+      } catch {
+        // The body was not JSON; keep the generic message.
+      }
+      reject(new ApiError(detail, xhr.status));
+    };
+
+    xhr.onerror = () => reject(new ApiError("Could not reach the API.", 0));
+    xhr.ontimeout = () => reject(new ApiError("The upload timed out.", 0));
+
+    const body = new FormData();
+    body.append("file", file);
+    xhr.send(body);
+  });
+}
+
+/**
+ * The downloadable refusal report, built from the summary we already have.
+ *
+ * Deliberately not the API's `?format=csv` path: that re-runs the import, so
+ * calling it after a successful upload would report every row as a duplicate.
+ * This describes the import that actually happened, with no second request.
+ */
+export function rejectedRowsCsv(summary: ImportSummary): string {
+  const cell = (value: string | number) => {
+    const text = String(value);
+    return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  };
+
+  const lines = [
+    "row,business_name,code,reason",
+    ...summary.rejected_rows.map((row) =>
+      [row.row, row.business_name, row.code, row.reason].map(cell).join(","),
+    ),
+  ];
+
+  return `${lines.join("\n")}\n`;
 }

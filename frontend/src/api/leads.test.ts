@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { sampleLeads } from "./fixtures";
-import { ApiError, getLead, listLeads } from "./leads";
+import { ApiError, getLead, listLeads, rejectedRowsCsv } from "./leads";
 
 // The vitest config sets VITE_USE_MOCK=1, so these exercise the sample-data
 // path deterministically — no network, no flakiness. The live-API path is
@@ -22,6 +22,38 @@ describe("listLeads", () => {
 
     expect(loaded.data.items).toHaveLength(2);
     expect(loaded.data.items[0].id).toBe(sampleLeads[1].id);
+  });
+});
+
+describe("rejectedRowsCsv", () => {
+  it("writes a header and one line per refused row, quoting commas and quotes", () => {
+    const csv = rejectedRowsCsv({
+      filename: "list.csv",
+      row_count: 2,
+      accepted: 0,
+      rejected: 2,
+      rejected_rows: [
+        {
+          row: 7,
+          business_name: 'Mwangaza, "The" Hardware',
+          code: "duplicate_phone",
+          reason: "This phone number is already on row 3 of the file.",
+        },
+        {
+          row: 19,
+          business_name: "Riverside Dental",
+          code: "missing_phone",
+          reason: "No phone number, so this lead cannot be contacted.",
+        },
+      ],
+      warnings: [],
+    });
+
+    expect(csv).toBe(
+      "row,business_name,code,reason\n" +
+        '7,"Mwangaza, ""The"" Hardware",duplicate_phone,This phone number is already on row 3 of the file.\n' +
+        "19,Riverside Dental,missing_phone,\"No phone number, so this lead cannot be contacted.\"\n",
+    );
   });
 });
 
