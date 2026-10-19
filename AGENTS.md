@@ -203,6 +203,7 @@ correct it in the same PR that changes a command.
 
 ```bash
 docker compose up --build                      # ONE COMMAND: database + API + UI, http://localhost:5174
+docker compose build api                       # rebuild before testing — api-test uses this image
 docker compose run --rm api-test               # backend tests inside the container
 docker compose down -v                         # stop, and delete the data volume
 

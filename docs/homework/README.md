@@ -29,6 +29,8 @@ because nobody could tell which branch was safe to pull.
 - The next person pulls the same branch and repeats.
 - The sprint PR merges to `main` when the sprint is done. If the coordinator wrote the last
   piece, someone else merges.
+- If the coordinator merges mid-sprint, the next person pulls `main` and cuts the sprint
+  branch again from it. If he has not merged, they pull the branch and carry on.
 
 ### If `main` moved
 
