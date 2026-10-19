@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import { importLeads, rejectedRowsCsv } from "@/api/leads";
 import type { ImportSummary } from "@/api/types";
+import { Scout } from "@/components/Scout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,14 @@ export function LeadImport() {
   const [error, setError] = useState<string | null>(null);
 
   const busy = phase === "uploading" || phase === "working";
+  const mood =
+    busy
+      ? "loading"
+      : phase === "error"
+        ? "error"
+        : phase === "done" && summary && summary.accepted > 0
+          ? "success"
+          : "idle";
 
   function chooseFile(selected: File | null) {
     setFile(selected);
@@ -81,8 +90,13 @@ export function LeadImport() {
 
   return (
     <div className="space-y-5">
-      <Card>
-        <CardHeader>
+      <Card className="relative">
+        {/* Wrapped because the scout's own stylesheet sets display, which would
+            beat Tailwind's `hidden` on the SVG itself. */}
+        <span className="pointer-events-none absolute top-6 right-6 hidden sm:block">
+          <Scout mood={mood} size={78} />
+        </span>
+        <CardHeader className="sm:pr-24">
           <CardTitle>Import leads</CardTitle>
           <CardDescription>
             Upload the researched list as a UTF-8 CSV. Every good row is saved; every row that

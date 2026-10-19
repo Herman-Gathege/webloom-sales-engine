@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { listLeads } from "@/api/leads";
 import type { Lead, LeadListResponse, LeadStatus, Loaded } from "@/api/types";
 import { DataSourceBanner } from "@/components/DataSourceBanner";
+import { Scout } from "@/components/Scout";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,13 @@ import {
 
 /** Radix Select cannot hold an empty string, so "no filter" gets its own value. */
 const ANY = "all";
+
+/**
+ * The filters run in the browser, so we need the whole list to page through it.
+ * 200 is the API's cap; past that, real server-side filtering is the next job.
+ */
+const MAX_LEADS = 200;
+const PAGE_SIZE = 25;
 
 const STATUS_LABELS: Record<LeadStatus, string> = {
   new: "New",
@@ -59,9 +67,7 @@ export function LeadList() {
 
   useEffect(() => {
     let cancelled = false;
-    // The list is filtered in the browser this sprint, so load the whole list
-    // the API will give us in one page. The API caps `limit` at 200.
-    listLeads({ limit: 200 })
+    listLeads({ limit: MAX_LEADS })
       .then((loaded) => {
         if (!cancelled) setResponse(loaded);
       })
@@ -80,6 +86,7 @@ export function LeadList() {
   const area = searchParams.get("area") ?? "";
   const website = searchParams.get("website") ?? "";
   const status = searchParams.get("status") ?? "";
+  const requestedPage = Number(searchParams.get("page") ?? "1");
 
   const hasFilter = Boolean(query || sector || area || website || status);
 
@@ -90,7 +97,7 @@ export function LeadList() {
     [allLeads],
   );
 
-  const leads = useMemo(() => {
+  const filtered = useMemo(() => {
     if (!allLeads) return null;
     const needle = query.trim().toLowerCase();
     return allLeads.filter((lead) => {
@@ -106,11 +113,25 @@ export function LeadList() {
     });
   }, [allLeads, query, sector, area, website, status]);
 
-  function setFilter(key: string, value: string) {
+  const pageCount = filtered ? Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)) : 1;
+  const page = Math.min(
+    Math.max(1, Number.isFinite(requestedPage) ? Math.floor(requestedPage) : 1),
+    pageCount,
+  );
+  const start = (page - 1) * PAGE_SIZE;
+  const visible = filtered ? filtered.slice(start, start + PAGE_SIZE) : null;
+
+  function setParam(key: string, value: string) {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(key, value);
     else next.delete(key);
+    // Any filter change starts again from the first page.
+    if (key !== "page") next.delete("page");
     setSearchParams(next, { replace: true });
+  }
+
+  function setPage(value: number) {
+    setParam("page", value > 1 ? String(value) : "");
   }
 
   function clearFilters() {
@@ -125,11 +146,11 @@ export function LeadList() {
         <CardHeader>
           <CardTitle>Leads</CardTitle>
           <CardDescription>
-            {leads === null
+            {filtered === null
               ? "Loading leads…"
               : hasFilter
-                ? `Showing ${leads.length} of ${allLeads?.length ?? 0} leads`
-                : `${response?.data.total ?? leads.length} in the pipeline`}
+                ? `Showing ${filtered.length} of ${allLeads?.length ?? 0}`
+                : `${response?.data.total ?? filtered.length} in the pipeline`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -140,15 +161,15 @@ export function LeadList() {
                 aria-label="Search leads"
                 placeholder="Search business, phone or area"
                 value={query}
-                onChange={(event) => setFilter("q", event.target.value)}
+                onChange={(event) => setParam("q", event.target.value)}
                 className="h-9 w-full sm:w-64"
               />
 
               <Select
                 value={sector || ANY}
-                onValueChange={(value) => setFilter("sector", value === ANY ? "" : value)}
+                onValueChange={(value) => setParam("sector", value === ANY ? "" : value)}
               >
-                <SelectTrigger aria-label="Filter by sector" className="h-9 w-[170px]">
+                <SelectTrigger aria-label="Filter by sector" className="h-9 w-[calc(50%-0.25rem)] sm:w-[170px]">
                   <SelectValue placeholder="Sector" />
                 </SelectTrigger>
                 <SelectContent>
@@ -163,9 +184,9 @@ export function LeadList() {
 
               <Select
                 value={area || ANY}
-                onValueChange={(value) => setFilter("area", value === ANY ? "" : value)}
+                onValueChange={(value) => setParam("area", value === ANY ? "" : value)}
               >
-                <SelectTrigger aria-label="Filter by area" className="h-9 w-[160px]">
+                <SelectTrigger aria-label="Filter by area" className="h-9 w-[calc(50%-0.25rem)] sm:w-[160px]">
                   <SelectValue placeholder="Area" />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,9 +201,9 @@ export function LeadList() {
 
               <Select
                 value={website || ANY}
-                onValueChange={(value) => setFilter("website", value === ANY ? "" : value)}
+                onValueChange={(value) => setParam("website", value === ANY ? "" : value)}
               >
-                <SelectTrigger aria-label="Filter by website" className="h-9 w-[160px]">
+                <SelectTrigger aria-label="Filter by website" className="h-9 w-[calc(50%-0.25rem)] sm:w-[160px]">
                   <SelectValue placeholder="Website" />
                 </SelectTrigger>
                 <SelectContent>
@@ -194,9 +215,9 @@ export function LeadList() {
 
               <Select
                 value={status || ANY}
-                onValueChange={(value) => setFilter("status", value === ANY ? "" : value)}
+                onValueChange={(value) => setParam("status", value === ANY ? "" : value)}
               >
-                <SelectTrigger aria-label="Filter by status" className="h-9 w-[150px]">
+                <SelectTrigger aria-label="Filter by status" className="h-9 w-[calc(50%-0.25rem)] sm:w-[150px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -223,7 +244,7 @@ export function LeadList() {
             </p>
           )}
 
-          {!error && !leads && (
+          {!error && !visible && (
             <div className="space-y-2">
               {Array.from({ length: 5 }).map((_, index) => (
                 <Skeleton key={index} className="h-10 w-full" />
@@ -231,52 +252,105 @@ export function LeadList() {
             </div>
           )}
 
-          {!error && leads && allLeads?.length === 0 && (
-            <p className="text-sm text-muted-foreground">No leads yet.</p>
+          {!error && visible && allLeads?.length === 0 && (
+            <div className="flex items-center gap-3 rounded-lg border border-dashed border-border px-4 py-6">
+              <Scout size={54} />
+              <p className="text-sm text-muted-foreground">
+                Nothing here yet. Import your list and the scout will get to work.
+              </p>
+            </div>
           )}
 
-          {!error && leads && (allLeads?.length ?? 0) > 0 && leads.length === 0 && (
-            <p className="text-sm text-muted-foreground">No leads match these filters.</p>
+          {!error && visible && (allLeads?.length ?? 0) > 0 && visible.length === 0 && (
+            <div className="flex items-center gap-3 rounded-lg border border-dashed border-border px-4 py-6">
+              <Scout size={54} />
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Nothing down this path.</p>
+                <Button variant="link" size="sm" className="h-auto p-0" onClick={clearFilters}>
+                  Clear the filters
+                </Button>
+              </div>
+            </div>
           )}
 
-          {!error && leads && leads.length > 0 && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Business</TableHead>
-                  <TableHead>Sector</TableHead>
-                  <TableHead>Area</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Website</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leads.map((lead) => (
-                  <TableRow
-                    key={lead.id}
-                    tabIndex={0}
-                    role="link"
-                    className="cursor-pointer"
-                    onClick={() => navigate(`/leads/${lead.id}`)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") navigate(`/leads/${lead.id}`);
-                    }}
-                  >
-                    <TableCell className="font-medium">{lead.business_name}</TableCell>
-                    <TableCell>{lead.sector ?? "—"}</TableCell>
-                    <TableCell>{lead.area ?? "—"}</TableCell>
-                    <TableCell className="font-mono text-xs whitespace-nowrap">
-                      {lead.phone ?? "—"}
-                    </TableCell>
-                    <TableCell>{lead.has_website ? "Yes" : "No website"}</TableCell>
-                    <TableCell>
-                      <StatusBadge status={lead.status} />
-                    </TableCell>
+          {!error && visible && visible.length > 0 && (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Business</TableHead>
+                    <TableHead className="hidden lg:table-cell">Sector</TableHead>
+                    <TableHead className="hidden lg:table-cell">Area</TableHead>
+                    <TableHead className="hidden xl:table-cell">Phone</TableHead>
+                    <TableHead className="hidden sm:table-cell">Website</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {visible.map((lead) => (
+                    <TableRow
+                      key={lead.id}
+                      tabIndex={0}
+                      role="link"
+                      className="cursor-pointer"
+                      onClick={() => navigate(`/leads/${lead.id}`)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") navigate(`/leads/${lead.id}`);
+                      }}
+                    >
+                      <TableCell className="max-w-[240px] truncate font-medium">
+                        {lead.business_name}
+                      </TableCell>
+                      <TableCell className="hidden max-w-[150px] truncate lg:table-cell">
+                        {lead.sector ?? "—"}
+                      </TableCell>
+                      <TableCell className="hidden max-w-[150px] truncate lg:table-cell">
+                        {lead.area ?? "—"}
+                      </TableCell>
+                      <TableCell className="hidden font-mono text-xs whitespace-nowrap xl:table-cell">
+                        {lead.phone ?? "—"}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {lead.has_website ? "Yes" : "No website"}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={lead.status} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {filtered && filtered.length > PAGE_SIZE && (
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+                  <p className="text-xs text-muted-foreground">
+                    Showing {start + 1}–{Math.min(start + PAGE_SIZE, filtered.length)} of{" "}
+                    {filtered.length}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={page <= 1}
+                      onClick={() => setPage(page - 1)}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-xs text-muted-foreground">
+                      Page {page} of {pageCount}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={page >= pageCount}
+                      onClick={() => setPage(page + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

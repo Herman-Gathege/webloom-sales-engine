@@ -17,17 +17,19 @@ const LABELS: Record<LeadStatus, string> = {
 };
 
 const CLASSES: Record<LeadStatus, string> = {
-  new: "border-transparent bg-secondary text-secondary-foreground",
-  contacted: "border-transparent bg-sky-100 text-sky-900",
-  replied: "border-transparent bg-indigo-100 text-indigo-900",
-  qualified: "border-transparent bg-amber-100 text-amber-900",
-  handed_off: "border-transparent bg-violet-100 text-violet-900",
-  proposal: "border-transparent bg-orange-100 text-orange-900",
-  won: "border-transparent bg-emerald-100 text-emerald-900",
-  lost: "border-transparent bg-zinc-200 text-zinc-700",
-  no_response: "border-transparent bg-zinc-100 text-zinc-600",
-  not_interested: "border-transparent bg-rose-100 text-rose-900",
-  opted_out: "border-transparent bg-red-200 text-red-900",
+  // Tinted from the Wadi palette rather than Tailwind's defaults: lime for
+  // fresh, teal as a lead warms, sand for the slow ones, deep green for won.
+  new: "border-transparent bg-[#eff5e0] text-[#084734]",
+  contacted: "border-transparent bg-[#d9efe7] text-[#0d4a3a]",
+  replied: "border-transparent bg-[#c9e6d8] text-[#084734]",
+  qualified: "border-transparent bg-[#f3e8cc] text-[#5c4515]",
+  handed_off: "border-transparent bg-[#cfe0da] text-[#0b3b30]",
+  proposal: "border-transparent bg-[#f6e3c9] text-[#6b3f0c]",
+  won: "border-transparent bg-[#b4d665] text-[#063326]",
+  lost: "border-transparent bg-[#eceeec] text-[#5c6660]",
+  no_response: "border-transparent bg-[#f2f4f1] text-[#6a7b72]",
+  not_interested: "border-transparent bg-[#f7dedb] text-[#8a1f16]",
+  opted_out: "border-transparent bg-[#3d5148] text-white",
 };
 
 export function StatusBadge({ status }: { status: LeadStatus }) {
