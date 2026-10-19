@@ -68,6 +68,9 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 - **Migrations and seed run on every API start.** Both are idempotent, so restarts are safe,
   but they add a couple of seconds. The seed still refuses to run when
   `ENVIRONMENT=production`.
+- **`api-test` runs the same image as `api`.** After changing backend code, rebuild before
+  testing — `docker compose build api && docker compose run --rm api-test`. Running the tests
+  against an old image is a green light that means nothing.
 - **The API image ships `requirements-dev.txt`.** That is what lets `api-test` run without a
   separate test image. It is fine for local development and should be split into runtime and
   test images before any non-local deployment.

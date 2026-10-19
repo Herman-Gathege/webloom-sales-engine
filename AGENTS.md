@@ -17,12 +17,29 @@ together, test it, learn how we worked, then build the next piece. The full work
 agreement is [`docs/team/how-we-work.md`](docs/team/how-we-work.md). The short version:
 
 - **Small vertical slices, not silos.** Nobody disappears for a week to reappear with a layer.
-- **Short-lived branches, small PRs, frequent integration.** `main` is the latest integrated
-  working state.
+- **One shared branch per sprint, one hand-off at a time.** Everyone adds to
+  `sprint/<number>-<short-name>` in turn. The sprint opens one PR to `main`; each hand-off
+  pushes to that branch and updates the same PR. `main` is the latest integrated working
+  state.
 - **The first version of everything is small.** Extra abstraction is a cost we pay now for a
   guess about later; we do not pay it.
 - **Human team agrees on the contract/decision. AI helps implement it. Human reviews the
   result.** That order is not optional.
+
+### The line
+
+1. Pull the sprint branch and run it. If the last hand-off is broken, say so before adding
+   anything.
+2. Do only your card's piece. Run its checks until they pass.
+3. Commit and push to the same sprint branch. The first hand-off opens the sprint PR to
+   `main`; every later hand-off updates it. Post "pushed, green — your turn, <name>".
+4. The coordinator reviews each hand-off against the card's **Done means**. The sprint PR
+   merges when the sprint is done; if the coordinator wrote the last piece, someone else
+   merges.
+5. The next person pulls the same branch and repeats until the sprint closes.
+
+Never push to `main`. Never open a second branch to work around someone. One branch per
+sprint, then it closes. The full steps are in `docs/homework/README.md`.
 
 ## Use subagents on every prompt
 
@@ -57,6 +74,7 @@ for its subject — edit the document, not a copy of it.
 | The exact Lead and Activity shapes the frontend and backend agree on | `docs/delivery/sprint-1-lead-contract.md` |
 | The detail behind each sprint: the pieces of work and their acceptance criteria | `docs/delivery/sprint-detail.md` |
 | What each of us is doing right now | `docs/homework/sprint-2/` |
+| How a hand-off works: the branch, the steps, the checks | `docs/homework/README.md` |
 | The finished first sprint, and how a sprint is run | `docs/homework/sprint-1/` |
 | Branching, PRs, review, definition of done, disagreements | `docs/team/how-we-work.md` |
 | How to talk to FikaTu (endpoints, events, token flow, gaps) | `docs/research/2026-10-08-fikatu-integration-notes.md` |
@@ -70,10 +88,14 @@ apart.
 
 ## Current state
 
-**Sprint 1 is done; Sprint 2 has just started.** Both halves and the containers are merged.
+**Sprint 1 is done; Sprint 2 is in progress.** Both halves and the containers are merged.
 What the first sprint was and how it went is in `docs/homework/sprint-1/status.md`; the whole
 plan is `docs/delivery/sprint-plan.md`; what we are doing right now is
 `docs/homework/sprint-2/`.
+
+Sprint 2 so far: the CSV importer (PRs #16 and #17) and Anne's seller review (PR #19) are
+merged. Herman's Lead List filters are in PR #20 on the shared `sprint/2-lead-desk` branch;
+Mark's CI is next. The branch and hand-off rules are in `docs/homework/README.md`.
 
 - **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
@@ -86,8 +108,8 @@ plan is `docs/delivery/sprint-plan.md`; what we are doing right now is
   the UI together from a clean clone. Ports and traps are in `docker/README.md`.
 - **Verified:** 118/118 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
   builds, lints and passes its tests on Node 22.
-- **Not built yet:** auth, sending, campaigns, filters and search on the lead list, and the
-  other eleven screens. `docs/delivery/sprint-plan.md` says which sprint brings each.
+- **Not built yet:** auth, sending, campaigns, and the other eleven screens.
+  `docs/delivery/sprint-plan.md` says which sprint brings each.
 - The shapes the two halves must agree on are frozen in
   `docs/delivery/sprint-1-lead-contract.md`. Change that document and
   `frontend/src/api/types.ts` in the same PR, or neither.
@@ -169,6 +191,7 @@ Auth is JWT (python-jose) with bcrypt password hashing and four roles: `owner`, 
 
 Branching, PRs, review, the definition of done, and how we handle disagreements all live in
 `docs/team/how-we-work.md` — that file is the source of truth, so do not restate it here.
+The practical hand-off steps are in `docs/homework/README.md`.
 Two extras that belong to this repo specifically: commits are conventional (`feat:`, `fix:`,
 `docs:`, `refactor:`, `test:`, `chore:`), and decisions that are expensive to reverse get an
 ADR in `docs/decisions/`.
@@ -180,6 +203,7 @@ correct it in the same PR that changes a command.
 
 ```bash
 docker compose up --build                      # ONE COMMAND: database + API + UI, http://localhost:5174
+docker compose build api                       # rebuild before testing — api-test uses this image
 docker compose run --rm api-test               # backend tests inside the container
 docker compose down -v                         # stop, and delete the data volume
 

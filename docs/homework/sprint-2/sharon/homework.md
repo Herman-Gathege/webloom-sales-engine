@@ -1,5 +1,8 @@
 # Sharon — Sprint 2
 
+> **Branch:** `sprint/2-lead-desk` · **Status:** done — PRs #16 and #17 merged. The new
+> hand-off rule is in [the hand-off steps](../../README.md).
+
 > **Where we are:** your Sprint 1 API is live and the app reads it. The eight leads it returns
 > are invented. **Your piece this sprint:** make the real list go in.
 

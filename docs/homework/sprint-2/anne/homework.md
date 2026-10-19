@@ -1,5 +1,8 @@
 # Anne — Sprint 2
 
+> **Branch:** `sprint/2-lead-desk` · **Status:** done — PR #19 merged. The new hand-off rule
+> is in [the hand-off steps](../../README.md).
+
 > **Where we are:** the app runs, and you can already click through the Lead List and a Lead
 > Detail with its history — the eight leads are invented. **Your piece this sprint:** the
 > seller's eye. You are the only one of us who can catch a screen that makes no sense to the

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [{ to: "/leads", label: "Leads", icon: Users }];
 
-/** Screens that exist in the roadmap but deliberately not in Sprint 1. */
+/** Screens that exist in the roadmap but deliberately not in this sprint. */
 const LATER_ITEMS = ["Campaigns", "Replies", "Pipeline"];
 
 export function AppLayout() {
@@ -42,7 +42,7 @@ export function AppLayout() {
 
         <div className="mt-6 px-6">
           <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            Later blocks
+            Later sprints
           </div>
           <ul className="mt-2 space-y-1 text-sm text-muted-foreground/70">
             {LATER_ITEMS.map((label) => (
@@ -52,7 +52,7 @@ export function AppLayout() {
         </div>
 
         <div className="mt-auto px-5 py-5 text-xs text-muted-foreground">
-          Sprint 1 · first Lego block
+          Sprint 2 · the Lead Desk is real
         </div>
       </aside>
 
