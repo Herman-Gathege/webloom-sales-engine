@@ -17,8 +17,8 @@ One shared branch: `sprint/2-lead-desk`. Read [the hand-off steps](../README.md)
 start. One person works on it at a time, then the next person pulls it and adds their piece.
 The sprint has one pull request to `main`; each hand-off updates it.
 
-**Right now:** Sharon is done (PRs #16 and #17), Anne is done (PR #19), Herman is doing the
-filters, and Mark is next with CI.
+**Right now:** Sharon is done (PRs #16 and #17), Anne is done (PR #19), Herman is done
+(PR #20, the filters), and Mark is next with CI.
 
 ## What we are doing
 

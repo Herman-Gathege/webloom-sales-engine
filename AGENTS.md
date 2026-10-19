@@ -94,8 +94,8 @@ plan is `docs/delivery/sprint-plan.md`; what we are doing right now is
 `docs/homework/sprint-2/`.
 
 Sprint 2 so far: the CSV importer (PRs #16 and #17) and Anne's seller review (PR #19) are
-merged. Herman's Lead List filters are on the shared `sprint/2-lead-desk` branch; Mark's CI is
-next. The branch and hand-off rules are in `docs/homework/README.md`.
+merged. Herman's Lead List filters are in PR #20 on the shared `sprint/2-lead-desk` branch;
+Mark's CI is next. The branch and hand-off rules are in `docs/homework/README.md`.
 
 - **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
