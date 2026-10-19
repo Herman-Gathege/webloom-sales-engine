@@ -11,15 +11,17 @@ result.** Nobody merges a decision an agent made for them.
 ## Branching
 
 - `main` is the latest integrated working state. It should always run.
-- Branch off an up-to-date `main`, short-lived: `feat/<name>`, `fix/<name>`, `docs/<name>`,
-  `chore/<name>`.
+- One shared branch per sprint: `sprint/<number>-<short-name>`. No personal branches.
+- Everyone adds to that branch in turn. The branch lives for the sprint, then it closes.
 - Nothing is pushed straight to `main`. Ever.
-- A branch should live hours to a couple of days. Older than that means it got too big —
-  split it.
+
+The steps, and how to hand off, are in [`docs/homework/README.md`](../homework/README.md).
 
 ## Pull requests
 
-- One small PR per piece of work. If the description needs paragraphs, it's too big.
+- One sprint PR from the sprint branch to `main`. The first hand-off opens it; every later
+  hand-off pushes to the same branch and updates it.
+- Keep each hand-off small. If the description needs paragraphs, it's too big.
 - Description answers three things: what it does, how to run/demo it, what to check.
 - Open a draft PR as soon as the piece is coherent. Don't hold work back until it's perfect.
 - Keep real changes under ~400 lines. Past that, split it.
@@ -32,19 +34,24 @@ result.** Nobody merges a decision an agent made for them.
   over-built?
 - Review within a working day, even if the answer is "this needs work". A PR waiting on you
   blocks the whole team.
-- The author answers or fixes; the author merges.
+- The author answers or fixes. The coordinator merges the sprint PR when the sprint is done.
+  If the coordinator wrote the last piece, someone else merges.
 
 ## Integration
 
-- Merge to `main` as soon as it's approved. Small and often beats big and rare.
-- After any merge, pull `main` and run the demo for that piece. If it doesn't run, fixing it
-  is the next thing anyone does.
+- One person works on the sprint branch at a time. When their piece is green, the coordinator
+  reviews it against the card.
+- The next person pulls the same sprint branch and adds their piece.
+- If `main` moved, merge `origin/main` into the sprint branch, re-run the checks, and push
+  before handing off. Never leave a conflict for the next person.
+- The sprint PR merges to `main` when the sprint is done. Run the sprint demo first. If it
+  does not run, fixing it is the next thing anyone does.
 
 ## What "done" means
 
 A piece is done when someone other than the author can:
 
-1. pull `main` and start it from a clean state,
+1. pull the sprint branch (or `main` after the sprint merges) and start it from a clean state,
 2. run that piece's demo and see it work,
 3. see its tests pass,
 4. undo it where it matters (migrations are reversible).

@@ -11,6 +11,15 @@ you can see eight **sample** leads and open one to read its history. That record
 Eight invented businesses are the problem. This sprint puts the **real 52-business list** into
 the system and makes the list usable.
 
+## How we work this sprint
+
+One shared branch: `sprint/2-lead-desk`. Read [the hand-off steps](../README.md) before you
+start. One person works on it at a time, then the next person pulls it and adds their piece.
+The sprint has one pull request to `main`; each hand-off updates it.
+
+**Right now:** Sharon is done (PRs #16 and #17), Anne is done (PR #19), Herman is doing the
+filters, and Mark is next with CI.
+
 ## What we are doing
 
 **The real list goes in, and the list gets filters.** Plus CI, so a broken test is visible to
@@ -42,7 +51,7 @@ Read only your own card. Each one tells you what you need.
 
 ## The loop
 
-Agree → Build → PR → Review → Merge → Run → Demo → Next sprint
+Pull → Build → Test → Push → Review → Next person → Merge at sprint close
 
 ## This sprint is done when
 
