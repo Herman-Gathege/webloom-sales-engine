@@ -1,8 +1,9 @@
 # Sprint 2 — CSV import contract
 
-**Status:** agreed for Sprint 2, and the shape the upload screen is built against. When that
-screen lands, this document and its types move together in the same pull request — the same
-rule [the Sprint 1 contract](sprint-1-lead-contract.md) set for the Lead shape.
+**Status:** implemented for Sprint 2 and extended by the 2026-10-21 compliance foundation.
+This document and `frontend/src/api/types.ts` move together — the same rule
+[the Sprint 1 contract](sprint-1-lead-contract.md) set for the Lead shape. The compliance
+boundary and operating workflow are in [`docs/compliance/`](../compliance/README.md).
 
 The screen is `frontend/src/routes/LeadImport.tsx`; its types are in
 `frontend/src/api/types.ts`.
@@ -27,15 +28,19 @@ API. Authentication and roles are Sprint 3; that is a known gap, not an oversigh
 
 ## What the file must contain
 
-The research list with the 16 columns it already has, in the same order. Extra columns are
-ignored, so a later list can carry more.
+The research list keeps its 16 existing columns and may add the optional compliance columns
+listed below. Extra columns are ignored, so a later list can carry more.
 
-The columns read are `Business`, `Sector`, `Area`, `Phone`, `WhatsApp capable`,
+The required columns are `Business`, `Sector`, `Area`, `Phone`, `WhatsApp capable`,
 `Website status` and `Source`. A file missing any of them is refused whole with a `400` that
 names them.
 
-`Date added`, `Opening message` and the last seven columns are not stored. Two of those are
-deliberate open questions, listed at the end.
+Optional provenance columns are `Email`, `Contact name`, `Contact type`, `Source URL`,
+`Collection date`, `Collection method`, and `Intended purpose`. Their absence never refuses an
+otherwise valid lead; it leaves all channels in `needs_review`. `Date added` is the fallback
+for collection date and the written `Source` is the fallback for collection method.
+
+`Opening message` and the remaining unused columns are still not stored.
 
 ## What each row becomes
 
@@ -49,10 +54,18 @@ deliberate open questions, listed at the end.
 | `Source` | `source` | `Google Maps listing` → `google_maps`. An unknown value is turned into a lowercase slug and reported. Empty is a refusal. |
 | `Sector` | `sector` | As written. There is no controlled vocabulary this sprint — Sprint 1's contract defers it — so no sector value is ever reported or rewritten. |
 | `Area` | `area` | As written; empty becomes `null`. |
+| `Email` | `email` | Lower-cased when valid; malformed values are left blank with a warning. |
+| `Contact name` | provenance `contact_name` | Optional named person, where research identified one. |
+| `Contact type` | provenance `contact_type` | `generic_business`, `named_individual`, or `unknown`. |
+| `Source URL` | provenance `source_url` | An `http` or `https` reference to the researched listing. |
+| `Collection date` | provenance `collection_date` | ISO `YYYY-MM-DD`; falls back to `Date added`. |
+| `Collection method` | provenance `collection_method` | How the source was researched; falls back to written `Source`. |
+| `Intended purpose` | provenance `intended_purpose` | Why the contact was collected; empty stays unknown. |
 
-Every imported lead is `status: "new"`, and gets the same two timeline entries a seeded lead
-gets: `lead.created` ("Imported from the Google Maps list") and `lead.researched` with the
-research string.
+Every imported lead is `status: "new"`, gets an `import_batches` row and row-numbered
+provenance, and starts `needs_review` independently for email, SMS, and WhatsApp. It gets the
+same two timeline entries a seeded lead gets: `lead.created` ("Imported from the Google Maps
+list") and `lead.researched` with the research string.
 
 **A landline is never WhatsApp-capable.** `020 NNNNNNN` in the list is `+2542…` once
 normalised (and `041`, `043` and the other fixed-line ranges behave the same way), so
@@ -66,9 +79,12 @@ disagrees is reported rather than believed.
 ```json
 {
   "filename": "webloom-lead-list.csv",
+  "batch_id": "3f7b0ee2-c3c1-4a02-a8a5-c773f9c24e29",
   "row_count": 52,
   "accepted": 50,
   "rejected": 2,
+  "duplicates": 1,
+  "requiring_review": 50,
   "rejected_rows": [
     {
       "row": 7,
@@ -108,6 +124,7 @@ disagrees is reported rather than believed.
 | `duplicate_phone` | the number is already on an earlier row of the file | This phone number is already on row N of the file. |
 | `duplicate_phone` | the number is already in the system | This phone number is already in the system. |
 | `blank_source` | `Source` is empty | No source recorded, so we cannot say where this lead came from. |
+| `suppressed_contact` | an all-marketing restriction already names the phone or email | This contact has opted out of marketing and is excluded from future imports. |
 
 A row with more than one problem reports the same one every time: business name, then phone,
 then source.
@@ -120,6 +137,11 @@ then source.
 | `landline_marked_whatsapp` | `whatsapp_capable` | A landline cannot receive WhatsApp, so it is marked not WhatsApp-capable. |
 | `website_status_unclassified` | `website_status` | Website status kept as written; has_website left false. |
 | `source_unrecognised` | `source` | Source not recognised; stored as a lowercase slug of the value. |
+| `email_invalid` | `email` | Email was not understood, so it was left blank and needs review. |
+| `source_url_invalid` | `source_url` | Source URL was not an `http(s)` address, so it was left blank. |
+| `collection_date_invalid` | `collection_date` | Collection date was not an ISO date, so it was left blank. |
+| `contact_type_unrecognised` | `contact_type` | Contact type was not recognised, so it was recorded as unknown. |
+| `contact_name_too_long` | `contact_name` | Contact name was longer than 255 characters, so it was left blank. |
 
 Every refusal and warning sentence above is written in one place in
 `backend/app/services/lead_import.py`, so Anne can replace the wording without touching a rule.
@@ -152,7 +174,9 @@ imported — because by then their numbers are in the system.
 
 It is safe, and it is how the guardrail is proven: the second import answers
 `accepted: 0, rejected: 52`, every row `duplicate_phone`, and the lead count does not move.
-Two leads can never share a phone number.
+Two leads can never share a phone number. If a lead is deleted and the same all-marketing
+contact is imported later, the row is refused as `suppressed_contact`; channel-specific
+suppression rows survive through their contact fingerprints.
 
 ## Calling it from the screen
 
@@ -168,24 +192,22 @@ For the download, post the same `body` to `/api/v1/leads/import?format=csv` and 
 response blob. `row_count` is the number to show as "52 rows read"; `accepted` and `rejected`
 are the headline, and `rejected_rows` is the list a person works through.
 
-## Open, and deliberately not decided here
+## Decisions and remaining open items
 
-The importer stores the raw `Website status` string, so nothing in the data is lost while these
-wait. They are raised in the importer's pull request, and the real 52-row list is not imported
-into the shared database until the team answers:
+The original importer shipped before these were settled. The current status is recorded here
+without erasing that history:
 
-1. **`consent_basis` and `source_url`.** AGENTS.md non-negotiable 5 wants the basis on which we
-   hold each contact recorded per lead, and Sprint 1's contract flags both fields as a decision
-   to settle *before* real rows arrive. The list has neither column; the basis is the same for
-   all 52 rows, and the source listing's URL was not captured.
+1. **Resolved 2026-10-21 — basis and `source_url`.** Imports capture traceable source fields
+   when supplied. They never infer consent or eligibility; every channel starts in
+   `needs_review` until a human records the applicable basis and evidence.
 2. **`reviews_count` and `social_presence`.** Derivable from `Website status` — for example
    `3,713 reviews - no website listed` — but there is no column for either.
 3. **`Opening message`.** A finished, ready-to-send draft on every row, and the quality bar for
    the first template in Sprint 4. No column, and it is not stored.
-4. **SMS eligibility for landlines.** `whatsapp_capable: false` is how a landline is marked
-   call-only today. A fixed line cannot receive SMS either, and Sprint 6 needs a channel-
-   eligibility field that says so; this sprint does not add one.
+4. **Resolved 2026-10-21 — independent channel eligibility.** Email, SMS, and WhatsApp now
+   have separate review records. Landline contacts cannot be approved for WhatsApp solely from
+   the research column; review and eventual dispatch must also check technical availability.
 
-Not in this sprint either: filters and search on the lead list (Herman's card), any record of
-import batches, role-gated contact details, and any change to the database schema — the
-importer adds no columns and no migration.
+The importer originally added no columns and no migration; that historical statement was
+superseded by the compliance migration on 2026-10-21. Role-gated contact details still require
+the Sprint 3 authentication work.

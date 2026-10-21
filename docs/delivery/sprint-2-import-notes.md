@@ -10,6 +10,13 @@ checked and how, and what is still open. Read the contract instead if you only w
 **Status:** built and verified, on two branches, open for review. Sprint 2 as a whole is not
 finished — CI, the Lead List filters and Anne's seller's pass are other cards.
 
+> **2026-10-21 compliance update.** The original importer described below deliberately shipped
+> without batches or schema changes. Current code adds `import_batches`, lead provenance,
+> optional provenance columns, independent channel review records, and terminal suppression.
+> The historical explanation is retained to show why the first slice was intentionally small;
+> the current contract is [the import contract](sprint-2-import-contract.md) and the
+> [compliance implementation notes](../compliance/implementation-notes.md).
+
 ## What it does
 
 One endpoint, `POST /api/v1/leads/import`, takes the researched list as it comes out of the
@@ -120,6 +127,9 @@ Filters, search and pagination on the Lead List (Herman's card) · any record of
 authentication and role-gated contact details, so today anyone who can reach the API sees every
 phone number (Sprint 3) · duplicating, editing or deleting a lead · sending, campaigns and the
 other eleven screens. The importer adds no columns and no migration.
+
+The final sentence records the original slice only. The compliance follow-up now adds the
+tables and optional fields described above; sending and role gating remain out of scope.
 
 ## Open, and for the team to answer
 

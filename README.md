@@ -9,13 +9,13 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Sprint 1 is done; Sprint 2 has just started.** One thin vertical slice runs end to
-end: sample leads in PostgreSQL, served by FastAPI, shown in a React lead list and lead detail
-with activity history.
+Pre-MVP. **Sprint 1 is done; Sprint 2 is in progress.** The Lead Desk runs end to end:
+researched leads import into PostgreSQL, can be searched and opened in React, and now carry
+provenance, independent channel-review state, terminal suppression history, and audit events.
 
 - [`frontend/`](frontend/) — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui.
-- [`backend/`](backend/README.md) — FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL 17, with a
-  reversible migration, an idempotent seed, two read endpoints, and the CSV importer.
+- [`backend/`](backend/README.md) — FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL 17, with
+  reversible migrations, an idempotent seed, lead review endpoints, and the CSV importer.
 - [`docker-compose.yml`](docker-compose.yml) — one command starts all three.
 
 There is no auth and no sending yet. What Sprint 1 was and how it went is in
@@ -100,6 +100,7 @@ implement it; a human reviews the result.** The short version is in
 | [How we work](docs/team/how-we-work.md) | Branching, PRs, review, what "done" means |
 | [FikaTu integration notes](docs/research/2026-10-08-fikatu-integration-notes.md) | Endpoints, events, and the gaps we must work around |
 | [Lead list audit](docs/research/2026-10-08-lead-list-audit.md) | What the first lead list contains and what it changes |
+| [Compliance foundation](docs/compliance/README.md) | Legal boundaries, responsibilities, and the practical outreach safeguards |
 | [AGENTS.md](AGENTS.md) | Conventions, guardrails, and the boundary rule |
 
 ## Intended stack
@@ -111,5 +112,5 @@ matches FikaTu so the two systems share one set of conventions.
 ## Not built yet
 
 Auth, campaigns, drafts, approval, sending, replies, and reporting —
-Sprints 3 to 9 in the [sprint plan](docs/delivery/sprint-plan.md). There is no CI yet either;
-Sprint 2 adds it, because today a red test is only visible to whoever ran it.
+Sprints 3 to 9 in the [sprint plan](docs/delivery/sprint-plan.md). The Sprint 2 CI workflow is
+present; its checks still need to be marked required in GitHub branch protection.

@@ -222,6 +222,7 @@ As Anne, I want to create a campaign from an offer, a segment, a template, and a
 - [ ] A campaign requires an offer, a channel, a template, an owner, and a goal
 - [ ] Leads are attached by segment or by explicit selection, with a preview count before saving
 - [ ] A campaign cannot include leads that have opted out
+- [ ] Campaign preview shows effective channel eligibility, purpose, and technical-contact skips
 - [ ] Campaign status moves through `draft`, `active`, `paused`, `completed`
 
 Tasks: campaign model and migration (Sharon, 6h) · create and preview endpoints (Mark, 8h) · campaign
@@ -246,6 +247,7 @@ As Anne, I want a personalised draft per lead generated from the template, so I 
 - [ ] Rendered text matches the seed message for the seed leads, byte for byte
 - [ ] Leads missing a required variable are skipped and listed with the reason
 - [ ] Opted-out and call-only leads are excluded according to channel rules
+- [ ] Only a human `eligible` decision for the selected channel can produce a sendable draft
 - [ ] Generation is idempotent: running it twice does not duplicate drafts
 
 Tasks: rendering service with tests (Sharon, 12h) · eligibility rules (Sharon, 6h) · generation job and
@@ -278,6 +280,7 @@ As Anne, I want to review, edit, approve, or reject each draft before it sends, 
 - [ ] A draft can be edited inline; edits are stored on the outreach, not the template
 - [ ] Approve, reject, and bulk approve work; each records the actor and timestamp
 - [ ] `draft` cannot move directly to `sent`; the API rejects an attempt
+- [ ] Sent items are the approved message version, with approval actor/time and campaign purpose retained
 - [ ] Rejected drafts require a reason chosen from a list
 - [ ] The queue loads 100 drafts without noticeable lag
 
@@ -305,6 +308,7 @@ As a team, we want outreach to move through explicit states, so a bug cannot sen
 - [ ] States: `draft`, `approved`, `queued`, `sent`, `delivered`, `failed`, `cancelled`
 - [ ] Only `approved` may be queued; only `queued` may be sent
 - [ ] Every transition records actor, timestamp, and reason
+- [ ] Queued follow-ups are cancelled when a matching suppression is recorded
 - [ ] Illegal transitions raise a typed error and are covered by tests
 - [ ] The state machine is the only writer of `sent_at` and `delivery_status`
 
@@ -317,6 +321,7 @@ As Anne, I want approved messages sent exactly once, so a retry never double-mes
 
 - [ ] A Celery task sends queued outreaches in batches with pacing
 - [ ] The FikaTu reference is persisted before any retry is possible
+- [ ] Every attempt and retry rereads approval, eligibility, purpose, suppression, and opt-out content
 - [ ] Re-running the task never sends the same outreach twice
 - [ ] Terminal failures move the outreach to `failed` with a reason
 - [ ] A kill-and-restart mid-batch sends no duplicates
@@ -341,6 +346,7 @@ Tasks: status sync task (Sharon, 8h) · outreach log API (Sharon, 4h) · outreac
 As a team, we want the guardrails enforced at send time, so a stale campaign cannot break a platform rule.
 
 - [ ] Send-time checks reject opted-out leads, call-only leads on WhatsApp/SMS, and leads without a valid number
+- [ ] Send-time checks reject `needs_review`, missing provenance/evidence, stale purpose, and unapproved campaigns
 - [ ] Sends are paced per channel so a batch cannot burst
 - [ ] A guardrail rejection is recorded as an activity event with the reason
 - [ ] Each guardrail has a test that proves it blocks
