@@ -3,7 +3,7 @@
 import uuid
 from collections.abc import Iterable
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
@@ -53,7 +53,9 @@ class LeadRepository:
         if lead is None:
             return None
         fingerprints = self._lead_fingerprints(lead)
-        lead._matching_suppressions = self.suppressions_for_fingerprints(fingerprints)
+        lead._matching_suppressions = self.suppressions_for_fingerprints(
+            fingerprints, lead_id=lead.id
+        )
         return lead
 
     def find_by_phone(self, phone: str) -> Lead | None:
@@ -105,13 +107,23 @@ class LeadRepository:
             )
         )
 
-    def suppressions_for_fingerprints(self, fingerprints: Iterable[str]) -> list[Suppression]:
+    def suppressions_for_fingerprints(
+        self,
+        fingerprints: Iterable[str],
+        *,
+        lead_id: uuid.UUID | None = None,
+    ) -> list[Suppression]:
         wanted = set(fingerprints)
-        if not wanted:
+        if not wanted and lead_id is None:
             return []
+        conditions = []
+        if wanted:
+            conditions.append(Suppression.contact_fingerprint.in_(wanted))
+        if lead_id is not None:
+            conditions.append(Suppression.lead_id == lead_id)
         statement = (
             select(Suppression)
-            .where(Suppression.contact_fingerprint.in_(wanted))
+            .where(or_(*conditions))
             .order_by(Suppression.created_at, Suppression.id)
         )
         return list(self.session.scalars(statement).all())

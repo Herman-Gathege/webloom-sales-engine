@@ -121,7 +121,7 @@ def upgrade() -> None:
         sa.CheckConstraint(
             "lawful_basis IS NULL OR lawful_basis IN "
             "('consent', 'contract', 'legal_obligation', 'vital_interests', "
-            "'public_task', 'legitimate_interests', 'other')",
+            "'public_interest', 'legitimate_interests', 'research_statistics')",
             name=op.f("ck_lead_channel_eligibility_lawful_basis_valid"),
         ),
         sa.CheckConstraint(

@@ -131,8 +131,8 @@ Sprint 5–6 acceptance gates in `docs/compliance/implementation-notes.md`.
   See `backend/README.md` and `docs/delivery/sprint-2-import-contract.md`.
 - **Built:** the containers — `docker compose up --build` starts the database, the API and
   the UI together from a clean clone. Ports and traps are in `docker/README.md`.
-- **Verified:** 133/133 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
-  builds, lints and passes its 28 tests on Node 24 locally, with CI pinned to Node 22.
+- **Verified:** 136/136 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
+  builds in the Node 22 container and passes its 28 tests plus lint locally.
 - **Not built yet:** auth, sending, campaigns, and the other eleven screens.
   `docs/delivery/sprint-plan.md` says which sprint brings each.
 - The shapes the two halves must agree on are frozen in

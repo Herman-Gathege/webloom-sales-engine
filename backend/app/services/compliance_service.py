@@ -89,6 +89,7 @@ class ComplianceService:
                     "previous_state": previous_state,
                     "new_state": decision.state,
                     "lawful_basis": decision.lawful_basis,
+                    "rationale": decision.rationale.strip(),
                 },
             )
         )

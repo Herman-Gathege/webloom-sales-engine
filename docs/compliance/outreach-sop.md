@@ -44,6 +44,10 @@ For an `eligible` decision, record:
 - the reviewer and timestamp;
 - a decision rationale.
 
+The stored categories are `consent`, `contract`, `legal_obligation`, `vital_interests`,
+`public_interest`, `legitimate_interests`, and `research_statistics`. Choosing a category is a
+human assessment; the system records it and does not decide whether it is legally sufficient.
+
 If the evidence is absent or ambiguous, leave the channel `needs_review`. Do not infer consent
 from a public listing or from the fact that a business owns a contact channel.
 

@@ -30,8 +30,9 @@ The API is:
 - `PUT /api/v1/leads/{id}/eligibility/{channel}`
 - `POST /api/v1/leads/{id}/suppressions`
 
-Lead Detail returns provenance, three effective channel states, and suppression history.
-Reviewer identity is currently self-asserted; Sprint 3 will connect it to an authenticated user.
+Lead Detail returns provenance, three effective channel states, each channel's technical contact
+availability, and suppression history. Reviewer identity is currently self-asserted; Sprint 3
+will connect it to an authenticated user.
 
 ### Suppression
 

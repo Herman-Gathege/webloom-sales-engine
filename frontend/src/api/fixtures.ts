@@ -123,7 +123,7 @@ const sampleSuppression: Suppression = {
   created_at: "2026-09-24T10:00:00Z",
 };
 
-function sampleEligibility(n: number): ChannelEligibility[] {
+function sampleEligibility(n: number, whatsappCapable: boolean): ChannelEligibility[] {
   return (["email", "sms", "whatsapp"] as const).map((channel) => {
     const emailEligible = n === 1 && channel === "email";
     const smsSuppressed = n === 1 && channel === "sms";
@@ -135,6 +135,10 @@ function sampleEligibility(n: number): ChannelEligibility[] {
         : emailEligible
           ? "eligible"
           : "needs_review",
+      technical_available:
+        channel === "email" ? Boolean(sampleLeads[n - 1]?.email) : channel === "sms"
+          ? !/^\+254[2-6]/.test(sampleLeads[n - 1]?.phone ?? "")
+          : whatsappCapable,
       lawful_basis: emailEligible ? "legitimate_interests" : null,
       evidence_summary: emailEligible ? "Owner asked for a website proposal." : null,
       evidence_source: emailEligible ? "Synthetic inbound email" : null,
@@ -159,7 +163,7 @@ export const sampleLeadDetails: LeadDetail[] = sampleLeads.map((entry, index) =>
     contact_type: "generic_business",
     contact_name: null,
   },
-  eligibility: sampleEligibility(index + 1),
+  eligibility: sampleEligibility(index + 1, entry.whatsapp_capable),
   suppressions: index === 0 ? [sampleSuppression] : [],
   activity: sampleActivity
     .filter((activity) => activity.lead_id === entry.id)

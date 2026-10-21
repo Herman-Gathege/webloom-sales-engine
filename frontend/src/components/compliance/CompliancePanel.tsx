@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import { recordSuppression, reviewEligibility } from "@/api/leads";
 import type {
-  Channel,
   ChannelEligibility,
   EligibilityReviewInput,
   EligibilityState,
@@ -136,9 +135,9 @@ function ChannelReviewForm({
                 <option value="contract">contract</option>
                 <option value="legal_obligation">legal obligation</option>
                 <option value="vital_interests">vital interests</option>
-                <option value="public_task">public task</option>
+                <option value="public_interest">public interest</option>
                 <option value="legitimate_interests">legitimate interests</option>
-                <option value="other">other</option>
+                <option value="research_statistics">research and statistics</option>
               </select>
             </label>
             <label className="space-y-1">
@@ -394,19 +393,13 @@ export function CompliancePanel({
   sampleMode: boolean;
   onUpdated: (lead: LeadDetail) => void;
 }) {
-  const landline = Boolean(lead.phone) && /^\+254[2-6]/.test(lead.phone ?? "");
-  const availability: Record<Channel, string> = {
-    email: lead.email ? "technical contact available" : "no email recorded",
-    sms: !lead.phone
-      ? "no phone recorded"
-      : landline
-        ? "landline cannot receive SMS"
-        : "technical contact available",
-    whatsapp:
-      lead.phone && lead.whatsapp_capable
-        ? "technical contact available; delivery not implemented"
-        : "not technically available",
-  };
+  function availability(record: ChannelEligibility): string {
+    if (!record.technical_available) return "not technically available";
+    if (record.channel === "whatsapp") {
+      return "technical contact available; delivery not implemented";
+    }
+    return "technical contact available";
+  }
 
   return (
     <Card>
@@ -478,7 +471,7 @@ export function CompliancePanel({
           {lead.eligibility.map((record) => (
             <div key={record.channel} className="space-y-1">
               <p className="text-xs text-muted-foreground">
-                {record.channel}: {availability[record.channel]}
+                {record.channel}: {availability(record)}
               </p>
               <ChannelReviewForm
                 key={`${record.channel}-${record.reviewer}-${record.state}`}

@@ -246,8 +246,29 @@ def test_channel_reviews_are_independent_and_audited(
         "previous_state": "needs_review",
         "new_state": "eligible",
         "lawful_basis": "legitimate_interests",
+        "rationale": "Direct request and relevant business context are recorded.",
     }
     assert "owner@example.test" not in json.dumps(audit.details)
+
+
+def test_lawful_basis_uses_the_documented_categories(
+    client: TestClient, session: Session, make_lead
+) -> None:
+    lead = make_lead(email="owner@example.test")
+    session.add(lead)
+    session.flush()
+
+    accepted = client.put(
+        f"/api/v1/leads/{lead.id}/eligibility/email",
+        json=review_payload(lawful_basis="public_interest"),
+    )
+    rejected = client.put(
+        f"/api/v1/leads/{lead.id}/eligibility/email",
+        json=review_payload(lawful_basis="other"),
+    )
+
+    assert accepted.status_code == 200
+    assert rejected.status_code == 422
 
 
 def test_a_public_listing_alone_starts_pending_and_eligible_requires_evidence(
@@ -292,6 +313,48 @@ def test_channel_suppression_only_blocks_that_channel(
     assert states["email"] == "needs_review"
     assert states["whatsapp"] == "needs_review"
     assert "contact_fingerprint" not in json.dumps(response.json())
+
+
+def test_an_all_marketing_restriction_follows_the_lead_if_its_contact_changes(
+    client: TestClient, session: Session, make_lead
+) -> None:
+    lead = make_lead(email=None)
+    session.add(lead)
+    session.flush()
+    client.post(
+        f"/api/v1/leads/{lead.id}/suppressions",
+        json={
+            "scope": "all_marketing",
+            "reason": "opt_out",
+            "source": "Written request",
+            "recorded_by": "Anne",
+        },
+    )
+
+    lead.email = "new-contact@example.test"
+    session.flush()
+
+    detail = client.get(f"/api/v1/leads/{lead.id}").json()
+    assert {row["effective_state"] for row in detail["eligibility"]} == {"suppressed"}
+
+
+def test_technical_availability_excludes_a_landline_from_sms(
+    client: TestClient, session: Session, make_lead
+) -> None:
+    lead = make_lead(phone="+254200000099", email=None, whatsapp_capable=False)
+    session.add(lead)
+    session.flush()
+
+    eligibility = {
+        row["channel"]: row["technical_available"]
+        for row in client.get(f"/api/v1/leads/{lead.id}").json()["eligibility"]
+    }
+
+    assert eligibility == {
+        "email": False,
+        "sms": False,
+        "whatsapp": False,
+    }
 
 
 def test_a_channel_suppression_requires_a_contact_for_that_channel(

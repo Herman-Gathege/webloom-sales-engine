@@ -52,6 +52,7 @@ class ChannelEligibilityRead(BaseModel):
     channel: Literal["email", "sms", "whatsapp"]
     state: Literal["needs_review", "eligible"]
     effective_state: Literal["needs_review", "eligible", "suppressed"]
+    technical_available: bool
     lawful_basis: str | None
     evidence_summary: str | None
     evidence_source: str | None
@@ -105,9 +106,9 @@ class EligibilityReviewRequest(BaseModel):
         "contract",
         "legal_obligation",
         "vital_interests",
-        "public_task",
+        "public_interest",
         "legitimate_interests",
-        "other",
+        "research_statistics",
     ] | None = None
     evidence_summary: str | None = Field(default=None, max_length=4000)
     evidence_source: str | None = Field(default=None, max_length=2000)

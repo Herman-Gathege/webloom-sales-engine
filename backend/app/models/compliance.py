@@ -123,6 +123,25 @@ class LeadChannelEligibility(Base):
             return "suppressed"
         return self.state
 
+    @property
+    def technical_available(self) -> bool:
+        """Whether the selected channel can use a contact currently on this lead."""
+        if self.channel == "email":
+            return bool(self.lead.email)
+
+        phone = self.lead.phone
+        if not phone:
+            return False
+        if self.channel == "whatsapp":
+            return self.lead.whatsapp_capable
+
+        # Kenyan fixed lines cannot receive SMS. A future international format
+        # remains technically available until a channel validator defines it.
+        kenyan_fixed_line = (
+            phone.startswith("+254") and len(phone) > 4 and phone[4] in "23456"
+        )
+        return not kenyan_fixed_line
+
     __table_args__ = (
         UniqueConstraint("lead_id", "channel", name="uq_lead_channel_eligibility_lead_channel"),
         CheckConstraint("channel IN ('email', 'sms', 'whatsapp')", name="channel_valid"),
@@ -132,7 +151,7 @@ class LeadChannelEligibility(Base):
         CheckConstraint(
             "lawful_basis IS NULL OR lawful_basis IN "
             "('consent', 'contract', 'legal_obligation', 'vital_interests', "
-            "'public_task', 'legitimate_interests', 'other')",
+            "'public_interest', 'legitimate_interests', 'research_statistics')",
             name="lawful_basis_valid",
         ),
         CheckConstraint(

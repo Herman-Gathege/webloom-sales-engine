@@ -104,14 +104,15 @@ export type LawfulBasis =
   | "contract"
   | "legal_obligation"
   | "vital_interests"
-  | "public_task"
+  | "public_interest"
   | "legitimate_interests"
-  | "other";
+  | "research_statistics";
 
 export interface ChannelEligibility {
   channel: Channel;
   state: EligibilityState;
   effective_state: EffectiveEligibilityState;
+  technical_available: boolean;
   lawful_basis: LawfulBasis | null;
   evidence_summary: string | null;
   evidence_source: string | null;
