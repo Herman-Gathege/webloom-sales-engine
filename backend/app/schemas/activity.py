@@ -15,4 +15,5 @@ class ActivityRead(BaseModel):
     type: str
     actor: str
     summary: str
+    details: dict[str, object] | None
     created_at: UtcDatetime

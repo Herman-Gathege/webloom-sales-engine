@@ -6,7 +6,14 @@ from collections.abc import Iterable
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.models import Activity, Lead
+from app.models import (
+    Activity,
+    ImportBatch,
+    Lead,
+    LeadChannelEligibility,
+    LeadProvenance,
+    Suppression,
+)
 
 
 class LeadRepository:
@@ -33,8 +40,21 @@ class LeadRepository:
 
     def get_with_activity(self, lead_id: uuid.UUID) -> Lead | None:
         """The lead and its history in two queries rather than one per row."""
-        statement = select(Lead).where(Lead.id == lead_id).options(selectinload(Lead.activity))
-        return self.session.scalar(statement)
+        statement = (
+            select(Lead)
+            .where(Lead.id == lead_id)
+            .options(
+                selectinload(Lead.activity),
+                selectinload(Lead.provenance),
+                selectinload(Lead.eligibility),
+            )
+        )
+        lead = self.session.scalar(statement)
+        if lead is None:
+            return None
+        fingerprints = self._lead_fingerprints(lead)
+        lead._matching_suppressions = self.suppressions_for_fingerprints(fingerprints)
+        return lead
 
     def find_by_phone(self, phone: str) -> Lead | None:
         return self.session.scalar(select(Lead).where(Lead.phone == phone))
@@ -59,9 +79,61 @@ class LeadRepository:
         self.session.add(activity)
         return activity
 
+    def add_import_batch(self, batch: ImportBatch) -> ImportBatch:
+        self.session.add(batch)
+        return batch
+
+    def add_provenance(self, provenance: LeadProvenance) -> LeadProvenance:
+        self.session.add(provenance)
+        return provenance
+
+    def add_eligibility(self, eligibility: LeadChannelEligibility) -> LeadChannelEligibility:
+        self.session.add(eligibility)
+        return eligibility
+
+    def add_suppression(self, suppression: Suppression) -> Suppression:
+        self.session.add(suppression)
+        return suppression
+
+    def get_eligibility(
+        self, lead_id: uuid.UUID, channel: str
+    ) -> LeadChannelEligibility | None:
+        return self.session.scalar(
+            select(LeadChannelEligibility).where(
+                LeadChannelEligibility.lead_id == lead_id,
+                LeadChannelEligibility.channel == channel,
+            )
+        )
+
+    def suppressions_for_fingerprints(self, fingerprints: Iterable[str]) -> list[Suppression]:
+        wanted = set(fingerprints)
+        if not wanted:
+            return []
+        statement = (
+            select(Suppression)
+            .where(Suppression.contact_fingerprint.in_(wanted))
+            .order_by(Suppression.created_at, Suppression.id)
+        )
+        return list(self.session.scalars(statement).all())
+
+    def flush(self) -> None:
+        self.session.flush()
+
     def count_activity(self) -> int:
         return self.session.scalar(select(func.count()).select_from(Activity)) or 0
 
     def commit(self) -> None:
         """Save the unit of work — the importer writes all its accepted rows at once."""
         self.session.commit()
+
+    @staticmethod
+    def _lead_fingerprints(lead: Lead) -> set[str]:
+        # Imported lazily to keep the repository free of service-level rules.
+        from app.services.contact_identity import contact_fingerprint
+
+        fingerprints: set[str] = set()
+        if lead.phone:
+            fingerprints.add(contact_fingerprint("phone", lead.phone))
+        if lead.email:
+            fingerprints.add(contact_fingerprint("email", lead.email))
+        return fingerprints
