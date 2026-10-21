@@ -1,7 +1,7 @@
 # Frontend
 
-The React shell for the Sales Engine. Sprint 1 has two screens: the Lead List and the
-Lead Detail (with the lead's activity history).
+The React shell for the Sales Engine. Sprint 2 has the searchable Lead List, Lead Detail with
+activity history and a practical compliance review card, and the CSV import screen.
 
 ## Node version — read this first
 
@@ -50,3 +50,11 @@ only if the API has been moved.
 The contract these fields follow is
 [`docs/delivery/sprint-1-lead-contract.md`](../docs/delivery/sprint-1-lead-contract.md), and
 `src/api/types.ts` is its TypeScript copy.
+
+## Compliance controls
+
+Lead Detail shows provenance, separate email/SMS/WhatsApp eligibility, terminal suppression
+history, and forms for recording human reviews or opt-outs. Mutation controls are deliberately
+disabled while sample fixtures are shown so a local demo cannot look like a persisted decision.
+Read [`docs/compliance/outreach-sop.md`](../docs/compliance/outreach-sop.md) for the operator
+workflow. Authentication and role-gated contact visibility still arrive in Sprint 3.

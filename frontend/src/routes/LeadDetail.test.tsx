@@ -35,4 +35,17 @@ describe("LeadDetail", () => {
       expect(screen.getByText(entry.summary)).toBeTruthy();
     }
   });
+
+  it("shows provenance, independent channel state, and terminal suppression", async () => {
+    renderDetail(lead.id);
+
+    expect(await screen.findByText("Compliance review")).toBeTruthy();
+    expect(screen.getByText("Synthetic research fixture")).toBeTruthy();
+    expect(screen.getByText("30000000-0000-4000-8000-000000000001")).toBeTruthy();
+    expect(screen.getAllByLabelText("Activity details").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("eligible").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("suppressed").length).toBeGreaterThan(0);
+    expect(screen.getByText(/suppresses every available marketing channel/i)).toBeTruthy();
+    expect(screen.getByText(/Review controls are disabled/i)).toBeTruthy();
+  });
 });

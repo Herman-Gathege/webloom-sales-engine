@@ -1,7 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sampleLeads } from "./fixtures";
-import { ApiError, getLead, listLeads, rejectedRowsCsv } from "./leads";
+import {
+  ApiError,
+  getLead,
+  listLeads,
+  recordSuppression,
+  rejectedRowsCsv,
+  reviewEligibility,
+} from "./leads";
 
 // The vitest config sets VITE_USE_MOCK=1, so these exercise the sample-data
 // path deterministically — no network, no flakiness. The live-API path is
@@ -29,9 +36,12 @@ describe("rejectedRowsCsv", () => {
   it("writes a header and one line per refused row, quoting commas and quotes", () => {
     const csv = rejectedRowsCsv({
       filename: "list.csv",
+      batch_id: "30000000-0000-4000-8000-000000000001",
       row_count: 2,
       accepted: 0,
       rejected: 2,
+      duplicates: 1,
+      requiring_review: 0,
       rejected_rows: [
         {
           row: 7,
@@ -71,6 +81,81 @@ describe("getLead", () => {
   });
 });
 
+describe("compliance mutations", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("sends one channel review to the API without using sample fallback", async () => {
+    const updated = {
+      ...sampleLeader(),
+      provenance: null,
+      eligibility: [],
+      suppressions: [],
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(updated), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await reviewEligibility(sampleLeads[0].id, "email", {
+      state: "needs_review",
+      lawful_basis: null,
+      evidence_summary: null,
+      evidence_source: null,
+      intended_purpose: null,
+      contact_context: null,
+      reviewer: "Anne",
+      rationale: "More evidence needed.",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `/api/v1/leads/${sampleLeads[0].id}/eligibility/email`,
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({
+          state: "needs_review",
+          lawful_basis: null,
+          evidence_summary: null,
+          evidence_source: null,
+          intended_purpose: null,
+          contact_context: null,
+          reviewer: "Anne",
+          rationale: "More evidence needed.",
+        }),
+      }),
+    );
+  });
+
+  it("sends a terminal suppression and surfaces API validation text", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ detail: "This lead has no contact available." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      recordSuppression(sampleLeads[0].id, {
+        scope: "all_marketing",
+        reason: "opt_out",
+        source: "Written request",
+        recorded_by: "Anne",
+        note: null,
+      }),
+    ).rejects.toThrow("This lead has no contact available.");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `/api/v1/leads/${sampleLeads[0].id}/suppressions`,
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+});
+
 describe("the Lead contract", () => {
   // If this fails, either the fixtures drifted or the agreed contract changed.
   // The contract lives in docs/delivery/sprint-1-lead-contract.md.
@@ -85,6 +170,7 @@ describe("the Lead contract", () => {
         "sector",
         "area",
         "phone",
+        "email",
         "whatsapp_capable",
         "website_status",
         "has_website",
@@ -93,11 +179,18 @@ describe("the Lead contract", () => {
         "created_at",
         "updated_at",
         "activity",
+        "provenance",
+        "eligibility",
+        "suppressions",
       ].sort(),
     );
 
     expect(Object.keys(activity).sort()).toEqual(
-      ["id", "lead_id", "type", "actor", "summary", "created_at"].sort(),
+      ["id", "lead_id", "type", "actor", "summary", "details", "created_at"].sort(),
     );
   });
 });
+
+function sampleLeader() {
+  return sampleLeads[0];
+}

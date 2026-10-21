@@ -33,6 +33,8 @@ export interface Lead {
   area: string | null;
   /** E.164, e.g. "+254709709000". */
   phone: string | null;
+  /** Lower-case contact email, when research captured one. */
+  email: string | null;
   whatsapp_capable: boolean;
   /** The raw research string, kept verbatim. Free text. */
   website_status: string | null;
@@ -54,6 +56,8 @@ export interface Activity {
   actor: string;
   /** Human-readable one-liner, derived on the server. */
   summary: string;
+  /** Structured, non-sensitive audit facts. */
+  details: Record<string, unknown> | null;
   /** ISO 8601, UTC. */
   created_at: string;
 }
@@ -73,7 +77,82 @@ export interface LeadListParams {
 
 /** GET /api/v1/leads/{id} */
 export interface LeadDetail extends Lead {
+  provenance: LeadProvenance | null;
+  eligibility: ChannelEligibility[];
+  suppressions: Suppression[];
   activity: Activity[];
+}
+
+export type ContactType = "unknown" | "generic_business" | "named_individual";
+
+export interface LeadProvenance {
+  import_batch_id: string | null;
+  row_number: number | null;
+  source_url: string | null;
+  collection_date: string | null;
+  collection_method: string | null;
+  intended_purpose: string | null;
+  contact_type: ContactType;
+  contact_name: string | null;
+}
+
+export type Channel = "email" | "sms" | "whatsapp";
+export type EligibilityState = "needs_review" | "eligible";
+export type EffectiveEligibilityState = EligibilityState | "suppressed";
+export type LawfulBasis =
+  | "consent"
+  | "contract"
+  | "legal_obligation"
+  | "vital_interests"
+  | "public_task"
+  | "legitimate_interests"
+  | "other";
+
+export interface ChannelEligibility {
+  channel: Channel;
+  state: EligibilityState;
+  effective_state: EffectiveEligibilityState;
+  lawful_basis: LawfulBasis | null;
+  evidence_summary: string | null;
+  evidence_source: string | null;
+  intended_purpose: string | null;
+  contact_context: string | null;
+  reviewer: string | null;
+  reviewed_at: string | null;
+  rationale: string | null;
+}
+
+export type SuppressionScope = "all_marketing" | Channel;
+export type SuppressionReason = "opt_out" | "objection" | "manual_restriction";
+
+export interface Suppression {
+  id: string;
+  contact_kind: "phone" | "email";
+  scope: SuppressionScope;
+  reason: SuppressionReason;
+  source: string;
+  recorded_by: string;
+  note: string | null;
+  created_at: string;
+}
+
+export interface EligibilityReviewInput {
+  state: EligibilityState;
+  lawful_basis: LawfulBasis | null;
+  evidence_summary: string | null;
+  evidence_source: string | null;
+  intended_purpose: string | null;
+  contact_context: string | null;
+  reviewer: string;
+  rationale: string;
+}
+
+export interface SuppressionInput {
+  scope: SuppressionScope;
+  reason: SuppressionReason;
+  source: string;
+  recorded_by: string;
+  note: string | null;
 }
 
 /**
@@ -111,9 +190,12 @@ export interface RowWarning {
 /** POST /api/v1/leads/import — what happened to the upload, row by row. */
 export interface ImportSummary {
   filename: string;
+  batch_id: string;
   row_count: number;
   accepted: number;
   rejected: number;
+  duplicates: number;
+  requiring_review: number;
   rejected_rows: RefusedRow[];
   warnings: RowWarning[];
 }

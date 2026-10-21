@@ -163,6 +163,14 @@ export function LeadImport() {
                 <span className={summary.rejected > 0 ? "text-amber-700" : "text-muted-foreground"}>
                   <span className="font-medium">{summary.rejected}</span> refused
                 </span>
+                <span className="text-muted-foreground">
+                  <span className="font-medium">{summary.duplicates}</span> duplicate
+                  {summary.duplicates === 1 ? "" : "s"}
+                </span>
+                <span className="text-amber-700">
+                  <span className="font-medium">{summary.requiring_review}</span> need
+                  compliance review
+                </span>
                 {summary.warnings.length > 0 && (
                   <span className="text-muted-foreground">
                     {summary.warnings.length} warning{summary.warnings.length === 1 ? "" : "s"}

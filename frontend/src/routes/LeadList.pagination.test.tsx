@@ -16,6 +16,7 @@ function makeLeads(count: number): Lead[] {
     sector: "Opticians and eyewear",
     area: "CBD",
     phone: `+2547000${String(index).padStart(5, "0")}`,
+    email: `business${index + 1}@example.test`,
     whatsapp_capable: true,
     website_status: "no website listed",
     has_website: false,
