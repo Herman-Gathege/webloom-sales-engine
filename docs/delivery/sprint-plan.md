@@ -1,6 +1,6 @@
 # Webloom Sales Engine — Sprint Plan
 
-**Updated:** 2026-10-13 · **Owner:** Herman Gathege · **Reviewed by:** Mark Mwenesi
+**Updated:** 2026-10-27 · **Owner:** Herman Gathege · **Reviewed by:** Mark Mwenesi
 **Scope:** [scope spec](../superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) ·
 **Detail:** [sprint detail](sprint-detail.md) · **Rules:** [how we work](../team/how-we-work.md)
 
@@ -22,15 +22,19 @@ before we start, rather than after.
 Detail → activity/history — and one command starts all of it. Shipped 2026-10-13 by all four
 of us; the record is in [the Sprint 1 closure](../homework/sprint-1/status.md).
 
-**Sprint 2 starts now: the Lead Desk is real**, owned by Sharon. Homework lives in
-[`docs/homework/sprint-2/`](../homework/sprint-2/README.md).
+**Sprint 2 is closed** — the lead desk is real, and the exit review is in
+[`docs/homework/sprint-2/status.md`](../homework/sprint-2/status.md).
+
+**Sprint 3 is implemented and awaits team review: lock the door**, owned by Mark. The scope
+and acceptance criteria are in [`sprint-3-auth.md`](sprint-3-auth.md); the review homework is in
+[`docs/homework/sprint-3/`](../homework/sprint-3/README.md).
 
 One thing we carry forward: Sprint 1 cost more in setup friction than in product. **From now
 on, the first task of a sprint is "a new person can run it", not the last.**
 
 ---
 
-## Sprint 2 — The Lead Desk is real ← we are here
+## Sprint 2 — The Lead Desk is real ✅ closed
 
 The real 52-row lead list goes in, instead of eight invented samples. Leads become
 filterable. And CI lands, so a red test is visible to everyone instead of only to whoever
@@ -63,8 +67,9 @@ FikaTu is not involved yet, and nothing here depends on another repository.
 Each is one small piece. **1 point ≈ half a focused day**, and the sizes compare sprints to
 each other — they are not a schedule.
 
-**Sprint 3 — Lock the door.** Login, users and roles. Only we can reach the pipeline, and a
-`viewer` cannot see contact details. *Owner: Mark · Reviewer: Herman · ~8 pts.*
+**Sprint 3 — Lock the door ← we are here.** Login and two roles, `admin` and `sales`. Only
+the team can reach the pipeline, and the API enforces what each role may do. *Owner: Mark ·
+Reviewer: Herman · ~8 pts.* Full detail: [`sprint-3-auth.md`](sprint-3-auth.md).
 
 **Sprint 4 — What we sell, in the system.** Offers (website packages first, other services
 later) and message templates with variants — all editable without a code change. *Owner:

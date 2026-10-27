@@ -114,12 +114,16 @@ class EligibilityReviewRequest(BaseModel):
     evidence_source: str | None = Field(default=None, max_length=2000)
     intended_purpose: str | None = Field(default=None, max_length=2000)
     contact_context: str | None = Field(default=None, max_length=2000)
-    reviewer: str = Field(min_length=1, max_length=64)
+    # Accepted for older clients but ignored: the route records the signed-in
+    # user's email, so a request cannot claim someone else reviewed it.
+    reviewer: str | None = Field(default=None, max_length=64)
     rationale: str = Field(min_length=1, max_length=4000)
 
     @field_validator("reviewer", "rationale")
     @classmethod
-    def review_text_is_not_blank(cls, value: str) -> str:
+    def review_text_is_not_blank(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         stripped = value.strip()
         if not stripped:
             raise ValueError("must not be blank")
@@ -151,12 +155,15 @@ class SuppressionCreate(BaseModel):
     scope: Literal["all_marketing", "email", "sms", "whatsapp"]
     reason: Literal["opt_out", "objection", "manual_restriction"]
     source: str = Field(min_length=1, max_length=255)
-    recorded_by: str = Field(min_length=1, max_length=64)
+    # Ignored by the route, which uses the signed-in user's email instead.
+    recorded_by: str | None = Field(default=None, max_length=64)
     note: str | None = Field(default=None, max_length=2000)
 
     @field_validator("source", "recorded_by")
     @classmethod
-    def suppression_text_is_not_blank(cls, value: str) -> str:
+    def suppression_text_is_not_blank(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         stripped = value.strip()
         if not stripped:
             raise ValueError("must not be blank")

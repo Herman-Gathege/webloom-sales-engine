@@ -1,7 +1,15 @@
 # Frontend
 
-The React shell for the Sales Engine. Sprint 2 has the searchable Lead List, Lead Detail with
-activity history and a practical compliance review card, and the CSV import screen.
+The React shell for Wadi. It has a login screen, the searchable Lead List, Lead Detail with
+activity history and a practical compliance review card, the CSV import screen, and an
+administrator-only user list.
+
+## Signing in
+
+Everything except `/login` needs a session. Tokens are stored in `localStorage` under
+`wadi.token`; a 401 anywhere clears it and returns you to the login page. The four
+development administrators are created by `python -m app.bootstrap` (see the backend README);
+each must set its own password at first login, and the API refuses lead data until it does.
 
 ## Node version — read this first
 
@@ -57,4 +65,5 @@ Lead Detail shows provenance, separate email/SMS/WhatsApp eligibility, terminal 
 history, and forms for recording human reviews or opt-outs. Mutation controls are deliberately
 disabled while sample fixtures are shown so a local demo cannot look like a persisted decision.
 Read [`docs/compliance/outreach-sop.md`](../docs/compliance/outreach-sop.md) for the operator
-workflow. Authentication and role-gated contact visibility still arrive in Sprint 3.
+workflow. Authentication and the `admin`/`sales` roles are in place; both roles can see contact
+details because both work the lead desk.

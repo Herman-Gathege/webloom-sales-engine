@@ -1,4 +1,9 @@
-"""Lead routes. Parse, authorise (later), delegate — no business rules here."""
+"""Lead routes. Parse, authorise, delegate — no business rules here.
+
+Every route here sits behind `get_current_user` (attached to this router in
+`router.py`). The routes that record compliance facts also take the user so the
+actor is the signed-in person rather than a value the caller supplies.
+"""
 
 from fastapi import (
     APIRouter,
@@ -13,7 +18,9 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.auth import get_current_user
 from app.database import get_session
+from app.models import User
 from app.repositories import LeadRepository
 from app.schemas import (
     EligibilityReviewRequest,
@@ -96,6 +103,7 @@ def import_leads(
         pattern="^(json|csv)$",
         description="`json` for the summary, `csv` to download the refused rows.",
     ),
+    current_user: User = Depends(get_current_user),
     service: LeadImportService = Depends(get_import_service),
 ) -> ImportSummary | Response:
     # Read one byte past the cap so an oversized upload is refused rather than
@@ -108,7 +116,11 @@ def import_leads(
         )
 
     try:
-        result = service.import_file(raw, file.filename or "upload.csv")
+        result = service.import_file(
+            raw,
+            file.filename or "upload.csv",
+            imported_by=current_user.email,
+        )
     except ImportFileError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message
@@ -145,6 +157,7 @@ def review_eligibility(
     lead_id: str,
     decision: EligibilityReviewRequest,
     channel: str = Path(pattern="^(email|sms|whatsapp)$"),
+    current_user: User = Depends(get_current_user),
     service: ComplianceService = Depends(get_compliance_service),
 ) -> LeadDetailRead:
     try:
@@ -158,7 +171,9 @@ def review_eligibility(
                 evidence_source=decision.evidence_source,
                 intended_purpose=decision.intended_purpose,
                 contact_context=decision.contact_context,
-                reviewer=decision.reviewer,
+                # The reviewer is whoever is signed in; a request body cannot
+                # claim to be someone else.
+                reviewer=current_user.email,
                 rationale=decision.rationale,
             ),
         )
@@ -181,6 +196,7 @@ def review_eligibility(
 def record_suppression(
     lead_id: str,
     request: SuppressionCreate,
+    current_user: User = Depends(get_current_user),
     service: ComplianceService = Depends(get_compliance_service),
 ) -> LeadDetailRead:
     try:
@@ -190,7 +206,7 @@ def record_suppression(
                 scope=request.scope,
                 reason=request.reason,
                 source=request.source,
-                recorded_by=request.recorded_by,
+                recorded_by=current_user.email,
                 note=request.note,
             ),
         )

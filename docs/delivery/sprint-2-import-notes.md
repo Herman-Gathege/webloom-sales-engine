@@ -7,8 +7,12 @@ This is the working note behind the importer. The shape a screen calls is in
 everyone else: what the piece does, the decisions inside it and the reasons for them, what was
 checked and how, and what is still open. Read the contract instead if you only want to call it.
 
-**Status:** built and verified, on two branches, open for review. Sprint 2 as a whole is not
-finished — CI, the Lead List filters and Anne's seller's pass are other cards.
+**Historical status:** built and verified during Sprint 2, which closed on 2026-10-27. This
+working note retains the state from when the importer was under review.
+
+> **Historical Sprint 2 baseline.** Authentication and role gating were added in Sprint 3.
+> Statements below about an unauthenticated API describe the original import slice, not the
+> current application.
 
 > **2026-10-21 compliance update.** The original importer described below deliberately shipped
 > without batches or schema changes. Current code adds `import_batches`, lead provenance,
@@ -124,12 +128,13 @@ should not be until the team answers the open questions below.
 ## What is deliberately not here
 
 Filters, search and pagination on the Lead List (Herman's card) · any record of import batches ·
-authentication and role-gated contact details, so today anyone who can reach the API sees every
-phone number (Sprint 3) · duplicating, editing or deleting a lead · sending, campaigns and the
-other eleven screens. The importer adds no columns and no migration.
+authentication and role-gated contact details (both added in Sprint 3) · duplicating, editing
+or deleting a lead · sending, campaigns and the other eleven screens. The original importer
+added no columns and no migration.
 
-The final sentence records the original slice only. The compliance follow-up now adds the
-tables and optional fields described above; sending and role gating remain out of scope.
+The final sentence records the original slice only. The compliance follow-up added the tables
+and optional fields described above; Sprint 3 added authentication and the two application
+roles. Sending remains out of scope.
 
 ## Open, and for the team to answer
 

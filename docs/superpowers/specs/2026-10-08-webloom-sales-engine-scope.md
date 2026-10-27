@@ -67,12 +67,13 @@ decides which doors are worth knocking on and what is behind them.
 The first users are the four of us. The system is internal, single-company, and
 role-based — **not** multi-tenant SaaS in v1.
 
+Sprint 3 reduced the original four-role proposal to two roles. The history is retained in
+[the Sprint 3 delivery record](../../delivery/sprint-detail.md#sprint-3--lock-the-door--we-are-here).
+
 | Role | Who | Can do |
 |---|---|---|
-| `owner` | Herman, Mark | Everything, including user management and settings |
-| `sales` | Anne (later: hired salespeople) | Leads, campaigns, approval, replies, qualification, handoff, deals |
-| `engineer` | Mark, Herman, Sharon | Read-only on sales data; full access to offers/templates/config |
-| `viewer` | stakeholders | Read-only dashboards and reports |
+| `admin` | Herman, Mark | Everything a seller can do, plus the read-only application-user list |
+| `sales` | Anne, Sharon, and later hired salespeople | Leads, campaigns, approval, replies, qualification, handoff, deals |
 
 ### 3.1 How each person's skills map to the work
 
@@ -103,7 +104,7 @@ The MVP is a working loop, end to end, on a real lead list:
 
 Concretely:
 
-1. **Auth and users** — login, four roles, permissions.
+1. **Auth and users** — login, two roles, permissions.
 2. **Offers** — the things we sell, with price guidance and a pitch angle. Website packages
    first; other services storable from day one.
 3. **Leads** — create, edit, list, filter (sector, area, website status, status, owner),
@@ -406,8 +407,8 @@ reputation or a provider account is worse than no sales engine.
 5. **Real lead data never enters git.** The lead list contains real phone numbers. It lives
    in a gitignored `data/` directory; the repo carries only a schema file with synthetic
    examples. Bulk exports are deliberate, logged actions.
-6. **Access control on personal data.** Only `owner` and `sales` roles see contact details;
-   exports are logged in `activity_events`.
+6. **Access control on personal data.** Only authenticated `admin` and `sales` roles see
+   contact details; exports are logged in `activity_events`.
 7. **Rate limiting and pacing.** Sending is paced per channel so a campaign cannot burst
    into a provider ban.
 8. **Honest reporting.** Delivery status shown as reported; unknown is unknown.

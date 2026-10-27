@@ -218,7 +218,7 @@ def test_provenance_survives_review_and_suppression_updates(
 
 
 def test_channel_reviews_are_independent_and_audited(
-    client: TestClient, session: Session, make_lead
+    client: TestClient, session: Session, make_lead, admin_user
 ) -> None:
     lead = make_lead(email="owner@example.test")
     session.add(lead)
@@ -240,7 +240,7 @@ def test_channel_reviews_are_independent_and_audited(
         select(Activity).where(Activity.type == "lead.eligibility_reviewed")
     )
     assert audit is not None
-    assert audit.actor == "Anne"
+    assert audit.actor == admin_user.email
     assert audit.details == {
         "channel": "email",
         "previous_state": "needs_review",

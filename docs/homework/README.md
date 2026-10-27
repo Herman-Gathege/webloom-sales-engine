@@ -9,17 +9,17 @@ We use **one shared branch per sprint**. No personal branches. Think of a car li
 person adds a piece, checks it, pushes, and passes it on. This replaced separate branches
 because nobody could tell which branch was safe to pull.
 
-**Current sprint (Sprint 2) branch:** `sprint/2-lead-desk`
+**Current sprint (Sprint 3) branch:** `sprint/3-auth`
 
 ### Your turn
 
-1. `git switch sprint/2-lead-desk && git pull` — start from what the last person pushed.
+1. `git switch sprint/3-auth && git pull` — start from what the last person pushed.
 2. Run `docker compose up --build`. If the last hand-off is broken, say so before adding
    anything.
 3. Do only what your card says.
 4. Run the checks on your card until they pass.
 5. `git add -A && git commit -m "<type>: <what you did>" && git push`
-6. The first hand-off opens one PR from `sprint/2-lead-desk` to `main`. Every later hand-off
+6. The first hand-off opens one PR from `sprint/3-auth` to `main`. Every later hand-off
    pushes to the same branch and updates that PR. Post in the group:
    **"pushed, green — your turn, <name>."**
 
@@ -58,4 +58,5 @@ Re-run the checks, push, then hand off. Never leave a conflict for the next pers
 ## Sprints
 
 - [Sprint 1](sprint-1/README.md) — finished.
-- [Sprint 2](sprint-2/README.md) — in progress.
+- [Sprint 2](sprint-2/README.md) — finished; exit review in [status.md](sprint-2/status.md).
+- [Sprint 3](sprint-3/README.md) — in progress.

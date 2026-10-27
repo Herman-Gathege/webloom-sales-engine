@@ -23,10 +23,11 @@ from sqlalchemy.orm import Session
 
 from alembic import command
 from alembic.config import Config
+from app.auth import get_current_user
 from app.config import get_settings
 from app.database import get_session
 from app.main import app
-from app.models import Lead, LeadChannelEligibility, LeadStatus
+from app.models import Lead, LeadChannelEligibility, LeadStatus, User, UserRole
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
@@ -99,8 +100,38 @@ def session(engine: Engine) -> Iterator[Session]:
 
 
 @pytest.fixture
-def client(session: Session) -> Iterator[TestClient]:
-    """The real app, using the test's session."""
+def admin_user() -> User:
+    """A signed-in administrator, without a database round trip.
+
+    Existing Sprint 1-2 tests exercise business behaviour, not auth, so they
+    run as this user. The auth tests use `anonymous_client` and real tokens.
+    """
+    return User(
+        id=uuid.uuid4(),
+        email="herman@example.test",
+        password_hash="not-used-because-auth-is-overridden",
+        role=UserRole.ADMIN,
+        is_active=True,
+        must_change_password=False,
+        token_version=0,
+    )
+
+
+@pytest.fixture
+def client(session: Session, admin_user: User) -> Iterator[TestClient]:
+    """The real app, using the test's session, signed in as an administrator."""
+    app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[get_current_user] = lambda: admin_user
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def anonymous_client(session: Session) -> Iterator[TestClient]:
+    """The real app with no `get_current_user` override: every call is unauthenticated."""
     app.dependency_overrides[get_session] = lambda: session
     try:
         with TestClient(app) as test_client:

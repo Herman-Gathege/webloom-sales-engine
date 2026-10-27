@@ -432,8 +432,15 @@ class LeadImportService:
     def __init__(self, repository: LeadRepository) -> None:
         self.repository = repository
 
-    def import_file(self, raw: bytes, filename: str) -> ImportResult:
-        """Import every good row and refuse the rest. Raises ImportFileError."""
+    def import_file(
+        self, raw: bytes, filename: str, *, imported_by: str = "system"
+    ) -> ImportResult:
+        """Import every good row and refuse the rest. Raises ImportFileError.
+
+        `imported_by` is the signed-in user's email once Sprint 3's API passes
+        it through; the default keeps direct service calls (and older tests)
+        working.
+        """
         rows = read_rows(raw)
         imported_at = datetime.now(UTC)
 
@@ -471,7 +478,7 @@ class LeadImportService:
 
         batch = ImportBatch(
             filename=filename,
-            imported_by="system",
+            imported_by=imported_by,
             row_count=len(rows),
             accepted=len(accepted),
             rejected=len(refused),

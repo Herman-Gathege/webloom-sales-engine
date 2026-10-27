@@ -73,9 +73,10 @@ for its subject — edit the document, not a copy of it.
 | The whole plan: nine sprints, what each delivers, who leads it | `docs/delivery/sprint-plan.md` |
 | The exact Lead and Activity shapes the frontend and backend agree on | `docs/delivery/sprint-1-lead-contract.md` |
 | The detail behind each sprint: the pieces of work and their acceptance criteria | `docs/delivery/sprint-detail.md` |
-| What each of us is doing right now | `docs/homework/sprint-2/` |
+| What each of us is doing right now | `docs/homework/sprint-3/` |
+| Sprint 3's scope, roles, and acceptance criteria | `docs/delivery/sprint-3-auth.md` |
 | How a hand-off works: the branch, the steps, the checks | `docs/homework/README.md` |
-| The finished first sprint, and how a sprint is run | `docs/homework/sprint-1/` |
+| How the first two sprints closed | `docs/homework/sprint-1/status.md`, `docs/homework/sprint-2/status.md` |
 | Branching, PRs, review, definition of done, disagreements | `docs/team/how-we-work.md` |
 | How to talk to FikaTu (endpoints, events, token flow, gaps) | `docs/research/2026-10-08-fikatu-integration-notes.md` |
 | What the current lead list actually contains | `docs/research/2026-10-08-lead-list-audit.md` |
@@ -107,15 +108,23 @@ human can review and convert.
 
 ## Current state
 
-**Sprint 1 is done; Sprint 2 is in progress.** Both halves and the containers are merged.
-What the first sprint was and how it went is in `docs/homework/sprint-1/status.md`; the whole
-plan is `docs/delivery/sprint-plan.md`; what we are doing right now is
-`docs/homework/sprint-2/`.
+**Sprints 1 and 2 are closed; Sprint 3 is implemented and awaiting team review.** The first
+two sprints and the containers are merged. The exit reviews are
+`docs/homework/sprint-1/status.md` and `docs/homework/sprint-2/status.md`; the plan is
+`docs/delivery/sprint-plan.md`; Sprint 3's scope is `docs/delivery/sprint-3-auth.md` and its
+review homework is `docs/homework/sprint-3/`.
 
-Sprint 2 so far: the CSV importer (PRs #16 and #17), Anne's seller review (PR #19), Herman's
-Lead List filters (PR #20), and the compliance hardening described below are on the sprint
-branch. The CI workflow now exists; requiring its checks in GitHub remains an administrator
-step. The branch and hand-off rules are in `docs/homework/README.md`.
+Sprint 2 shipped the CSV importer (PRs #16 and #17), Anne's seller review (PR #19), the filters
+and import screen (#20–#23), the Wadi identity, and the compliance hardening below. Two
+accepted deviations are recorded in its exit review: the 62 pre-compliance leads have no
+provenance rows (all are `needs_review`), and list filtering is client-side over up to 200
+leads. CI exists; requiring its checks in GitHub remains an administrator step.
+
+Sprint 3 adds email/password login, `admin` and `sales` roles enforced on the API, logout that
+invalidates issued tokens, a forced first-login password change, and an idempotent
+development bootstrap for four administrators. Tokens are JWTs signed with
+`JWT_SECRET_KEY`; passwords are bcrypt hashes with `passlib`. The compliance reviewer and
+import actor now come from the authenticated session rather than the request body.
 
 The 2026-10-21 compliance foundation adds import provenance/batches, independent human review
 for email/SMS/WhatsApp, terminal lead-independent suppression, auditable review events, and the
@@ -125,15 +134,16 @@ Sprint 5–6 acceptance gates in `docs/compliance/implementation-notes.md`.
 - **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
   sample data until the API answers. See `frontend/README.md`.
-- **Built:** `backend/` — the Lead and Activity model, the Alembic migration, an idempotent
-  synthetic seed, `GET /api/v1/leads` and `GET /api/v1/leads/{id}`, the CSV importer that
-  brings the real research list in (`POST /api/v1/leads/import`), and a pytest suite.
-  See `backend/README.md` and `docs/delivery/sprint-2-import-contract.md`.
+- **Built:** `backend/` — the Lead and Activity model, the compliance models, reversible
+  migrations `0001`–`0003`, an idempotent synthetic seed, the read/import/compliance
+  endpoints, authentication with `admin`/`sales` roles, the bootstrap command, and a pytest
+  suite. See `backend/README.md`, `docs/delivery/sprint-2-import-contract.md` and
+  `docs/delivery/sprint-3-auth.md`.
 - **Built:** the containers — `docker compose up --build` starts the database, the API and
   the UI together from a clean clone. Ports and traps are in `docker/README.md`.
-- **Verified:** 136/136 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
-  builds in the Node 22 container and passes its 28 tests plus lint locally.
-- **Not built yet:** auth, sending, campaigns, and the other eleven screens.
+- **Verified:** 150/150 backend tests green against PostgreSQL 17 and Python 3.12; the
+  frontend builds in the Node 22 container and passes its 34 tests plus lint locally.
+- **Not built yet:** sending, campaigns, and the other eleven screens.
   `docs/delivery/sprint-plan.md` says which sprint brings each.
 - The shapes the two halves must agree on are frozen in
   `docs/delivery/sprint-1-lead-contract.md`. Change that document and
@@ -165,7 +175,8 @@ wrong regardless of how well it is written.
    directory. Committed fixtures and examples use synthetic values only.
 5. **Every lead records its source and the basis on which we hold it.** Provenance is a
    field, not an assumption.
-6. **Contact details are role-gated.** Only `owner` and `sales` see them; exports are logged.
+6. **Contact details are role-gated.** Only authenticated `admin` and `sales` users see them;
+   exports are logged.
 7. **Research respects terms of service.** Data comes from sources we are permitted to use.
 
 ## Team and decision rights
@@ -210,8 +221,7 @@ Data: PostgreSQL 17, Redis 7. Frontend: React 19, Vite, TypeScript, Tailwind CSS
 shadcn/ui, React Router v7, TanStack Table, Axios. Infrastructure: Docker, Docker Compose,
 Nginx. Observability: structlog, prometheus-client.
 
-Auth is JWT (python-jose) with bcrypt password hashing and four roles: `owner`, `sales`,
-`engineer`, `viewer`.
+Auth is JWT (python-jose) with bcrypt password hashing and two roles: `admin` and `sales`.
 
 ## Working agreements
 

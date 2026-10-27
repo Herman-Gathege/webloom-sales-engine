@@ -17,6 +17,7 @@ TABLES = {
     "lead_provenance",
     "lead_channel_eligibility",
     "suppressions",
+    "users",
 }
 
 
@@ -116,7 +117,7 @@ def test_migration_up_and_down_on_a_clean_database(migration_database_url: str) 
     finally:
         engine.dispose()
 
-    # Reversible: down drops both tables, up builds them again.
+    # Reversible: down drops every application table, up builds them again.
     run_migrations(migration_database_url, "downgrade", "base")
     assert TABLES.isdisjoint(_table_names(migration_database_url))
 
