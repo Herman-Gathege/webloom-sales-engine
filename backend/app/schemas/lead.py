@@ -31,6 +31,7 @@ class LeadRead(BaseModel):
     status: LeadStatus
     created_at: UtcDatetime
     updated_at: UtcDatetime
+    compliance: "LeadComplianceRead | None"
 
 
 class LeadProvenanceRead(BaseModel):
@@ -38,12 +39,39 @@ class LeadProvenanceRead(BaseModel):
 
     import_batch_id: uuid.UUID | None
     row_number: int | None
+    source_name: str | None
     source_url: str | None
     collection_date: date | None
     collection_method: str | None
     intended_purpose: str | None
     contact_type: Literal["unknown", "generic_business", "named_individual"]
     contact_name: str | None
+
+
+class ChannelComplianceResultRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    channel: Literal["email", "sms", "whatsapp"]
+    status: Literal["eligible", "needs_review", "blocked", "invalid"]
+    technical_available: bool
+    decision_current: bool
+    reason_codes: list[str]
+    explanation: str
+
+
+class LeadComplianceRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    status: Literal["eligible", "needs_review", "blocked", "invalid"]
+    data_quality_status: Literal["complete", "incomplete", "invalid"]
+    reason_codes: list[str]
+    explanation: str
+    eligible_channels: list[Literal["email", "sms", "whatsapp"]]
+    suppressed_channels: list[Literal["email", "sms", "whatsapp"]]
+    channel_results: list[ChannelComplianceResultRead]
+    outreach_ready: bool
+    evaluated_at: UtcDatetime
+    rule_version: str
 
 
 class ChannelEligibilityRead(BaseModel):
@@ -95,6 +123,48 @@ class LeadListRead(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class ImportBatchOptionRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    filename: str
+    imported_at: UtcDatetime
+
+
+class LeadFilterOptionsRead(BaseModel):
+    sectors: list[str]
+    areas: list[str]
+    sources: list[str]
+    statuses: list[LeadStatus]
+    compliance_statuses: list[
+        Literal["eligible", "needs_review", "blocked", "invalid"]
+    ]
+    data_quality_statuses: list[Literal["complete", "incomplete", "invalid"]]
+    import_batches: list[ImportBatchOptionRead]
+
+
+class OutreachCheckRequest(BaseModel):
+    lead_ids: list[uuid.UUID] = Field(min_length=1, max_length=200)
+    channel: Literal["email", "sms", "whatsapp"]
+
+
+class OutreachGateResultRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    lead_id: uuid.UUID
+    channel: Literal["email", "sms", "whatsapp"]
+    allowed: bool
+    compliance_status: Literal["eligible", "needs_review", "blocked", "invalid"]
+    reason_codes: list[str]
+    explanation: str
+    evaluated_at: UtcDatetime
+
+
+class OutreachCheckResponse(BaseModel):
+    channel: Literal["email", "sms", "whatsapp"]
+    results: list[OutreachGateResultRead]
 
 
 class EligibilityReviewRequest(BaseModel):
@@ -168,3 +238,6 @@ class SuppressionCreate(BaseModel):
         if not stripped:
             raise ValueError("must not be blank")
         return stripped
+
+
+LeadRead.model_rebuild()

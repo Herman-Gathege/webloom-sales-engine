@@ -16,6 +16,7 @@ TABLES = {
     "import_batches",
     "lead_provenance",
     "lead_channel_eligibility",
+    "lead_compliance_evaluation",
     "suppressions",
     "users",
 }
@@ -110,6 +111,42 @@ def test_migration_up_and_down_on_a_clean_database(migration_database_url: str) 
         indexes = {index["name"] for index in inspector.get_indexes("activities")}
         assert "ix_activities_lead_id_created_at" in indexes
 
+        assert "source_name" in {
+            column["name"] for column in inspector.get_columns("lead_provenance")
+        }
+        assert "reviewed_input_fingerprint" in {
+            column["name"]
+            for column in inspector.get_columns("lead_channel_eligibility")
+        }
+        assert {
+            "matched",
+            "eligible",
+            "needs_review",
+            "blocked",
+            "invalid",
+            "provenance_incomplete",
+        } <= {
+            column["name"] for column in inspector.get_columns("import_batches")
+        }
+        assert {
+            "id",
+            "lead_id",
+            "status",
+            "data_quality_status",
+            "reason_codes",
+            "explanation",
+            "eligible_channels",
+            "suppressed_channels",
+            "channel_results",
+            "outreach_ready",
+            "evaluated_at",
+            "rule_version",
+            "input_fingerprint",
+        } == {
+            column["name"]
+            for column in inspector.get_columns("lead_compliance_evaluation")
+        }
+
         foreign_keys = inspector.get_foreign_keys("activities")
         assert len(foreign_keys) == 1
         assert foreign_keys[0]["referred_table"] == "leads"
@@ -183,3 +220,26 @@ def test_the_compliance_migration_backfills_every_existing_lead(
         ("sms", "needs_review"),
         ("whatsapp", "needs_review"),
     ]
+
+    engine = create_engine(migration_database_url)
+    try:
+        with engine.connect() as connection:
+            evaluation = connection.execute(
+                text(
+                    """
+                    SELECT status, data_quality_status, outreach_ready,
+                           rule_version, length(input_fingerprint)
+                    FROM lead_compliance_evaluation
+                    WHERE lead_id = :lead_id
+                    """
+                ),
+                {"lead_id": lead_id},
+            ).one()
+    finally:
+        engine.dispose()
+
+    assert evaluation.status == "needs_review"
+    assert evaluation.data_quality_status in {"complete", "incomplete"}
+    assert evaluation.outreach_ready is False
+    assert evaluation.rule_version == "migration-0004"
+    assert evaluation[4] == 64

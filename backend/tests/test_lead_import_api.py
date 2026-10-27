@@ -22,10 +22,18 @@ REPORT_FIELDS = {
     "batch_id",
     "row_count",
     "accepted",
+    "created",
     "rejected",
+    "matched",
     "duplicates",
+    "eligible",
+    "needs_review",
+    "blocked",
+    "invalid",
+    "provenance_incomplete",
     "requiring_review",
     "rejected_rows",
+    "review_rows",
     "warnings",
 }
 
@@ -47,10 +55,17 @@ def test_the_report_has_exactly_the_documented_shape(client: TestClient) -> None
     assert set(body) == REPORT_FIELDS
     assert body["filename"] == "import_clean.csv"
     assert (body["row_count"], body["accepted"], body["rejected"]) == (3, 3, 0)
+    assert body["created"] == 3
+    assert body["matched"] == 0
     assert body["duplicates"] == 0
     assert body["requiring_review"] == 3
+    assert body["needs_review"] == 3
+    assert body["eligible"] == body["blocked"] == body["invalid"] == 0
+    assert body["provenance_incomplete"] == 0
     assert body["batch_id"]
     assert body["rejected_rows"] == []
+    assert len(body["review_rows"]) == 3
+    assert all(row["compliance_status"] == "needs_review" for row in body["review_rows"])
     assert body["warnings"] == []
     assert client.get("/api/v1/leads").json()["total"] == 3
 
