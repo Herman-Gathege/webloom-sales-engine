@@ -14,9 +14,11 @@ import type {
   EligibilityReviewInput,
   ImportSummary,
   LeadDetail,
+  LeadFilterOptions,
   LeadListParams,
   LeadListResponse,
   Loaded,
+  OutreachCheckResponse,
   SuppressionInput,
 } from "./types";
 
@@ -25,6 +27,77 @@ export { ApiError } from "./client";
 
 /** Set VITE_USE_MOCK=1 to skip the API entirely, e.g. with no backend running. */
 const FORCE_SAMPLE = import.meta.env.VITE_USE_MOCK === "1";
+
+function sampleList(params: LeadListParams): LeadListResponse {
+  const limit = params.limit ?? 50;
+  const offset = params.offset ?? 0;
+  const needle = params.q?.trim().toLowerCase() ?? "";
+  let items = sampleLeads.filter((lead) => {
+    const detail = sampleLeadDetails.find((entry) => entry.id === lead.id);
+    if (params.sector && lead.sector !== params.sector) return false;
+    if (params.area && lead.area !== params.area) return false;
+    if (params.source && lead.source !== params.source) return false;
+    if (params.website === "yes" && !lead.has_website) return false;
+    if (params.website === "no" && lead.has_website) return false;
+    if (params.status && lead.status !== params.status) return false;
+    if (
+      params.compliance_status &&
+      lead.compliance.status !== params.compliance_status
+    ) {
+      return false;
+    }
+    if (
+      params.data_quality_status &&
+      lead.compliance.data_quality_status !== params.data_quality_status
+    ) {
+      return false;
+    }
+    if (params.outreach_ready !== undefined && lead.compliance.outreach_ready !== params.outreach_ready) {
+      return false;
+    }
+    if (params.has_suppression !== undefined) {
+      const hasSuppression = lead.compliance.suppressed_channels.length > 0;
+      if (hasSuppression !== params.has_suppression) return false;
+    }
+    if (params.provenance === "missing" && detail?.provenance) return false;
+    if (params.provenance !== "missing" && params.provenance && !detail?.provenance) {
+      return false;
+    }
+    if (params.batch_id && detail?.provenance?.import_batch_id !== params.batch_id) {
+      return false;
+    }
+    if (!needle) return true;
+    return [lead.business_name, lead.phone ?? "", lead.email ?? "", lead.area ?? "", lead.sector ?? "", lead.source]
+      .some((value) => value.toLowerCase().includes(needle));
+  });
+
+  if (params.sort === "oldest") {
+    items = [...items].sort((a, b) => a.created_at.localeCompare(b.created_at));
+  } else if (params.sort === "business_name") {
+    items = [...items].sort((a, b) => a.business_name.localeCompare(b.business_name));
+  } else if (params.sort === "compliance_status") {
+    const order = { eligible: 0, needs_review: 1, blocked: 2, invalid: 3 };
+    items = [...items].sort(
+      (a, b) => order[a.compliance.status] - order[b.compliance.status],
+    );
+  }
+  return {
+    items: items.slice(offset, offset + limit),
+    total: items.length,
+    limit,
+    offset,
+  };
+}
+
+function leadQuery(params: LeadListParams): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      query.set(key, String(value));
+    }
+  }
+  return query.toString();
+}
 
 async function mutate<T>(path: string, method: "POST" | "PUT", body: unknown): Promise<T> {
   return apiRequest<T>(path, {
@@ -37,30 +110,65 @@ async function mutate<T>(path: string, method: "POST" | "PUT", body: unknown): P
 export async function listLeads(
   params: LeadListParams = {},
 ): Promise<Loaded<LeadListResponse>> {
-  const limit = params.limit ?? 50;
-  const offset = params.offset ?? 0;
-
   const fromSample = (reason?: string): Loaded<LeadListResponse> => ({
     source: "sample",
     reason,
-    data: {
-      items: sampleLeads.slice(offset, offset + limit),
-      total: sampleLeads.length,
-      limit,
-      offset,
-    },
+    data: sampleList(params),
   });
 
   if (FORCE_SAMPLE) return fromSample("VITE_USE_MOCK=1");
 
   try {
+    const query = leadQuery(params);
     return {
       source: "api",
-      data: await apiRequest<LeadListResponse>(`/leads?limit=${limit}&offset=${offset}`),
+      data: await apiRequest<LeadListResponse>(`/leads${query ? `?${query}` : ""}`),
     };
   } catch (cause) {
     return fromSample(cause instanceof Error ? cause.message : undefined);
   }
+}
+
+export async function getLeadFilterOptions(): Promise<Loaded<LeadFilterOptions>> {
+  const fromSample = (reason?: string): Loaded<LeadFilterOptions> => ({
+    source: "sample",
+    reason,
+    data: {
+      sectors: [...new Set(sampleLeads.map((lead) => lead.sector).filter((value): value is string => Boolean(value)))].sort(),
+      areas: [...new Set(sampleLeads.map((lead) => lead.area).filter((value): value is string => Boolean(value)))].sort(),
+      sources: [...new Set(sampleLeads.map((lead) => lead.source))].sort(),
+      statuses: [...new Set(sampleLeads.map((lead) => lead.status))],
+      compliance_statuses: ["eligible", "needs_review", "blocked", "invalid"],
+      data_quality_statuses: ["complete", "incomplete", "invalid"],
+      import_batches: [
+        {
+          id: "30000000-0000-4000-8000-000000000001",
+          filename: "synthetic-sample.csv",
+          imported_at: "2026-09-23T09:00:00Z",
+        },
+      ],
+    },
+  });
+
+  if (FORCE_SAMPLE) return fromSample("VITE_USE_MOCK=1");
+  try {
+    return {
+      source: "api",
+      data: await apiRequest<LeadFilterOptions>("/leads/filter-options"),
+    };
+  } catch (cause) {
+    return fromSample(cause instanceof Error ? cause.message : undefined);
+  }
+}
+
+export function checkOutreach(
+  leadIds: string[],
+  channel: "email" | "sms" | "whatsapp",
+): Promise<OutreachCheckResponse> {
+  return mutate<OutreachCheckResponse>("/leads/outreach-check", "POST", {
+    lead_ids: leadIds,
+    channel,
+  });
 }
 
 export async function getLead(id: string): Promise<Loaded<LeadDetail>> {

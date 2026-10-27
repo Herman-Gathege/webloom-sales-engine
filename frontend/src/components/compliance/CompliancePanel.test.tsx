@@ -77,4 +77,13 @@ describe("CompliancePanel", () => {
       true,
     );
   });
+
+  it("shows the automatic outcome separately from human channel evidence", () => {
+    render(<CompliancePanel lead={lead} sampleMode onUpdated={vi.fn()} />);
+
+    expect(screen.getByText("Automatic eligibility result")).toBeTruthy();
+    expect(screen.getByText("Automatic channel gate")).toBeTruthy();
+    expect(screen.getByText(lead.compliance.explanation)).toBeTruthy();
+    expect(screen.getByText("Current human decision")).toBeTruthy();
+  });
 });

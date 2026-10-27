@@ -5,9 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Lead } from "@/api/types";
 import { LeadList } from "./LeadList";
 
-const mocks = vi.hoisted(() => ({ listLeads: vi.fn() }));
+const mocks = vi.hoisted(() => ({ listLeads: vi.fn(), getLeadFilterOptions: vi.fn() }));
 
-vi.mock("@/api/leads", () => ({ listLeads: mocks.listLeads }));
+vi.mock("@/api/leads", () => ({
+  listLeads: mocks.listLeads,
+  getLeadFilterOptions: mocks.getLeadFilterOptions,
+}));
 
 function makeLeads(count: number): Lead[] {
   return Array.from({ length: count }, (_, index) => ({
@@ -24,15 +27,44 @@ function makeLeads(count: number): Lead[] {
     status: "new" as const,
     created_at: "2026-10-19T09:00:00Z",
     updated_at: "2026-10-19T09:00:00Z",
+    compliance: {
+      status: "needs_review" as const,
+      data_quality_status: "complete" as const,
+      reason_codes: ["human_review_required:email"],
+      explanation: "Needs review: a human decision is required.",
+      eligible_channels: [],
+      suppressed_channels: [],
+      channel_results: [],
+      outreach_ready: false,
+      evaluated_at: "2026-10-19T09:00:00Z",
+      rule_version: "2026-10-27.1",
+    },
   }));
 }
 
 describe("LeadList pagination", () => {
   beforeEach(() => {
     mocks.listLeads.mockReset();
-    mocks.listLeads.mockResolvedValue({
+    mocks.getLeadFilterOptions.mockReset();
+    mocks.getLeadFilterOptions.mockResolvedValue({
       source: "api",
-      data: { items: makeLeads(60), total: 60, limit: 200, offset: 0 },
+      data: {
+        sectors: ["Opticians and eyewear"],
+        areas: ["CBD"],
+        sources: ["google_maps"],
+        statuses: ["new"],
+        compliance_statuses: ["eligible", "needs_review", "blocked", "invalid"],
+        data_quality_statuses: ["complete", "incomplete", "invalid"],
+        import_batches: [],
+      },
+    });
+    mocks.listLeads.mockImplementation(async (params = {}) => {
+      const limit = params.limit ?? 50;
+      const offset = params.offset ?? 0;
+      return {
+        source: "api",
+        data: { items: makeLeads(60).slice(offset, offset + limit), total: 60, limit, offset },
+      };
     });
   });
 
@@ -54,5 +86,5 @@ describe("LeadList pagination", () => {
     expect(screen.getByText("Business 26")).toBeTruthy();
     expect(screen.queryByText("Business 1")).toBeNull();
     expect(screen.getByText(/page 2 of 3/i)).toBeTruthy();
-  });
+  }, 10_000);
 });

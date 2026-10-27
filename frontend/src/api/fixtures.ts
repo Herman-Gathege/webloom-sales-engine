@@ -13,11 +13,75 @@ import type {
   Activity,
   ChannelEligibility,
   Lead,
+  LeadCompliance,
   LeadDetail,
   Suppression,
 } from "./types";
 
 const CREATED = "2026-09-23T09:00:00Z";
+const EVALUATED = "2026-09-24T10:05:00Z";
+
+function sampleCompliance(n: number): LeadCompliance {
+  const status =
+    n === 1 ? "eligible" : n === 4 ? "blocked" : n === 6 ? "invalid" : "needs_review";
+  const eligibleChannels = n === 1 ? (["email"] as const) : [];
+  const suppressedChannels = n === 1 ? (["sms"] as const) : n === 4 ? (["email", "sms", "whatsapp"] as const) : [];
+  const reasonCodes =
+    status === "eligible"
+      ? ["eligible:email", "suppressed:sms"]
+      : status === "blocked"
+        ? ["all_marketing_suppressed"]
+        : status === "invalid"
+          ? ["no_usable_contact"]
+          : ["human_review_required:email"];
+  return {
+    status,
+    data_quality_status:
+      status === "invalid" ? "invalid" : n === 3 ? "incomplete" : "complete",
+    reason_codes: [...reasonCodes],
+    explanation:
+      status === "eligible"
+        ? "Outreach-ready on email; recorded evidence is current. SMS remains suppressed."
+        : status === "blocked"
+          ? "Blocked: all marketing is suppressed."
+          : status === "invalid"
+            ? "Invalid or incomplete data: there is no usable contact."
+            : "Needs review: a human decision and supporting evidence are required.",
+    eligible_channels: [...eligibleChannels],
+    suppressed_channels: [...suppressedChannels],
+    channel_results: (["email", "sms", "whatsapp"] as const).map((channel) => {
+      const channelStatus =
+        suppressedChannels.some((suppressed) => suppressed === channel)
+          ? "blocked"
+          : eligibleChannels.some((eligible) => eligible === channel)
+            ? "eligible"
+            : status === "invalid"
+              ? "invalid"
+              : "needs_review";
+      return {
+        channel,
+        status: channelStatus,
+        technical_available: status !== "invalid",
+        decision_current: channelStatus === "eligible",
+        reason_codes:
+          channelStatus === "eligible"
+            ? [`eligible:${channel}`]
+            : channelStatus === "blocked"
+              ? [`suppressed:${channel}`]
+              : [`human_review_required:${channel}`],
+        explanation:
+          channelStatus === "eligible"
+            ? `${channel.toUpperCase()} has a current recorded basis for outreach.`
+            : channelStatus === "blocked"
+              ? `${channel.toUpperCase()} is blocked by a terminal restriction.`
+              : `${channel.toUpperCase()} needs a human decision before outreach.`,
+      };
+    }),
+    outreach_ready: status === "eligible",
+    evaluated_at: EVALUATED,
+    rule_version: "2026-10-27.1",
+  };
+}
 
 function lead(
   n: number,
@@ -41,6 +105,7 @@ function lead(
     status: "new",
     created_at: CREATED,
     updated_at: CREATED,
+    compliance: sampleCompliance(n),
   };
 }
 
@@ -156,6 +221,7 @@ export const sampleLeadDetails: LeadDetail[] = sampleLeads.map((entry, index) =>
   provenance: {
     import_batch_id: "30000000-0000-4000-8000-000000000001",
     row_number: index + 2,
+    source_name: "Google Maps listing",
     source_url: `https://example.test/research/${index + 1}`,
     collection_date: "2026-09-23",
     collection_method: "Synthetic research fixture",

@@ -23,6 +23,31 @@ export const LEAD_STATUSES = [
 ] as const;
 
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
+export type ComplianceStatus = "eligible" | "needs_review" | "blocked" | "invalid";
+export type DataQualityStatus = "complete" | "incomplete" | "invalid";
+export type Channel = "email" | "sms" | "whatsapp";
+
+export interface ChannelComplianceResult {
+  channel: Channel;
+  status: ComplianceStatus;
+  technical_available: boolean;
+  decision_current: boolean;
+  reason_codes: string[];
+  explanation: string;
+}
+
+export interface LeadCompliance {
+  status: ComplianceStatus;
+  data_quality_status: DataQualityStatus;
+  reason_codes: string[];
+  explanation: string;
+  eligible_channels: Channel[];
+  suppressed_channels: Channel[];
+  channel_results: ChannelComplianceResult[];
+  outreach_ready: boolean;
+  evaluated_at: string;
+  rule_version: string;
+}
 
 export interface Lead {
   /** UUID. */
@@ -45,6 +70,7 @@ export interface Lead {
   /** ISO 8601, UTC. */
   created_at: string;
   updated_at: string;
+  compliance: LeadCompliance;
 }
 
 export interface Activity {
@@ -73,6 +99,35 @@ export interface LeadListResponse {
 export interface LeadListParams {
   limit?: number;
   offset?: number;
+  q?: string;
+  sector?: string;
+  area?: string;
+  source?: string;
+  website?: "yes" | "no";
+  status?: LeadStatus;
+  compliance_status?: ComplianceStatus;
+  data_quality_status?: DataQualityStatus;
+  provenance?: "available" | "missing" | "incomplete";
+  outreach_ready?: boolean;
+  has_suppression?: boolean;
+  batch_id?: string;
+  sort?: "newest" | "oldest" | "business_name" | "compliance_status";
+}
+
+export interface ImportBatchOption {
+  id: string;
+  filename: string;
+  imported_at: string;
+}
+
+export interface LeadFilterOptions {
+  sectors: string[];
+  areas: string[];
+  sources: string[];
+  statuses: LeadStatus[];
+  compliance_statuses: ComplianceStatus[];
+  data_quality_statuses: DataQualityStatus[];
+  import_batches: ImportBatchOption[];
 }
 
 /** GET /api/v1/leads/{id} */
@@ -88,6 +143,7 @@ export type ContactType = "unknown" | "generic_business" | "named_individual";
 export interface LeadProvenance {
   import_batch_id: string | null;
   row_number: number | null;
+  source_name: string | null;
   source_url: string | null;
   collection_date: string | null;
   collection_method: string | null;
@@ -96,7 +152,6 @@ export interface LeadProvenance {
   contact_name: string | null;
 }
 
-export type Channel = "email" | "sms" | "whatsapp";
 export type EligibilityState = "needs_review" | "eligible";
 export type EffectiveEligibilityState = EligibilityState | "suppressed";
 export type LawfulBasis =
@@ -194,9 +249,40 @@ export interface ImportSummary {
   batch_id: string;
   row_count: number;
   accepted: number;
+  created: number;
   rejected: number;
+  matched: number;
   duplicates: number;
+  eligible: number;
+  needs_review: number;
+  blocked: number;
+  invalid: number;
+  provenance_incomplete: number;
   requiring_review: number;
   rejected_rows: RefusedRow[];
+  review_rows: ImportReviewRow[];
   warnings: RowWarning[];
+}
+
+export interface ImportReviewRow {
+  row: number;
+  business_name: string;
+  compliance_status: Exclude<ComplianceStatus, "eligible">;
+  reason_codes: string[];
+  explanation: string;
+}
+
+export interface OutreachCheckResult {
+  lead_id: string;
+  channel: Channel;
+  allowed: boolean;
+  compliance_status: ComplianceStatus;
+  reason_codes: string[];
+  explanation: string;
+  evaluated_at: string;
+}
+
+export interface OutreachCheckResponse {
+  channel: Channel;
+  results: OutreachCheckResult[];
 }
