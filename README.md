@@ -9,10 +9,11 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Sprints 1 and 2 are closed; Sprint 3 is in progress.** The Lead Desk runs end to
-end with authentication in front of it: researched leads import into PostgreSQL, can be
-searched and opened in React, and carry provenance, independent channel-review state, terminal
-suppression history, and audit events.
+Pre-MVP. **Sprints 1 and 2 are closed; Sprint 3 authentication is integrated and its
+solidification slice is in review.** The Lead Desk runs end to end with authentication in
+front of it: researched leads import into PostgreSQL, are automatically evaluated and
+filterable in React, and carry provenance, independent channel-review state, durable
+eligibility, terminal suppression history, and audit events.
 
 - [`frontend/`](frontend/) — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui.
 - [`backend/`](backend/README.md) — FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL 17, with
@@ -23,7 +24,8 @@ suppression history, and audit events.
 There is no sending yet. Sprint 2's exit review is
 [here](docs/homework/sprint-2/status.md); what we are building now is
 [Sprint 3 authentication](docs/delivery/sprint-3-auth.md), with
-[review homework](docs/homework/sprint-3/README.md).
+[review homework](docs/homework/sprint-3/README.md). The CSV-to-outreach boundary is described
+in [Sprint 3 solidification](docs/delivery/sprint-3-solidification.md).
 
 ## Run it
 
@@ -113,6 +115,7 @@ implement it; a human reviews the result.** The short version is in
 | [Scope spec](docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) | What we are building, what is out of scope, and the design |
 | [Sprint plan](docs/delivery/sprint-plan.md) | The nine sprints, what each delivers, and who leads it. Read this one |
 | [Sprint 3 scope](docs/delivery/sprint-3-auth.md) | Login, roles, bootstrap, and what this sprint does not do |
+| [Sprint 3 solidification](docs/delivery/sprint-3-solidification.md) | CSV import outcomes, automatic eligibility, Lead Desk filters, and the current outreach boundary |
 | [Sprint 3 review homework](docs/homework/sprint-3/README.md) | What each of us is reviewing right now |
 | [Sprint 2 exit](docs/homework/sprint-2/status.md) · [Sprint 1 record](docs/homework/sprint-1/status.md) | How the first two sprints closed, with evidence |
 | [Lead API contract](docs/delivery/sprint-1-lead-contract.md) | The exact Lead and Activity shapes the API and UI agree on |
