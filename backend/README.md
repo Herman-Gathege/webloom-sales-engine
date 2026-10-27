@@ -1,8 +1,9 @@
 # Backend — Webloom Sales Engine
 
-The Lead backend: the Lead and Activity tables, the Alembic migration, a repeatable synthetic
-seed, the two read endpoints, the CSV importer that brings the real research list in, and their
-tests. It is the piece that replaces the frontend's **"Sample data"** banner with real leads.
+The Lead backend: Lead and Activity tables, import batches, provenance, independent channel
+eligibility review, terminal suppression, reversible migrations, a repeatable synthetic seed,
+read/review endpoints, the CSV importer, and their tests. It is the piece that replaces the
+frontend's **"Sample data"** banner with real leads.
 
 Deliberately **not** here yet: authentication and roles, sending, campaigns, exports,
 background jobs, and FikaTu delivery. The containers live at the repo root —
@@ -18,7 +19,7 @@ Requests flow one way: `api` → `schemas` → `services` → `repositories` →
 | `app/schemas/` | Pydantic request/response models — the JSON the frontend sees |
 | `app/services/` | Business rules; where "a malformed id is a 404" lives |
 | `app/repositories/` | Data access; the only layer that writes queries |
-| `app/models/` | SQLAlchemy ORM models (`leads`, `activities`) |
+| `app/models/` | Lead, activity, import provenance, channel review, and suppression models |
 | `app/database/` | Engine, session factory, declarative base |
 | `app/config/` | Settings, read from the environment |
 | `app/seed/` | Synthetic sample leads, and the idempotent runner |
@@ -189,11 +190,25 @@ curl -F "file=@../data/webloom-lead-list.csv" http://localhost:8001/api/v1/leads
 ```
 
 ```json
-{"filename": "webloom-lead-list.csv", "row_count": 52, "accepted": 52, "rejected": 0,
- "rejected_rows": [], "warnings": []}
+{"filename": "webloom-lead-list.csv",
+ "batch_id": "3f7b0ee2-c3c1-4a02-a8a5-c773f9c24e29",
+ "row_count": 52, "accepted": 52, "rejected": 0, "duplicates": 0,
+ "requiring_review": 52, "rejected_rows": [], "warnings": []}
 ```
 
-Every code, every sentence a person reads, and the mapping rules are in
+### Channel review and opt-outs
+
+- `PUT /api/v1/leads/{id}/eligibility/{channel}` records a human email, SMS, or WhatsApp
+  decision. An `eligible` decision requires its lawful basis and evidence.
+- `POST /api/v1/leads/{id}/suppressions` records a channel or all-marketing opt-out. It is
+  terminal, idempotent, and returns the updated Lead Detail.
+
+`GET /api/v1/leads/{id}` includes `provenance`, three independent `eligibility` records, and
+safe `suppressions` history. Audit details never expose contact fingerprints or raw message
+bodies. Read [`docs/compliance/implementation-notes.md`](../docs/compliance/implementation-notes.md)
+before changing these paths.
+
+Every import code, every sentence a person reads, and the mapping rules are in
 [`docs/delivery/sprint-2-import-contract.md`](../docs/delivery/sprint-2-import-contract.md).
 
 ### Errors
@@ -262,6 +277,9 @@ by itself.
   sprint; the long-term rule that status is derived from evidence is not implemented.
 - **No auth.** Every caller sees contact details. Sprint 1 runs locally for the four of us;
   the role-gating rule starts applying in the login sprint.
+- **No send path yet.** Campaign approval, dispatch, queue cancellation, FikaTu retries, and
+  delivery-result auditing arrive in Sprints 5–6. The send-time safeguards are documented as
+  blocking acceptance gates rather than falsely claimed as implemented here.
 - **`activities` is not `activity_events`.** This is the per-lead timeline the detail screen
   shows; the scope spec's `activity_events` is the wider audit feed for a later sprint.
 - **Not the final schema.** The contract is a small subset of the scope spec's data model —

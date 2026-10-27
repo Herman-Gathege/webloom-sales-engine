@@ -9,11 +9,14 @@
 
 import { sampleLeadDetails, sampleLeads } from "./fixtures";
 import type {
+  Channel,
+  EligibilityReviewInput,
   ImportSummary,
   LeadDetail,
   LeadListParams,
   LeadListResponse,
   Loaded,
+  SuppressionInput,
 } from "./types";
 
 /** The dev server proxies /api to the FastAPI service (see vite.config.ts). */
@@ -34,17 +37,38 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string): Promise<T> {
+function validationMessage(detail: unknown): string | null {
+  if (typeof detail === "string") return detail;
+  if (!Array.isArray(detail)) return null;
+  const messages = detail
+    .map((item) =>
+      item && typeof item === "object" && "msg" in item && typeof item.msg === "string"
+        ? item.msg
+        : null,
+    )
+    .filter((message): message is string => Boolean(message));
+  return messages.length > 0 ? messages.join("; ") : null;
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
-      headers: { Accept: "application/json" },
+      ...init,
+      headers: { Accept: "application/json", ...init.headers },
       signal: controller.signal,
     });
     if (!response.ok) {
-      throw new ApiError(`The API answered ${response.status} for ${path}.`, response.status);
+      let detail = `The API answered ${response.status} for ${path}.`;
+      try {
+        const body = (await response.json()) as { detail?: unknown };
+        detail = validationMessage(body.detail) ?? detail;
+      } catch {
+        // A non-JSON error keeps the stable status message.
+      }
+      throw new ApiError(detail, response.status);
     }
     return (await response.json()) as T;
   } catch (cause) {
@@ -53,6 +77,14 @@ async function request<T>(path: string): Promise<T> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function mutate<T>(path: string, method: "POST" | "PUT", body: unknown): Promise<T> {
+  return request<T>(path, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 }
 
 export async function listLeads(
@@ -101,6 +133,22 @@ export async function getLead(id: string): Promise<Loaded<LeadDetail>> {
     if (cause instanceof ApiError && cause.status >= 400 && cause.status < 500) throw cause;
     return fromSample(cause instanceof Error ? cause.message : undefined);
   }
+}
+
+export function reviewEligibility(
+  id: string,
+  channel: Channel,
+  decision: EligibilityReviewInput,
+): Promise<LeadDetail> {
+  return mutate<LeadDetail>(
+    `/leads/${encodeURIComponent(id)}/eligibility/${channel}`,
+    "PUT",
+    decision,
+  );
+}
+
+export function recordSuppression(id: string, request: SuppressionInput): Promise<LeadDetail> {
+  return mutate<LeadDetail>(`/leads/${encodeURIComponent(id)}/suppressions`, "POST", request);
 }
 
 /**

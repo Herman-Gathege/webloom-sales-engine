@@ -14,10 +14,16 @@ copy of anything.
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 
-from app.models import Activity, Lead, LeadStatus
+from app.models import (
+    Activity,
+    Lead,
+    LeadChannelEligibility,
+    LeadProvenance,
+    LeadStatus,
+)
 
 SOURCE = "google_maps"
 
@@ -134,6 +140,7 @@ def build_sample_leads() -> list[Lead]:
             sector=sector,
             area=area,
             phone=phone,
+            email=f"sample{index + 1}@example.test",
             whatsapp_capable=whatsapp_capable,
             website_status=website_status,
             has_website=has_website,
@@ -143,6 +150,18 @@ def build_sample_leads() -> list[Lead]:
             created_at=created_at,
             updated_at=created_at,
         )
+        lead.provenance = LeadProvenance(
+            source_url=f"https://example.test/research/{index + 1}",
+            collection_date=date(2026, 9, 23),
+            collection_method="Synthetic research fixture",
+            intended_purpose="Business outreach",
+            contact_type="generic_business",
+            contact_name=None,
+        )
+        for channel in ("email", "sms", "whatsapp"):
+            lead.eligibility.append(
+                LeadChannelEligibility(channel=channel, state="needs_review")
+            )
 
         activity_number += 1
         lead.activity.append(
@@ -151,6 +170,7 @@ def build_sample_leads() -> list[Lead]:
                 type="lead.created",
                 actor="system",
                 summary="Imported from the Google Maps list",
+                details={"sample": True},
                 created_at=created_at,
             )
         )
@@ -162,6 +182,7 @@ def build_sample_leads() -> list[Lead]:
                 type="lead.researched",
                 actor="system",
                 summary=f"Website research recorded: {website_status}",
+                details={"source": SOURCE},
                 created_at=created_at.replace(second=30),
             )
         )

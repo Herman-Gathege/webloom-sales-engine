@@ -1,6 +1,7 @@
 """The migration, on a clean database of its own — and back again."""
 
 import os
+import uuid
 from collections.abc import Iterator
 
 import pytest
@@ -9,7 +10,14 @@ from sqlalchemy.engine import make_url
 
 from tests.conftest import require_test_database_url, run_migrations
 
-TABLES = {"leads", "activities"}
+TABLES = {
+    "leads",
+    "activities",
+    "import_batches",
+    "lead_provenance",
+    "lead_channel_eligibility",
+    "suppressions",
+}
 
 
 @pytest.fixture
@@ -68,6 +76,7 @@ def test_migration_up_and_down_on_a_clean_database(migration_database_url: str) 
             "sector",
             "area",
             "phone",
+            "email",
             "whatsapp_capable",
             "website_status",
             "has_website",
@@ -84,6 +93,7 @@ def test_migration_up_and_down_on_a_clean_database(migration_database_url: str) 
             "type",
             "actor",
             "summary",
+            "details",
             "created_at",
         }
 
@@ -125,3 +135,50 @@ def test_the_test_database_name_is_guarded() -> None:
             os.environ.pop("TEST_DATABASE_URL", None)
         else:
             os.environ["TEST_DATABASE_URL"] = previous
+
+
+def test_the_compliance_migration_backfills_every_existing_lead(
+    migration_database_url: str,
+) -> None:
+    run_migrations(migration_database_url, "upgrade", "0001")
+    engine = create_engine(migration_database_url)
+    lead_id = uuid.uuid4()
+    try:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO leads (id, business_name, phone, source, status)
+                    VALUES (:id, 'Synthetic Existing Lead', '+254700000990',
+                            'google_maps', 'new')
+                    """
+                ),
+                {"id": lead_id},
+            )
+    finally:
+        engine.dispose()
+
+    run_migrations(migration_database_url, "upgrade", "head")
+
+    engine = create_engine(migration_database_url)
+    try:
+        with engine.connect() as connection:
+            rows = connection.execute(
+                text(
+                    """
+                    SELECT channel, state
+                    FROM lead_channel_eligibility
+                    WHERE lead_id = :lead_id
+                    ORDER BY channel
+                    """
+                ),
+                {"lead_id": lead_id},
+            ).all()
+    finally:
+        engine.dispose()
+
+    assert [(row.channel, row.state) for row in rows] == [
+        ("email", "needs_review"),
+        ("sms", "needs_review"),
+        ("whatsapp", "needs_review"),
+    ]

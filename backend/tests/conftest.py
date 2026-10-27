@@ -26,7 +26,7 @@ from alembic.config import Config
 from app.config import get_settings
 from app.database import get_session
 from app.main import app
-from app.models import Lead, LeadStatus
+from app.models import Lead, LeadChannelEligibility, LeadStatus
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
@@ -130,6 +130,11 @@ def make_lead() -> Iterator[Callable[..., Lead]]:
             "status": LeadStatus.NEW,
         }
         values.update(overrides)
-        return Lead(**values)
+        lead = Lead(**values)
+        for channel in ("email", "sms", "whatsapp"):
+            lead.eligibility.append(
+                LeadChannelEligibility(channel=channel, state="needs_review")
+            )
+        return lead
 
     yield factory

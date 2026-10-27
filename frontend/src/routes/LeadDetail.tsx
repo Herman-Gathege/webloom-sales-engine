@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { getLead } from "@/api/leads";
 import type { LeadDetail as LeadDetailRecord, Loaded } from "@/api/types";
+import { CompliancePanel } from "@/components/compliance/CompliancePanel";
 import { DataSourceBanner } from "@/components/DataSourceBanner";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <dd className="text-sm">{children}</dd>
     </div>
   );
+}
+
+function activityDetails(details: Record<string, unknown> | null) {
+  return Object.entries(details ?? {}).filter(([, value]) => {
+    return (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean" ||
+      value === null
+    );
+  });
 }
 
 export function LeadDetail() {
@@ -60,6 +72,12 @@ export function LeadDetail() {
   const response = settled ? state.response : null;
   const error = settled ? state.error : null;
   const lead = response?.data ?? null;
+  const sampleMode = response?.source === "sample";
+
+  function applyComplianceUpdate(updated: LeadDetailRecord) {
+    if (!id) return;
+    setState({ id, response: { source: "api", data: updated }, error: null });
+  }
 
   return (
     <div className="space-y-5">
@@ -101,6 +119,9 @@ export function LeadDetail() {
                 <Field label="Phone">
                   <span className="font-mono text-xs">{lead.phone ?? "—"}</span>
                 </Field>
+                <Field label="Email">
+                  <span className="font-mono text-xs">{lead.email ?? "—"}</span>
+                </Field>
                 <Field label="WhatsApp">{lead.whatsapp_capable ? "Yes" : "No / call only"}</Field>
                 <Field label="Website">{lead.has_website ? "Yes" : "None found"}</Field>
                 <Field label="Research note">{lead.website_status ?? "—"}</Field>
@@ -109,6 +130,12 @@ export function LeadDetail() {
               </dl>
             </CardContent>
           </Card>
+
+          <CompliancePanel
+            lead={lead}
+            sampleMode={sampleMode}
+            onUpdated={applyComplianceUpdate}
+          />
 
           <Card>
             <CardHeader>
@@ -134,6 +161,19 @@ export function LeadDetail() {
                       <p className="font-mono text-xs text-muted-foreground">
                         {entry.type} · {entry.actor}
                       </p>
+                      {activityDetails(entry.details).length > 0 && (
+                        <dl
+                          aria-label="Activity details"
+                          className="grid gap-x-4 gap-y-1 text-xs sm:grid-cols-2"
+                        >
+                          {activityDetails(entry.details).map(([key, value]) => (
+                            <div key={key} className="flex gap-1">
+                              <dt className="text-muted-foreground">{key}:</dt>
+                              <dd>{value === null ? "—" : String(value)}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      )}
                       {index < lead.activity.length - 1 && <Separator className="mt-2" />}
                     </li>
                   ))}

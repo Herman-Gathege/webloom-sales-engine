@@ -25,6 +25,7 @@ layer to get out of step.
 | `sector` | string or null | Free text in Sprint 1, e.g. `"Opticians and eyewear"`. Normalised into a controlled vocabulary in a later sprint — do not build that now. |
 | `area` | string or null | Free text, e.g. `"CBD and Westlands, 3 branches"`. |
 | `phone` | string or null | E.164, e.g. `"+254709709000"`. Also the de-duplication key: the importer normalises the source's two formats (`0NNN NNNNNN` mobile and `020 NNNNNNN` landline). Null when a lead has no phone yet. |
+| `email` | string or null | Lower-cased contact email added by the Sprint 2 compliance foundation. Never a de-duplication key by itself. |
 | `whatsapp_capable` | boolean | False for landlines. Per-lead, never per-campaign — the source list marks all six landlines `Call only`. |
 | `website_status` | string or null | The raw research string, kept verbatim, e.g. `"3,713 reviews - no website listed"`. The source list has 37 distinct values and we are not normalising it yet. |
 | `has_website` | boolean | The "you have nothing online" pitch depends on this, so it is a real column, not a string match at read time. |
@@ -55,6 +56,7 @@ the scope spec) in later sprints.
 | `type` | string | Stable machine name, e.g. `"lead.created"`. The UI only uses it to pick an icon. |
 | `actor` | string | `"system"` in Sprint 1. Becomes a real user id once login exists, in Sprint 3. |
 | `summary` | string | One line a human reads, e.g. `"Imported from the Google Maps list"`. The UI renders this string. |
+| `details` | object or null | Structured, non-sensitive audit facts. Never contains raw contact details or message bodies. |
 | `created_at` | datetime | ISO 8601, UTC. The timeline is ordered by this. |
 
 ## The endpoints
@@ -76,11 +78,28 @@ the frontend's default base URL is `/api/v1`. Set `VITE_API_BASE_URL` to point e
 ### `GET /api/v1/leads/{id}`
 
 ```json
-{ "/* every Lead field above */": "", "activity": [ /* Activity[] */ ] }
+{
+  "/* every Lead field above */": "",
+  "provenance": { "/* source, collection, purpose, contact context */": "" },
+  "eligibility": [ /* three independent channel decisions */ ],
+  "suppressions": [ /* terminal restrictions; no fingerprints or raw contacts */ ],
+  "activity": [ /* Activity[] */ ]
+}
 ```
 
 `activity` is oldest first, so the timeline reads top to bottom. It is `[]` when nothing
-has happened yet — never null.
+has happened yet — never null. `provenance` may be null for an older lead. `eligibility`
+always represents email, SMS, and WhatsApp separately; `suppressions` may be empty.
+
+### Compliance review endpoints
+
+`PUT /api/v1/leads/{id}/eligibility/{channel}` records a human decision for one of
+`email`, `sms`, or `whatsapp`. `eligible` requires lawful basis, evidence summary/source,
+intended purpose, contact context, reviewer, and rationale. It returns the full Lead Detail.
+
+`POST /api/v1/leads/{id}/suppressions` records a terminal `all_marketing`, `email`, `sms`, or
+`whatsapp` restriction and returns the full Lead Detail. There is intentionally no removal
+endpoint. Exact semantics are in the [compliance implementation notes](../compliance/implementation-notes.md).
 
 ### Errors
 
@@ -114,13 +133,13 @@ Each of these is a later sprint, not an oversight:
   and has its own document: [the Sprint 2 import contract](sprint-2-import-contract.md).
 - **Campaigns, templates, outreach, replies, qualification.** All deferred.
 
-## One gap to agree before the importer lands
+## Original provenance gap — resolved in Sprint 2
 
 `AGENTS.md` non-negotiable 5 says every lead must record the basis on which we hold its
 contact details. This contract has **no `consent_basis`**, and no `source_url`, so a
 researcher cannot re-find the listing a lead came from.
 
-That does not bite in Sprint 1, because every seeded lead is synthetic. It **does** bite in
-Sprint 2, when real rows from `data/webloom-lead-list.csv` start arriving. The team should
-decide before then whether to add those two fields to the Lead shape or to a contacts
-table. Flagging rather than choosing, because it changes a table two systems read.
+That did not bite in Sprint 1 because every seeded lead was synthetic. It was resolved on
+2026-10-21 with separate provenance and channel-eligibility records rather than putting
+evidence directly on the Lead. The historical concern is retained here because import,
+contact, and eligibility remain distinct concepts.

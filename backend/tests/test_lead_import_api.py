@@ -17,7 +17,17 @@ from fastapi.testclient import TestClient
 from app.services.lead_import import MAX_UPLOAD_BYTES
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
-REPORT_FIELDS = {"filename", "row_count", "accepted", "rejected", "rejected_rows", "warnings"}
+REPORT_FIELDS = {
+    "filename",
+    "batch_id",
+    "row_count",
+    "accepted",
+    "rejected",
+    "duplicates",
+    "requiring_review",
+    "rejected_rows",
+    "warnings",
+}
 
 
 def upload(client: TestClient, fixture: str, **params: str):
@@ -37,6 +47,9 @@ def test_the_report_has_exactly_the_documented_shape(client: TestClient) -> None
     assert set(body) == REPORT_FIELDS
     assert body["filename"] == "import_clean.csv"
     assert (body["row_count"], body["accepted"], body["rejected"]) == (3, 3, 0)
+    assert body["duplicates"] == 0
+    assert body["requiring_review"] == 3
+    assert body["batch_id"]
     assert body["rejected_rows"] == []
     assert body["warnings"] == []
     assert client.get("/api/v1/leads").json()["total"] == 3
@@ -45,6 +58,8 @@ def test_the_report_has_exactly_the_documented_shape(client: TestClient) -> None
 def test_the_refused_rows_are_shaped_for_a_screen(client: TestClient) -> None:
     body = upload(client, "import_mixed.csv").json()
 
+    assert body["duplicates"] == 1
+    assert body["requiring_review"] == 3
     assert set(body["rejected_rows"][0]) == {"row", "business_name", "code", "reason"}
     assert set(body["warnings"][0]) == {"row", "field", "value", "code", "message"}
     assert body["rejected_rows"][0]["business_name"] == ""

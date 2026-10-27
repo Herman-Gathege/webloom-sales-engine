@@ -79,12 +79,31 @@ for its subject — edit the document, not a copy of it.
 | Branching, PRs, review, definition of done, disagreements | `docs/team/how-we-work.md` |
 | How to talk to FikaTu (endpoints, events, token flow, gaps) | `docs/research/2026-10-08-fikatu-integration-notes.md` |
 | What the current lead list actually contains | `docs/research/2026-10-08-lead-list-audit.md` |
+| Compliance operating rules and legal boundaries | `docs/compliance/README.md` |
 | Decisions that are expensive to reverse | `docs/decisions/` (ADRs) |
 | Everything above, indexed | `docs/README.md` |
 
 When a document and the code disagree, the code is the current state and the document is the
 intent. Say which you found, then fix the document or fix the code — never leave the two
 apart.
+
+## Preserve project knowledge
+
+Documentation is cumulative project knowledge. Extend it by default; do not replace a document
+wholesale to make it shorter or more uniform. Preserve requirements, decisions, historical
+context, examples, implementation notes, and unrelated roadmap items. Make the smallest
+surgical edit, and explicitly mark superseded detail where leaving it unchanged would mislead.
+When code and documentation conflict, state which is current and reconcile them in the same
+change.
+
+## Compliance safeguards continue
+
+Future lead discovery, enrichment, imports, campaigns, AI assistance, follow-ups, scoring,
+analytics, and integrations must preserve provenance, independent channel eligibility,
+terminal suppression, human approval, and proportionate audit history. Read the
+[`docs/compliance/`](docs/compliance/) documents before changing those paths. Compliance work
+adds safeguards without replacing the Sales Engine's goal: useful, targeted outreach that a
+human can review and convert.
 
 ## Current state
 
@@ -93,9 +112,15 @@ What the first sprint was and how it went is in `docs/homework/sprint-1/status.m
 plan is `docs/delivery/sprint-plan.md`; what we are doing right now is
 `docs/homework/sprint-2/`.
 
-Sprint 2 so far: the CSV importer (PRs #16 and #17) and Anne's seller review (PR #19) are
-merged. Herman's Lead List filters are in PR #20 on the shared `sprint/2-lead-desk` branch;
-Mark's CI is next. The branch and hand-off rules are in `docs/homework/README.md`.
+Sprint 2 so far: the CSV importer (PRs #16 and #17), Anne's seller review (PR #19), Herman's
+Lead List filters (PR #20), and the compliance hardening described below are on the sprint
+branch. The CI workflow now exists; requiring its checks in GitHub remains an administrator
+step. The branch and hand-off rules are in `docs/homework/README.md`.
+
+The 2026-10-21 compliance foundation adds import provenance/batches, independent human review
+for email/SMS/WhatsApp, terminal lead-independent suppression, auditable review events, and the
+operator compliance workflow. Sending is still absent; its mandatory rechecks are recorded as
+Sprint 5–6 acceptance gates in `docs/compliance/implementation-notes.md`.
 
 - **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
@@ -106,8 +131,8 @@ Mark's CI is next. The branch and hand-off rules are in `docs/homework/README.md
   See `backend/README.md` and `docs/delivery/sprint-2-import-contract.md`.
 - **Built:** the containers — `docker compose up --build` starts the database, the API and
   the UI together from a clean clone. Ports and traps are in `docker/README.md`.
-- **Verified:** 118/118 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
-  builds, lints and passes its tests on Node 22.
+- **Verified:** 136/136 backend tests green against PostgreSQL 17 and Python 3.12; the frontend
+  builds in the Node 22 container and passes its 28 tests plus lint locally.
 - **Not built yet:** auth, sending, campaigns, and the other eleven screens.
   `docs/delivery/sprint-plan.md` says which sprint brings each.
 - The shapes the two halves must agree on are frozen in
@@ -171,6 +196,7 @@ backend/app/
 └── integrations/    # fikatu/ — the only code that knows FikaTu's API exists
 frontend/            # React SPA
 docs/                # scope, sprint plan, roadmap, homework, research, ADRs
+  compliance/        # legal boundaries, outreach SOP, implementation status
 docker/              # nginx, postgres, redis, worker configuration
 ```
 

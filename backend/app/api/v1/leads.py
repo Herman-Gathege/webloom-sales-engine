@@ -1,24 +1,40 @@
 """Lead routes. Parse, authorise (later), delegate — no business rules here."""
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Path,
+    Query,
+    Response,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from app.database import get_session
 from app.repositories import LeadRepository
 from app.schemas import (
+    EligibilityReviewRequest,
     ImportSummary,
     LeadDetailRead,
     LeadListRead,
     LeadRead,
     RefusedRowRead,
     RowWarningRead,
+    SuppressionCreate,
 )
 from app.services import (
     MAX_UPLOAD_BYTES,
+    ComplianceService,
+    ComplianceTargetError,
+    EligibilityDecision,
     ImportFileError,
     LeadImportService,
     LeadNotFoundError,
     LeadService,
+    SuppressionDecision,
     refused_rows_csv,
 )
 from app.services.lead_service import DEFAULT_LIMIT
@@ -32,6 +48,10 @@ def get_lead_service(session: Session = Depends(get_session)) -> LeadService:
 
 def get_import_service(session: Session = Depends(get_session)) -> LeadImportService:
     return LeadImportService(LeadRepository(session))
+
+
+def get_compliance_service(session: Session = Depends(get_session)) -> ComplianceService:
+    return ComplianceService(LeadRepository(session))
 
 
 @router.get("", response_model=LeadListRead, summary="List leads, newest first")
@@ -105,12 +125,84 @@ def import_leads(
 
     return ImportSummary(
         filename=result.filename,
+        batch_id=result.batch_id,
         row_count=result.row_count,
         accepted=result.accepted,
         rejected=result.rejected,
+        duplicates=result.duplicates,
+        requiring_review=result.requiring_review,
         rejected_rows=[RefusedRowRead.model_validate(row) for row in result.refused],
         warnings=[RowWarningRead.model_validate(warning) for warning in result.warnings],
     )
+
+
+@router.put(
+    "/{lead_id}/eligibility/{channel}",
+    response_model=LeadDetailRead,
+    summary="Record a human channel-eligibility review",
+)
+def review_eligibility(
+    lead_id: str,
+    decision: EligibilityReviewRequest,
+    channel: str = Path(pattern="^(email|sms|whatsapp)$"),
+    service: ComplianceService = Depends(get_compliance_service),
+) -> LeadDetailRead:
+    try:
+        lead = service.review_eligibility(
+            lead_id,
+            channel,
+            EligibilityDecision(
+                state=decision.state,
+                lawful_basis=decision.lawful_basis,
+                evidence_summary=decision.evidence_summary,
+                evidence_source=decision.evidence_source,
+                intended_purpose=decision.intended_purpose,
+                contact_context=decision.contact_context,
+                reviewer=decision.reviewer,
+                rationale=decision.rationale,
+            ),
+        )
+    except LeadNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
+        ) from None
+    except ComplianceTargetError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from None
+    return LeadDetailRead.model_validate(lead)
+
+
+@router.post(
+    "/{lead_id}/suppressions",
+    response_model=LeadDetailRead,
+    summary="Record a channel-specific or all-marketing opt-out",
+)
+def record_suppression(
+    lead_id: str,
+    request: SuppressionCreate,
+    service: ComplianceService = Depends(get_compliance_service),
+) -> LeadDetailRead:
+    try:
+        lead = service.record_suppression(
+            lead_id,
+            SuppressionDecision(
+                scope=request.scope,
+                reason=request.reason,
+                source=request.source,
+                recorded_by=request.recorded_by,
+                note=request.note,
+            ),
+        )
+    except LeadNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
+        ) from None
+    except ComplianceTargetError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from None
+    return LeadDetailRead.model_validate(lead)
 
 
 @router.get("/{lead_id}", response_model=LeadDetailRead, summary="One lead with its activity")

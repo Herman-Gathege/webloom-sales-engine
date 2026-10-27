@@ -13,12 +13,22 @@ the `WhatsApp capable` column already marks `Call only`, and the handful of ways
 import csv
 import io
 import re
+import uuid
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
+from urllib.parse import urlsplit
 
-from app.models import Activity, Lead, LeadStatus
+from app.models import (
+    Activity,
+    ImportBatch,
+    Lead,
+    LeadChannelEligibility,
+    LeadProvenance,
+    LeadStatus,
+)
 from app.repositories import LeadRepository
+from app.services.contact_identity import contact_fingerprint, normalize_email, valid_email
 
 # Bigger than this is refused rather than read into memory. The real list is
 # 30 KB; the cap is for whoever uploads a database dump by mistake.
@@ -39,6 +49,16 @@ COLUMNS_READ = (
     "Source",
 )
 
+OPTIONAL_COLUMNS = (
+    "Email",
+    "Contact name",
+    "Contact type",
+    "Source URL",
+    "Collection date",
+    "Collection method",
+    "Intended purpose",
+)
+
 # The words a person reads, kept in one place so Anne's rejected-row wording can
 # replace them without touching any logic.
 REFUSAL_REASONS: dict[str, str] = {
@@ -49,6 +69,9 @@ REFUSAL_REASONS: dict[str, str] = {
         " (expected 0NNN NNNNNN or 020 NNNNNNN)."
     ),
     "blank_source": "No source recorded, so we cannot say where this lead came from.",
+    "suppressed_contact": (
+        "This contact has opted out of marketing and is excluded from future imports."
+    ),
 }
 DUPLICATE_PHONE_CODE = "duplicate_phone"
 DUPLICATE_IN_FILE_REASON = "This phone number is already on row {row} of the file."
@@ -63,6 +86,29 @@ WARNING_MESSAGES: dict[str, str] = {
     ),
     "website_status_unclassified": "Website status kept as written; has_website left false.",
     "source_unrecognised": "Source not recognised; stored as a lowercase slug of the value.",
+    "email_invalid": "Email was not understood, so it was left blank and needs review.",
+    "source_url_invalid": "Source URL was not an http(s) address, so it was left blank.",
+    "collection_date_invalid": (
+        "Collection date was not an ISO date (YYYY-MM-DD), so it was left blank."
+    ),
+    "contact_type_unrecognised": (
+        "Contact type was not recognised, so it was recorded as unknown."
+    ),
+    "contact_name_too_long": (
+        "Contact name was longer than 255 characters, so it was left blank."
+    ),
+}
+
+CONTACT_TYPE_ALIASES = {
+    "unknown": "unknown",
+    "generic": "generic_business",
+    "business": "generic_business",
+    "generic business": "generic_business",
+    "generic_business": "generic_business",
+    "named": "named_individual",
+    "individual": "named_individual",
+    "named individual": "named_individual",
+    "named_individual": "named_individual",
 }
 
 # The list's two values. Anything else is reported and worked out from the number
@@ -123,9 +169,12 @@ class ImportResult:
     """What the import did, ready to be shaped into the response."""
 
     filename: str
+    batch_id: uuid.UUID
     row_count: int
     accepted: int
     rejected: int
+    duplicates: int
+    requiring_review: int
     refused: list[RefusedRow]
     warnings: list[RowWarning]
 
@@ -139,10 +188,17 @@ class _MappedRow:
     sector: str | None
     area: str | None
     phone: str
+    email: str | None
     whatsapp_capable: bool
     website_status: str | None
     has_website: bool
     source: str
+    source_url: str | None
+    collection_date: date | None
+    collection_method: str | None
+    intended_purpose: str | None
+    contact_type: str
+    contact_name: str | None
 
 
 def read_rows(raw: bytes) -> list[tuple[int, dict[str, str]]]:
@@ -297,6 +353,46 @@ def map_row(line: int, row: dict[str, str]) -> tuple[_MappedRow, list[RowWarning
     if not source_understood:
         warn("source", source_raw, "source_unrecognised")
 
+    email_raw = row.get("Email", "").strip()
+    email = normalize_email(email_raw) if email_raw else None
+    if email and not valid_email(email):
+        warn("email", "", "email_invalid")
+        email = None
+
+    source_url = row.get("Source URL", "").strip() or None
+    if source_url:
+        parsed = urlsplit(source_url)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            warn("source_url", source_url, "source_url_invalid")
+            source_url = None
+
+    collection_date_raw = (
+        row.get("Collection date", "").strip() or row.get("Date added", "").strip()
+    )
+    collection_date: date | None = None
+    if collection_date_raw and re.fullmatch(r"\d{4}-\d{2}-\d{2}", collection_date_raw):
+        try:
+            collection_date = date.fromisoformat(collection_date_raw)
+        except ValueError:
+            warn("collection_date", collection_date_raw, "collection_date_invalid")
+    elif collection_date_raw:
+        warn("collection_date", collection_date_raw, "collection_date_invalid")
+
+    contact_type_raw = row.get("Contact type", "").strip()
+    contact_type = CONTACT_TYPE_ALIASES.get(contact_type_raw.lower(), "unknown")
+    if contact_type_raw and contact_type == "unknown" and contact_type_raw.lower() != "unknown":
+        warn("contact_type", contact_type_raw, "contact_type_unrecognised")
+
+    contact_name = row.get("Contact name", "").strip() or None
+    if contact_name and len(contact_name) > 255:
+        warn("contact_name", "", "contact_name_too_long")
+        contact_name = None
+
+    collection_method = (
+        row.get("Collection method", "").strip() or source_raw or None
+    )
+    intended_purpose = row.get("Intended purpose", "").strip() or None
+
     mapped = _MappedRow(
         line=line,
         business_name=business_name,
@@ -305,10 +401,17 @@ def map_row(line: int, row: dict[str, str]) -> tuple[_MappedRow, list[RowWarning
         sector=sector,
         area=row["Area"].strip() or None,
         phone=phone,
+        email=email,
         whatsapp_capable=whatsapp_capable,
         website_status=website_status or None,
         has_website=has_website,
         source=source,
+        source_url=source_url,
+        collection_date=collection_date,
+        collection_method=collection_method,
+        intended_purpose=intended_purpose,
+        contact_type=contact_type,
+        contact_name=contact_name,
     )
     return mapped, warnings
 
@@ -363,15 +466,32 @@ class LeadImportService:
             seen_in_file[mapped.phone] = line
             candidates.append(mapped)
 
+        candidates = self._drop_suppressed_contacts(candidates, refused)
         accepted = self._drop_known_phones(candidates, refused)
-        self._save(accepted, imported_at)
+
+        batch = ImportBatch(
+            filename=filename,
+            imported_by="system",
+            row_count=len(rows),
+            accepted=len(accepted),
+            rejected=len(refused),
+            duplicates=sum(row.code == DUPLICATE_PHONE_CODE for row in refused),
+            review_required=len(accepted),
+        )
+        self.repository.add_import_batch(batch)
+        self.repository.flush()
+        self._save(accepted, imported_at, batch.id)
+        self.repository.commit()
         refused.sort(key=lambda row: row.row)
 
         return ImportResult(
             filename=filename,
+            batch_id=batch.id,
             row_count=len(rows),
             accepted=len(accepted),
             rejected=len(refused),
+            duplicates=batch.duplicates,
+            requiring_review=batch.review_required,
             refused=refused,
             warnings=warnings,
         )
@@ -396,7 +516,47 @@ class LeadImportService:
             accepted.append(mapped)
         return accepted
 
-    def _save(self, accepted: Sequence[_MappedRow], imported_at: datetime) -> None:
+    def _drop_suppressed_contacts(
+        self, candidates: list[_MappedRow], refused: list[RefusedRow]
+    ) -> list[_MappedRow]:
+        """Block re-import when an all-marketing opt-out already names a contact."""
+        fingerprints = {
+            contact_fingerprint("phone", mapped.phone) for mapped in candidates
+        }
+        fingerprints.update(
+            contact_fingerprint("email", mapped.email)
+            for mapped in candidates
+            if mapped.email
+        )
+        all_marketing = {
+            suppression.contact_fingerprint
+            for suppression in self.repository.suppressions_for_fingerprints(fingerprints)
+            if suppression.scope == "all_marketing"
+        }
+        accepted: list[_MappedRow] = []
+        for mapped in candidates:
+            candidates_fingerprints = {contact_fingerprint("phone", mapped.phone)}
+            if mapped.email:
+                candidates_fingerprints.add(contact_fingerprint("email", mapped.email))
+            if candidates_fingerprints & all_marketing:
+                refused.append(
+                    RefusedRow(
+                        mapped.line,
+                        mapped.business_name,
+                        "suppressed_contact",
+                        REFUSAL_REASONS["suppressed_contact"],
+                    )
+                )
+                continue
+            accepted.append(mapped)
+        return accepted
+
+    def _save(
+        self,
+        accepted: Sequence[_MappedRow],
+        imported_at: datetime,
+        batch_id: uuid.UUID,
+    ) -> None:
         """Write every accepted lead in one transaction.
 
         The accepted rows are one second apart, the file's first row newest, so
@@ -411,6 +571,7 @@ class LeadImportService:
                 sector=mapped.sector,
                 area=mapped.area,
                 phone=mapped.phone,
+                email=mapped.email,
                 whatsapp_capable=mapped.whatsapp_capable,
                 website_status=mapped.website_status,
                 has_website=mapped.has_website,
@@ -419,11 +580,26 @@ class LeadImportService:
                 created_at=created_at,
                 updated_at=created_at,
             )
+            lead.provenance = LeadProvenance(
+                import_batch_id=batch_id,
+                row_number=mapped.line,
+                source_url=mapped.source_url,
+                collection_date=mapped.collection_date,
+                collection_method=mapped.collection_method,
+                intended_purpose=mapped.intended_purpose,
+                contact_type=mapped.contact_type,
+                contact_name=mapped.contact_name,
+            )
+            for channel in ("email", "sms", "whatsapp"):
+                lead.eligibility.append(
+                    LeadChannelEligibility(channel=channel, state="needs_review")
+                )
             lead.activity.append(
                 Activity(
                     type="lead.created",
                     actor="system",
                     summary=IMPORT_ACTIVITY_SUMMARY,
+                    details={"batch_id": str(batch_id), "row_number": mapped.line},
                     created_at=created_at,
                 )
             )
@@ -436,11 +612,10 @@ class LeadImportService:
                     summary=RESEARCH_ACTIVITY_SUMMARY.format(
                         website_status=mapped.website_status or NO_RESEARCH_SUMMARY
                     ),
+                    details={"source": mapped.source},
                     # Half a minute later, so the timeline has one order rather
                     # than two rows sharing a timestamp.
                     created_at=created_at + timedelta(seconds=30),
                 )
             )
             self.repository.add(lead)
-
-        self.repository.commit()

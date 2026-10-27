@@ -14,9 +14,12 @@ vi.mock("@/api/leads", () => ({
 
 const summary: ImportSummary = {
   filename: "webloom-lead-list.csv",
+  batch_id: "30000000-0000-4000-8000-000000000001",
   row_count: 52,
   accepted: 50,
   rejected: 2,
+  duplicates: 1,
+  requiring_review: 50,
   rejected_rows: [
     {
       row: 7,
@@ -90,6 +93,8 @@ describe("LeadImport", () => {
     expect(counts).toContain("52 rows read");
     expect(counts).toContain("50 imported");
     expect(counts).toContain("2 refused");
+    expect(counts).toContain("1 duplicate");
+    expect(counts).toContain("50 need compliance review");
 
     expect(screen.getByText("Mwangaza Hardware")).toBeTruthy();
     expect(screen.getByText("This phone number is already on row 3 of the file.")).toBeTruthy();

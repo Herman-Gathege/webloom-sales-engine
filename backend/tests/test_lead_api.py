@@ -14,6 +14,7 @@ LEAD_FIELDS = {
     "sector",
     "area",
     "phone",
+    "email",
     "whatsapp_capable",
     "website_status",
     "has_website",
@@ -186,7 +187,12 @@ def test_detail_returns_every_lead_field_plus_activity(
 
     assert response.status_code == 200
     body = response.json()
-    assert set(body) == LEAD_FIELDS | {"activity"}
+    assert set(body) == LEAD_FIELDS | {
+        "activity",
+        "provenance",
+        "eligibility",
+        "suppressions",
+    }
     assert body["business_name"] == "Baraka Chemist"
     assert body["has_website"] is True
     assert [entry["type"] for entry in body["activity"]] == ["lead.created", "lead.researched"]
@@ -196,6 +202,7 @@ def test_detail_returns_every_lead_field_plus_activity(
         "type",
         "actor",
         "summary",
+        "details",
         "created_at",
     }
     assert body["activity"][0]["lead_id"] == str(lead.id)

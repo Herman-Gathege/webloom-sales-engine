@@ -50,6 +50,12 @@ def test_seeded_leads_follow_the_contract(session: Session) -> None:
     assert any(lead.phone is None for lead in leads)
     assert any(lead.has_website for lead in leads)
     assert any(not lead.whatsapp_capable for lead in leads)
+    assert all(lead.provenance is not None for lead in leads)
+    assert all(
+        {row.channel for row in lead.eligibility} == {"email", "sms", "whatsapp"}
+        for lead in leads
+    )
+    assert all(row.state == "needs_review" for lead in leads for row in lead.eligibility)
 
 
 def test_every_seeded_lead_has_its_own_activity(session: Session) -> None:

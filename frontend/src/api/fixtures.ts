@@ -9,7 +9,13 @@
  * docs/research/2026-10-08-lead-list-audit.md
  */
 
-import type { Activity, Lead, LeadDetail } from "./types";
+import type {
+  Activity,
+  ChannelEligibility,
+  Lead,
+  LeadDetail,
+  Suppression,
+} from "./types";
 
 const CREATED = "2026-09-23T09:00:00Z";
 
@@ -27,6 +33,7 @@ function lead(
     sector,
     area,
     phone: `+2547000001${String(n).padStart(2, "0")}`,
+    email: `sample${n}@example.test`,
     whatsapp_capable,
     website_status,
     has_website: false,
@@ -91,6 +98,7 @@ export const sampleActivity: Activity[] = sampleLeads.flatMap((entry, i) => [
     type: "lead.created",
     actor: "system",
     summary: "Imported from the Google Maps list",
+    details: { sample: true },
     created_at: CREATED,
   },
   {
@@ -99,13 +107,65 @@ export const sampleActivity: Activity[] = sampleLeads.flatMap((entry, i) => [
     type: "lead.researched",
     actor: "system",
     summary: `Website research recorded: ${entry.website_status}`,
+    details: { source: "google_maps" },
     created_at: "2026-09-23T09:05:00Z",
   },
 ]);
 
-export const sampleLeadDetails: LeadDetail[] = sampleLeads.map((entry) => ({
+const sampleSuppression: Suppression = {
+  id: "20000000-0000-4000-8000-000000000001",
+  contact_kind: "phone",
+  scope: "sms",
+  reason: "opt_out",
+  source: "Synthetic seller review",
+  recorded_by: "Anne",
+  note: "Asked to use email only.",
+  created_at: "2026-09-24T10:00:00Z",
+};
+
+function sampleEligibility(n: number, whatsappCapable: boolean): ChannelEligibility[] {
+  return (["email", "sms", "whatsapp"] as const).map((channel) => {
+    const emailEligible = n === 1 && channel === "email";
+    const smsSuppressed = n === 1 && channel === "sms";
+    return {
+      channel,
+      state: emailEligible ? "eligible" : "needs_review",
+      effective_state: smsSuppressed
+        ? "suppressed"
+        : emailEligible
+          ? "eligible"
+          : "needs_review",
+      technical_available:
+        channel === "email" ? Boolean(sampleLeads[n - 1]?.email) : channel === "sms"
+          ? !/^\+254[2-6]/.test(sampleLeads[n - 1]?.phone ?? "")
+          : whatsappCapable,
+      lawful_basis: emailEligible ? "legitimate_interests" : null,
+      evidence_summary: emailEligible ? "Owner asked for a website proposal." : null,
+      evidence_source: emailEligible ? "Synthetic inbound email" : null,
+      intended_purpose: emailEligible ? "Website proposal follow-up" : null,
+      contact_context: emailEligible ? "Named business owner" : null,
+      reviewer: emailEligible ? "Anne" : null,
+      reviewed_at: emailEligible ? "2026-09-24T10:00:00Z" : null,
+      rationale: emailEligible ? "Direct request recorded by the seller." : null,
+    };
+  });
+}
+
+export const sampleLeadDetails: LeadDetail[] = sampleLeads.map((entry, index) => ({
   ...entry,
+  provenance: {
+    import_batch_id: "30000000-0000-4000-8000-000000000001",
+    row_number: index + 2,
+    source_url: `https://example.test/research/${index + 1}`,
+    collection_date: "2026-09-23",
+    collection_method: "Synthetic research fixture",
+    intended_purpose: "Business outreach",
+    contact_type: "generic_business",
+    contact_name: null,
+  },
+  eligibility: sampleEligibility(index + 1, entry.whatsapp_capable),
+  suppressions: index === 0 ? [sampleSuppression] : [],
   activity: sampleActivity
-    .filter((a) => a.lead_id === entry.id)
+    .filter((activity) => activity.lead_id === entry.id)
     .sort((a, b) => a.created_at.localeCompare(b.created_at)),
 }));

@@ -1,4 +1,4 @@
-"""The Lead model — the Sprint 1 shape in docs/delivery/sprint-1-lead-contract.md."""
+"""The Lead model, extended by the Sprint 2 compliance foundation."""
 
 import enum
 import uuid
@@ -54,6 +54,7 @@ class Lead(Base):
     # until a lead has a phone; Postgres allows many NULLs under one unique
     # constraint, so phone-less leads do not collide with each other.
     phone: Mapped[str | None] = mapped_column(String(32), unique=True)
+    email: Mapped[str | None] = mapped_column(String(255), index=True)
     whatsapp_capable: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default=text("true")
     )
@@ -83,6 +84,33 @@ class Lead(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    provenance: Mapped["LeadProvenance | None"] = relationship(  # noqa: F821
+        back_populates="lead",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        uselist=False,
+    )
+    eligibility: Mapped[list["LeadChannelEligibility"]] = relationship(  # noqa: F821
+        back_populates="lead",
+        order_by="LeadChannelEligibility.channel",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    suppressions: Mapped[list["Suppression"]] = relationship(  # noqa: F821
+        back_populates="lead",
+        order_by="Suppression.created_at, Suppression.id",
+        passive_deletes=True,
+    )
+
+    @property
+    def matching_suppressions(self) -> list["Suppression"]:  # noqa: F821
+        """All terminal restrictions for the contacts on this lead.
+
+        The repository loads fingerprint matches, including restrictions recorded
+        before this lead row was re-imported. The linked relationship is only a
+        navigation aid; the fingerprint is what enforcement trusts.
+        """
+        return getattr(self, "_matching_suppressions", self.suppressions)
 
     __table_args__ = (
         CheckConstraint("business_name <> ''", name="business_name_not_blank"),

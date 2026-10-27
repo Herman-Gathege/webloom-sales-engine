@@ -4,6 +4,8 @@ The wire shape a screen should call is written out for Herman in
 `docs/delivery/sprint-2-import-contract.md`; this file is the code's copy of it.
 """
 
+from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -38,8 +40,11 @@ class ImportSummary(BaseModel):
     """
 
     filename: str
+    batch_id: UUID
     row_count: int
     accepted: int
     rejected: int
+    duplicates: int
+    requiring_review: int
     rejected_rows: list[RefusedRowRead]
     warnings: list[RowWarningRead]

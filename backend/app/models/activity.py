@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, Index, String, Text, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
@@ -27,6 +28,8 @@ class Activity(Base):
         String(64), nullable=False, default="system", server_default="system"
     )
     summary: Mapped[str] = mapped_column(Text, nullable=False)
+    # Structured audit facts. Never use this for contact values or message bodies.
+    details: Mapped[dict[str, object] | None] = mapped_column(JSONB)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
