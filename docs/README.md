@@ -6,8 +6,9 @@ Start with the document that matches what you are about to do.
 |---|---|
 | what we are building, and what is out of scope | [scope spec](superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) |
 | the whole plan: nine sprints, and who leads each | [sprint plan](delivery/sprint-plan.md) |
-| what each of us is doing right now | [Sprint 2 homework](homework/sprint-2/README.md) |
-| how the last sprint went | [Sprint 1 record](homework/sprint-1/status.md) |
+| what each of us is doing right now | [Sprint 3 review homework](homework/sprint-3/README.md) |
+| the current sprint's scope, roles and acceptance criteria | [Sprint 3 authentication](delivery/sprint-3-auth.md) |
+| how the last two sprints went | [Sprint 2 exit](homework/sprint-2/status.md) · [Sprint 1 record](homework/sprint-1/status.md) |
 | deep detail on every piece of work | [sprint detail](delivery/sprint-detail.md) — reference only |
 | how we branch, review, and merge | [how we work](team/how-we-work.md) |
 | what we verified about FikaTu | [FikaTu integration notes](research/2026-10-08-fikatu-integration-notes.md) |
@@ -26,7 +27,8 @@ docs/
 ├── superpowers/specs/   the scope spec — the gate
 ├── delivery/            the sprint plan, and the detailed backlog behind it
 ├── homework/sprint-1/   the finished first sprint: its cards, and its record
-├── homework/sprint-2/   what each of us is doing right now
+├── homework/sprint-2/   the second sprint: its cards, and its exit review
+├── homework/sprint-3/   the current sprint's review assignment
 ├── team/                how we work
 ├── research/            verified findings: FikaTu, the lead list
 ├── compliance/          legal boundaries, operating rules, implementation status

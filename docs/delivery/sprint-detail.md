@@ -73,7 +73,7 @@ Hiding contact details by role needs login, so it lands in Sprint 3.
 
 ---
 
-## Sprint 2 — the Lead Desk is real ← we are here
+## Sprint 2 — the Lead Desk is real ✅ closed
 
 **Owner:** Sharon · **Reviewer:** Mark. The real 52-row list goes in, the list becomes filterable,
 and CI lands so a red test is visible to everyone instead of only to whoever ran it.
@@ -138,35 +138,21 @@ Lead Desk. The team decides.
 
 ---
 
-## Sprint 3 — lock the door
+## Sprint 3 — lock the door ← we are here
 
-**Owner:** Mark · **Reviewer:** Herman. Login, users and roles. Only we can reach the pipeline.
+**Owner:** Mark · **Reviewer:** Herman. Login, and two roles: `admin` and `sales`.
 
-### Authentication and login
-*Owner: Mark · Reviewer: Herman · ~5 pts*
-As a team member, I want to log in securely, so only we can see our pipeline.
+**Scope and acceptance criteria live in
+[`sprint-3-auth.md`](sprint-3-auth.md).** Read that, not a copy here.
 
-- [ ] Login with email and password returns a JWT; wrong credentials return 401
-- [ ] Passwords are stored with bcrypt; no plaintext or reversible hash anywhere
-- [ ] Protected endpoints reject missing, malformed, and expired tokens
-- [ ] Token expiry and refresh behaviour are documented
-- [ ] Lockout or delay after repeated failed attempts
+Two decisions changed since this section was first written, and are recorded so the history
+stays honest:
 
-Tasks: user model and password hashing (Mark, 6h) · login endpoint and JWT issue/verify (Mark, 6h) ·
-auth middleware and dependency (Mark, 4h) · auth tests including failure paths (Sharon, 4h).
-**Total 20h.**
-
-### User management and role enforcement
-*Owner: Sharon · Reviewer: Mark · ~3 pts*
-As an owner, I want to manage users and roles, so access matches responsibility.
-
-- [ ] Owners can create, deactivate, and re-role users
-- [ ] `owner`, `sales`, `engineer`, `viewer` are enforced on the API, not only hidden in the UI
-- [ ] A `viewer` cannot read contact details; a `sales` user can
-- [ ] Attempts to exceed a role are covered by tests
-
-Tasks: user CRUD endpoints (Sharon, 6h) · role guard dependency (Sharon, 3h) · role tests (Sharon,
-3h). **Total 12h.**
+- The four roles (`owner`, `sales`, `engineer`, `viewer`) were cut to **`admin` and
+  `sales`**. A two-role model is enough for four people and does not need a permission
+  matrix.
+- User *management* (create, deactivate, re-role) moved out of scope. Sprint 3 ships a
+  read-only administrator user list so there is a real admin-only API to enforce.
 
 ---
 
@@ -519,7 +505,7 @@ As Herman, I want exports to be deliberate and recorded, so personal data does n
 
 - [ ] Lead and campaign data export to CSV
 - [ ] Every export writes an activity event with actor, timestamp, and row count
-- [ ] Only owner and sales roles can export
+- [ ] Only admin and sales roles can export
 - [ ] Exports exclude fields the role may not see
 
 Tasks: export endpoints with audit events (Sharon, 8h) · role tests (Sharon, 4h). **Total 12h.**

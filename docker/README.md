@@ -1,4 +1,4 @@
-# Docker — Sprint 1
+# Docker
 
 This directory holds the container wiring for the first slice. One command starts the whole
 slice — database, API and UI — from a clean clone:
@@ -36,11 +36,33 @@ bundle.
 
 ```bash
 docker compose up --build       # start db + api + frontend; open http://localhost:5174
+docker compose run --rm -e BOOTSTRAP_ADMIN_PASSWORD api python -m app.bootstrap  # create the four dev admins
 docker compose run --rm api-test   # run the backend tests in a container
 docker compose exec db psql -U postgres -d webloom_sales_engine   # inspect the app db
 docker compose down             # stop containers, keep the data volume
 docker compose down -v          # stop and delete the data volume
 ```
+
+## First login
+
+The app now starts at a login screen. Create the four development administrators once:
+
+```bash
+BOOTSTRAP_ADMIN_PASSWORD='choose-a-temporary-password' \
+  docker compose run --rm -e BOOTSTRAP_ADMIN_PASSWORD api python -m app.bootstrap
+
+# add a sales account to test that role
+BOOTSTRAP_ADMIN_PASSWORD='choose-a-temporary-password' \
+  docker compose run --rm -e BOOTSTRAP_ADMIN_PASSWORD api python -m app.bootstrap --sales you@example.test
+```
+
+It prints how many accounts it created and how many already existed — never the password. It
+is safe to rerun and never resets an existing password. Each account sets its own password at
+first login; until it does, the API refuses lead data for that account.
+
+`JWT_SECRET_KEY` is passed to the API from the shell (falling back to the documented
+development value). Set it in the environment before `docker compose up` when this is not a
+local machine.
 
 To work on the frontend with hot reload instead of the built image, run the containers for the
 backend only and use the dev server:

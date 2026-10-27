@@ -34,6 +34,12 @@ services:
       TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/webloom_sales_engine_test
       ENVIRONMENT: development
       SQL_ECHO: "false"
+      # Used to sign access tokens. The fallback is the documented development
+      # value; override it in a real environment.
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-only-change-me-before-anything-real}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-480}
+      # Only read by `python -m app.bootstrap`; empty is fine.
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
     ports:
       - "${API_PORT:-8001}:8000"
     depends_on:

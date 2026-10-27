@@ -31,8 +31,8 @@ The API is:
 - `POST /api/v1/leads/{id}/suppressions`
 
 Lead Detail returns provenance, three effective channel states, each channel's technical contact
-availability, and suppression history. Reviewer identity is currently self-asserted; Sprint 3
-will connect it to an authenticated user.
+availability, and suppression history. Since Sprint 3 the reviewer identity comes from the
+authenticated session; a request body can no longer claim to be someone else.
 
 ### Suppression
 
@@ -79,7 +79,9 @@ all-marketing confirmation, sample-mode mutation blocking, and import summary co
 
 ## Known limitations
 
-- Authentication and role-gated contact visibility arrive in Sprint 3.
+- Authentication arrived in Sprint 3 with two roles, `admin` and `sales`. Both may see contact
+  details because both work the lead desk; there is no read-only role yet. Add field-level
+  gating when such a role exists.
 - Nothing sends yet, so no dispatch attempt can be blocked or audited in this slice.
 - FikaTu has no WhatsApp provider. WhatsApp eligibility is stored but delivery is unavailable.
 - There is no automated reply ingest; replies and opt-outs are recorded by a person.

@@ -9,19 +9,21 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Sprint 1 is done; Sprint 2 is in progress.** The Lead Desk runs end to end:
-researched leads import into PostgreSQL, can be searched and opened in React, and now carry
-provenance, independent channel-review state, terminal suppression history, and audit events.
+Pre-MVP. **Sprints 1 and 2 are closed; Sprint 3 is in progress.** The Lead Desk runs end to
+end with authentication in front of it: researched leads import into PostgreSQL, can be
+searched and opened in React, and carry provenance, independent channel-review state, terminal
+suppression history, and audit events.
 
 - [`frontend/`](frontend/) — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui.
 - [`backend/`](backend/README.md) — FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL 17, with
-  reversible migrations, an idempotent seed, lead review endpoints, and the CSV importer.
+  reversible migrations, an idempotent seed, lead review endpoints, the CSV importer, and
+  JWT authentication with `admin`/`sales` roles.
 - [`docker-compose.yml`](docker-compose.yml) — one command starts all three.
 
-There is no auth and no sending yet. What Sprint 1 was and how it went is in
-the [Sprint 1 record](docs/homework/sprint-1/status.md); what we are building now, and who
-leads it, is the [sprint plan](docs/delivery/sprint-plan.md) and
-[Sprint 2](docs/homework/sprint-2/README.md).
+There is no sending yet. Sprint 2's exit review is
+[here](docs/homework/sprint-2/status.md); what we are building now is
+[Sprint 3 authentication](docs/delivery/sprint-3-auth.md), with
+[review homework](docs/homework/sprint-3/README.md).
 
 ## Run it
 
@@ -62,13 +64,30 @@ The traps we hit, and the decisions to agree before the next sprint, are in the
 
 ## If you are one of the four of us
 
-We are in **Sprint 2 — the real leads**, led by Sharon. Open your own card in
-[`docs/homework/sprint-2/`](docs/homework/sprint-2/README.md): it is short and it tells you
-everything you need, without reading anything else. The whole plan, if you want it, is the
+We are in **Sprint 3 — lock the door**, led by Mark. Your review assignment is in
+[`docs/homework/sprint-3/`](docs/homework/sprint-3/README.md); the scope is
+[Sprint 3 authentication](docs/delivery/sprint-3-auth.md). The whole plan is the
 [sprint plan](docs/delivery/sprint-plan.md).
 
-Sprint 1's cards are kept in [`docs/homework/sprint-1/`](docs/homework/sprint-1/README.md) as
-the record of how the first sprint went.
+The first two sprints are kept as records:
+[Sprint 1](docs/homework/sprint-1/status.md) and
+[Sprint 2](docs/homework/sprint-2/status.md).
+
+There are four administrator accounts and no public sign-up. Create them locally once:
+
+```bash
+BOOTSTRAP_ADMIN_PASSWORD='choose-a-temporary-password' \
+  docker compose run --rm -e BOOTSTRAP_ADMIN_PASSWORD api python -m app.bootstrap
+```
+
+Each account must set its own password at first login.
+
+To try the sales role, add a sales account the same way:
+
+```bash
+BOOTSTRAP_ADMIN_PASSWORD='choose-a-temporary-password' \
+  docker compose run --rm -e BOOTSTRAP_ADMIN_PASSWORD api python -m app.bootstrap --sales you@example.test
+```
 
 ## How we work
 
@@ -93,8 +112,9 @@ implement it; a human reviews the result.** The short version is in
 |---|---|
 | [Scope spec](docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) | What we are building, what is out of scope, and the design |
 | [Sprint plan](docs/delivery/sprint-plan.md) | The nine sprints, what each delivers, and who leads it. Read this one |
-| [Homework — Sprint 2](docs/homework/sprint-2/README.md) | What each of us is doing right now |
-| [Sprint 1 record](docs/homework/sprint-1/status.md) | What the first sprint shipped, and what we learned |
+| [Sprint 3 scope](docs/delivery/sprint-3-auth.md) | Login, roles, bootstrap, and what this sprint does not do |
+| [Sprint 3 review homework](docs/homework/sprint-3/README.md) | What each of us is reviewing right now |
+| [Sprint 2 exit](docs/homework/sprint-2/status.md) · [Sprint 1 record](docs/homework/sprint-1/status.md) | How the first two sprints closed, with evidence |
 | [Lead API contract](docs/delivery/sprint-1-lead-contract.md) | The exact Lead and Activity shapes the API and UI agree on |
 | [Sprint detail](docs/delivery/sprint-detail.md) | Deep detail on every piece of work, sprint by sprint. Reference only |
 | [How we work](docs/team/how-we-work.md) | Branching, PRs, review, what "done" means |
@@ -111,6 +131,6 @@ matches FikaTu so the two systems share one set of conventions.
 
 ## Not built yet
 
-Auth, campaigns, drafts, approval, sending, replies, and reporting —
-Sprints 3 to 9 in the [sprint plan](docs/delivery/sprint-plan.md). The Sprint 2 CI workflow is
-present; its checks still need to be marked required in GitHub branch protection.
+Campaigns, drafts, approval, sending, replies, and reporting — Sprints 4 to 9 in the
+[sprint plan](docs/delivery/sprint-plan.md). The CI workflow is present; its checks still need
+to be marked required in GitHub branch protection.

@@ -1,24 +1,45 @@
-import { Menu, Upload, Users, X } from "lucide-react";
+import {
+  LogOut,
+  Menu,
+  ShieldCheck,
+  Upload,
+  Users as UsersIcon,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
+import { useAuth } from "@/auth/context";
 import { CrewList, CrewRail } from "@/components/Crew";
 import { Scout } from "@/components/Scout";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
+interface NavItem {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  end: boolean;
+  adminOnly?: boolean;
+}
+
+const NAV_ITEMS: NavItem[] = [
   // `end` keeps "Leads" from staying lit while you are on the import screen.
-  { to: "/leads", label: "Leads", icon: Users, end: true },
+  { to: "/leads", label: "Leads", icon: UsersIcon, end: true },
   { to: "/leads/import", label: "Import", icon: Upload, end: true },
+  { to: "/admin/users", label: "Users", icon: ShieldCheck, end: true, adminOnly: true },
 ];
 
 /** Screens that exist in the plan but deliberately not in this sprint. */
 const LATER_ITEMS = ["Campaigns", "Replies", "Pipeline"];
 
 function NavItems({ onNavigate }: { onNavigate?: () => void }) {
+  const { user } = useAuth();
+  const items = NAV_ITEMS.filter((item) => !item.adminOnly || user?.role === "admin");
+
   return (
     <nav className="flex flex-col gap-1 px-3">
-      {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+      {items.map(({ to, label, icon: Icon, end }) => (
         <NavLink
           key={to}
           to={to}
@@ -48,6 +69,35 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
         </NavLink>
       ))}
     </nav>
+  );
+}
+
+function Account({ onNavigate }: { onNavigate?: () => void }) {
+  const { user, logout } = useAuth();
+  if (!user) return null;
+
+  return (
+    <div className="flex items-center gap-2 px-5 pb-3">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[11px] text-sidebar-foreground/75" title={user.email}>
+          {user.email}
+        </p>
+        <p className="text-[10px] uppercase tracking-[0.16em] text-sidebar-foreground/35">
+          {user.role}
+        </p>
+      </div>
+      <button
+        type="button"
+        aria-label="Sign out"
+        onClick={() => {
+          void logout();
+          onNavigate?.();
+        }}
+        className="grid size-7 place-items-center rounded-md text-sidebar-foreground/50 transition-colors hover:bg-white/10 hover:text-white"
+      >
+        <LogOut className="size-4" />
+      </button>
+    </div>
   );
 }
 
@@ -108,6 +158,7 @@ export function AppLayout() {
         <LaterSprints className="mt-8" />
 
         <div className="mt-auto">
+          <Account />
           <CrewRail />
           <div className="flex items-end gap-3 border-t border-sidebar-border px-5 py-4">
             <Scout size={78} />
@@ -207,7 +258,11 @@ export function AppLayout() {
               </div>
             </div>
 
-            <div className="mt-auto flex items-end gap-3 border-t border-sidebar-border px-5 py-4">
+            <div className="mt-auto">
+              <Account onNavigate={() => setOpenedAt(null)} />
+            </div>
+
+            <div className="flex items-end gap-3 border-t border-sidebar-border px-5 py-4">
               <Scout size={56} />
               <p className="pb-1 text-[11px] leading-snug text-sidebar-foreground/45">
                 Reading the ground.

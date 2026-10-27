@@ -1,13 +1,14 @@
 # Backend — Webloom Sales Engine
 
-The Lead backend: Lead and Activity tables, import batches, provenance, independent channel
+The sales backend: Lead and Activity tables, import batches, provenance, independent channel
 eligibility review, terminal suppression, reversible migrations, a repeatable synthetic seed,
-read/review endpoints, the CSV importer, and their tests. It is the piece that replaces the
-frontend's **"Sample data"** banner with real leads.
+read/review endpoints, the CSV importer, and — since Sprint 3 — authentication with `admin`
+and `sales` roles. It is the piece that replaces the frontend's **"Sample data"** banner with
+real leads.
 
-Deliberately **not** here yet: authentication and roles, sending, campaigns, exports,
-background jobs, and FikaTu delivery. The containers live at the repo root —
-see [`docker/README.md`](../docker/README.md).
+Deliberately **not** here yet: sending, campaigns, exports, background jobs, and FikaTu
+delivery. The containers live at the repo root — see
+[`docker/README.md`](../docker/README.md).
 
 ## Layout
 
@@ -53,6 +54,9 @@ Settings come from the environment, or from `backend/.env` if it exists:
 | `TEST_DATABASE_URL` | `...@localhost:5432/webloom_sales_engine_test` | The test suite's database. Its name must end in `_test`. |
 | `ENVIRONMENT` | `development` | `production` makes the seed refuse to run. |
 | `SQL_ECHO` | `false` | Log every SQL statement. |
+| `JWT_SECRET_KEY` | development placeholder | Signs access tokens. Replace it anywhere real; startup refuses the placeholder outside `development`. |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `480` | Access-token lifetime (8 hours). |
+| `BOOTSTRAP_ADMIN_PASSWORD` | unset | Temporary password used only by `python -m app.bootstrap`. |
 
 ## Docker
 
@@ -90,11 +94,42 @@ Run everything from `backend/`.
 .venv/bin/alembic downgrade base    # reverse the migration — it is not one-way
 .venv/bin/alembic check             # fail if the models and the migration have drifted
 .venv/bin/python -m app.seed        # load the synthetic sample leads (safe to re-run)
+.venv/bin/python -m app.bootstrap   # create the four development admins (safe to re-run)
 .venv/bin/uvicorn app.main:app --reload --port 8001   # the API the frontend proxies to
 .venv/bin/python -m pytest -v       # the test suite (needs TEST_DATABASE_URL)
 ```
 
 Interactive docs are at <http://localhost:8001/docs> once the server is running.
+
+## Authentication
+
+Two roles, no permission matrix:
+
+| Role | May |
+|---|---|
+| `admin` | Everything `sales` may, plus `GET /api/v1/users` |
+| `sales` | Sign in and work the lead desk (list, detail, import, compliance review) |
+
+- `POST /api/v1/auth/login` — email + password, returns a bearer token and the user.
+- `GET /api/v1/auth/me` — the signed-in user.
+- `POST /api/v1/auth/logout` — bumps the user's `token_version`, invalidating issued tokens.
+- `POST /api/v1/auth/change-password` — returns a fresh token.
+- `GET /api/v1/users` — administrators only.
+
+Every `/api/v1/leads` route requires a token. Wrong password and unknown email return the
+same `401`. A bootstrapped account must change its password before it can read business data;
+that is enforced by the API (403), not only by the UI.
+
+Set a local temporary password and create the four administrators:
+
+```bash
+cd backend
+BOOTSTRAP_ADMIN_PASSWORD='choose-a-temporary-password' .venv/bin/python -m app.bootstrap
+# add a sales account to test the other role:
+BOOTSTRAP_ADMIN_PASSWORD='choose-a-temporary-password' .venv/bin/python -m app.bootstrap --sales you@example.test
+```
+
+Rerunning it never duplicates an account and never resets a password that already exists.
 
 ## The API
 

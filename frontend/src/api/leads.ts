@@ -8,6 +8,7 @@
  */
 
 import { sampleLeadDetails, sampleLeads } from "./fixtures";
+import { API_BASE_URL, ApiError, apiRequest, getToken } from "./client";
 import type {
   Channel,
   EligibilityReviewInput,
@@ -19,68 +20,14 @@ import type {
   SuppressionInput,
 } from "./types";
 
-/** The dev server proxies /api to the FastAPI service (see vite.config.ts). */
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "/api/v1").replace(/\/+$/, "");
+// Existing imports of ApiError from this module keep working.
+export { ApiError } from "./client";
 
 /** Set VITE_USE_MOCK=1 to skip the API entirely, e.g. with no backend running. */
 const FORCE_SAMPLE = import.meta.env.VITE_USE_MOCK === "1";
 
-const REQUEST_TIMEOUT_MS = 4000;
-
-export class ApiError extends Error {
-  status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-  }
-}
-
-function validationMessage(detail: unknown): string | null {
-  if (typeof detail === "string") return detail;
-  if (!Array.isArray(detail)) return null;
-  const messages = detail
-    .map((item) =>
-      item && typeof item === "object" && "msg" in item && typeof item.msg === "string"
-        ? item.msg
-        : null,
-    )
-    .filter((message): message is string => Boolean(message));
-  return messages.length > 0 ? messages.join("; ") : null;
-}
-
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...init,
-      headers: { Accept: "application/json", ...init.headers },
-      signal: controller.signal,
-    });
-    if (!response.ok) {
-      let detail = `The API answered ${response.status} for ${path}.`;
-      try {
-        const body = (await response.json()) as { detail?: unknown };
-        detail = validationMessage(body.detail) ?? detail;
-      } catch {
-        // A non-JSON error keeps the stable status message.
-      }
-      throw new ApiError(detail, response.status);
-    }
-    return (await response.json()) as T;
-  } catch (cause) {
-    if (cause instanceof ApiError) throw cause;
-    throw new ApiError(`Could not reach the API at ${API_BASE_URL}.`, 0);
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 async function mutate<T>(path: string, method: "POST" | "PUT", body: unknown): Promise<T> {
-  return request<T>(path, {
+  return apiRequest<T>(path, {
     method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -109,7 +56,7 @@ export async function listLeads(
   try {
     return {
       source: "api",
-      data: await request<LeadListResponse>(`/leads?limit=${limit}&offset=${offset}`),
+      data: await apiRequest<LeadListResponse>(`/leads?limit=${limit}&offset=${offset}`),
     };
   } catch (cause) {
     return fromSample(cause instanceof Error ? cause.message : undefined);
@@ -126,7 +73,7 @@ export async function getLead(id: string): Promise<Loaded<LeadDetail>> {
   if (FORCE_SAMPLE) return fromSample("VITE_USE_MOCK=1");
 
   try {
-    return { source: "api", data: await request<LeadDetail>(`/leads/${encodeURIComponent(id)}`) };
+    return { source: "api", data: await apiRequest<LeadDetail>(`/leads/${encodeURIComponent(id)}`) };
   } catch (cause) {
     // A reachable API that answers 404 has answered us. Do not hide that behind
     // sample data — a missing lead is a real result and the UI should say so.
@@ -169,6 +116,8 @@ export function importLeads(
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${API_BASE_URL}/leads/import`);
     xhr.setRequestHeader("Accept", "application/json");
+    const token = getToken();
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.responseType = "text";
     xhr.timeout = 60_000;
 

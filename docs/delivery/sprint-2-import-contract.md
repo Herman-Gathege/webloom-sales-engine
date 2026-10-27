@@ -23,8 +23,9 @@ because a row we cannot use must never cost us the rows beside it.
 | Size | Up to 5 MB. Over that is a `413`. |
 | Content type | Ignored — browsers send whatever they like for a `.csv`, so the bytes are what count. |
 
-There is **no auth yet**, so contact details are not yet hidden from anyone who can reach the
-API. Authentication and roles are Sprint 3; that is a known gap, not an oversight.
+**Sprint 2 baseline:** this endpoint had no authentication yet. Sprint 3 now requires a valid
+`admin` or `sales` session for every lead endpoint; this statement is retained to describe the
+original contract accurately.
 
 ## What the file must contain
 
@@ -209,5 +210,5 @@ without erasing that history:
    the research column; review and eventual dispatch must also check technical availability.
 
 The importer originally added no columns and no migration; that historical statement was
-superseded by the compliance migration on 2026-10-21. Role-gated contact details still require
-the Sprint 3 authentication work.
+superseded by the compliance migration on 2026-10-21. Sprint 3 now supplies the authentication
+required by the endpoint and limits lead access to `admin` and `sales`.

@@ -9,3 +9,9 @@ psycopg[binary]==3.2.3
 # Form and file uploads: the CSV importer takes the research list as a
 # multipart upload. FastAPI's floor is >=0.0.7.
 python-multipart==0.0.32
+# Authentication: the same pair FikaTu uses (ADR-001), so the team has one
+# mental model for tokens and password hashing.
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+# passlib 1.7.4 reads bcrypt.__about__, which bcrypt 4.1 removed.
+bcrypt==4.0.1

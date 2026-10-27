@@ -1,6 +1,9 @@
 # Sprint 2 — the Lead Desk is real
 
-**Started:** 2026-10-13 · **Owner:** Sharon · **Reviewer:** Mark
+**Started:** 2026-10-13 · **Closed:** 2026-10-27 · **Owner:** Sharon · **Reviewer:** Mark
+
+> **Sprint 2 is closed.** The evidence, the accepted deviations and the known limitations are
+> in [the exit review](status.md). This page stays as the record of what the sprint asked for.
 
 ## Where we are
 
@@ -17,8 +20,9 @@ One shared branch: `sprint/2-lead-desk`. Read [the hand-off steps](../README.md)
 start. One person works on it at a time, then the next person pulls it and adds their piece.
 The sprint has one pull request to `main`; each hand-off updates it.
 
-**Right now:** Sharon is done (PRs #16 and #17), Anne is done (PR #19), Herman is done
-(PR #20 the filters, and PR #21 the import screen), and Mark is next with CI.
+**How it ended:** Sharon shipped the importer (PRs #16, #17), Anne the seller review (#19),
+Herman the filters and import screen (#20–#23), Mark the CI workflow, and the compliance
+foundation landed in #24.
 
 ## What we are doing
 

@@ -6,6 +6,7 @@ from app.models.compliance import (
     Suppression,
 )
 from app.models.lead import Lead, LeadStatus
+from app.models.user import User, UserRole
 
 __all__ = [
     "Activity",
@@ -15,4 +16,6 @@ __all__ = [
     "LeadProvenance",
     "LeadStatus",
     "Suppression",
+    "User",
+    "UserRole",
 ]
