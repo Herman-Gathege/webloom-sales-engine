@@ -39,7 +39,7 @@ describe("LeadList", () => {
 
     expect(await screen.findByText(optician.business_name)).toBeTruthy();
     expect(screen.queryByText(other.business_name)).toBeNull();
-    expect(screen.getByText(/showing 1 of/i)).toBeTruthy();
+    expect(screen.getByText(/1 match the current filters/i)).toBeTruthy();
   });
 
   it("searches business name, phone and area", async () => {
@@ -80,6 +80,17 @@ describe("LeadList", () => {
     renderAt("/leads?status=contacted");
 
     expect(await screen.findByText(/nothing down this path/i)).toBeTruthy();
+  });
+
+  it("filters by compliance outcome and shows the reason", async () => {
+    const eligible = sampleLeads.find((lead) => lead.compliance.status === "eligible")!;
+    const blocked = sampleLeads.find((lead) => lead.compliance.status === "blocked")!;
+
+    renderAt("/leads?compliance_status=eligible");
+
+    expect(await screen.findByText(eligible.business_name)).toBeTruthy();
+    expect(screen.queryByText(blocked.business_name)).toBeNull();
+    expect(screen.getByText(eligible.compliance.explanation)).toBeTruthy();
   });
 
   it("filters as the seller types", async () => {

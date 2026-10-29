@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 
 from app.models import Activity, Lead, LeadChannelEligibility, Suppression
 from app.repositories import LeadRepository
+from app.services.compliance_evaluator import ComplianceEvaluator
 from app.services.contact_identity import contact_fingerprint
 from app.services.lead_service import LeadNotFoundError
 
@@ -38,6 +39,7 @@ class ComplianceTargetError(Exception):
 class ComplianceService:
     def __init__(self, repository: LeadRepository) -> None:
         self.repository = repository
+        self.evaluator = ComplianceEvaluator(repository)
 
     def review_eligibility(
         self,
@@ -67,6 +69,11 @@ class ComplianceService:
             )
             self.repository.add_eligibility(eligibility)
 
+        if decision.state == "eligible":
+            blocker = self.evaluator.review_blocker(lead, channel)
+            if blocker is not None:
+                raise ComplianceTargetError(blocker)
+
         previous_state = eligibility.state
         eligibility.state = decision.state
         eligibility.lawful_basis = self._clean(decision.lawful_basis)
@@ -77,6 +84,9 @@ class ComplianceService:
         eligibility.reviewer = decision.reviewer.strip()
         eligibility.reviewed_at = datetime.now(UTC)
         eligibility.rationale = decision.rationale.strip()
+        eligibility.reviewed_input_fingerprint = (
+            self.evaluator.channel_input_fingerprint(lead, eligibility)
+        )
 
         self.repository.add_activity(
             Activity(
@@ -93,12 +103,18 @@ class ComplianceService:
                 },
             )
         )
+        self.repository.flush()
+        self.evaluator.evaluate(
+            lead,
+            actor=eligibility.reviewer,
+            record_activity=True,
+        )
         self.repository.commit()
         return self._reload(parsed_id)
 
     def record_suppression(self, lead_id: str, request: SuppressionDecision) -> Lead:
         parsed_id = self._lead_id(lead_id)
-        lead = self.repository.get(parsed_id)
+        lead = self.repository.get_with_activity(parsed_id)
         if lead is None:
             raise LeadNotFoundError(lead_id)
 
@@ -152,7 +168,21 @@ class ComplianceService:
                     },
                 )
             )
-            self.repository.commit()
+        self.repository.flush()
+        all_contact_fingerprints = {
+            contact_fingerprint(kind, value)
+            for kind, value in self._contacts_for_scope(lead, "all_marketing")
+        }
+        lead._matching_suppressions = self.repository.suppressions_for_fingerprints(
+            all_contact_fingerprints,
+            lead_id=parsed_id,
+        )
+        self.evaluator.evaluate(
+            lead,
+            actor=request.recorded_by.strip(),
+            record_activity=True,
+        )
+        self.repository.commit()
         return self._reload(parsed_id)
 
     @staticmethod

@@ -32,6 +32,10 @@ Never invent a source URL, collection date, evidence, or review decision to clea
 
 ## 3. Review provenance and channel eligibility
 
+After import, the Lead Desk shows the automatic lead outcome and concise reasons. Filter
+`compliance_status=needs_review` (optionally with the import batch) to work only the exceptions
+that need a person. `blocked` is for audit and must not be treated as an outreach queue.
+
 Open each imported lead and confirm provenance before making a channel decision. Email, SMS,
 and WhatsApp are reviewed separately.
 
@@ -50,6 +54,10 @@ human assessment; the system records it and does not decide whether it is legall
 
 If the evidence is absent or ambiguous, leave the channel `needs_review`. Do not infer consent
 from a public listing or from the fact that a business owns a contact channel.
+
+The automatic evaluator reruns after review, suppression, or material contact/provenance
+changes. If a lead later changes, an older human approval remains visible as history but is
+stale and cannot pass the current outreach gate.
 
 ## 4. Prepare the campaign
 
@@ -70,6 +78,11 @@ identify the approver, timestamp, campaign, channel, message version, and any co
 lead.
 
 ## 6. Dispatch through FikaTu
+
+The current Sprint 3 readiness guard is `POST /api/v1/leads/{id}/outreach-check/{channel}` for
+one lead and `POST /api/v1/leads/outreach-check` for up to 200 leads. It re-evaluates the lead
+and returns the allowed/blocked result per channel. It does not queue or send. Sprint 5–6 must
+call this boundary from every queue, dispatch, retry, and follow-up path.
 
 Before every attempt and every retry, the Sales Engine must recheck:
 
@@ -93,6 +106,10 @@ failures. FikaTu owns provider retries and delivery status; it does not decide s
 - Keep the note short and relevant. Never copy unnecessary message content into audit details.
 
 Suppression is terminal. The current UI offers no removal path.
+
+Inbound messages are not ingested automatically in Sprint 3. A person must record the reply or
+objection through the existing suppression control. Do not describe this as end-to-end opt-out
+automation until the inbound messaging integration exists.
 
 ## Dispatch decision checklist
 

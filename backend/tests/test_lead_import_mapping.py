@@ -16,6 +16,7 @@ from app.services.lead_import import (
     map_row,
     normalise_phone,
     normalise_source,
+    normalise_text,
     parse_website_status,
     read_rows,
     refusal_for,
@@ -112,6 +113,18 @@ def test_the_website_grammars(raw: str, expected: tuple[bool, bool]) -> None:
 )
 def test_source_aliases_and_slugs(raw: str, expected: tuple[str, bool]) -> None:
     assert normalise_source(raw) == expected
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("  Mwangaza   Opticians  ", "Mwangaza Opticians"),
+        ("CBD,\n 3 branches", "CBD, 3 branches"),
+        ("", ""),
+    ],
+)
+def test_human_readable_fields_collapse_whitespace(raw: str, expected: str) -> None:
+    assert normalise_text(raw) == expected
 
 
 def test_a_recognised_row_warns_about_nothing() -> None:

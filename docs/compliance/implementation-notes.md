@@ -2,6 +2,11 @@
 
 **Implemented:** 2026-10-21 in the Sprint 2 Lead Desk slice
 
+**Extended 2026-10-27:** automatic, durable lead eligibility and the outreach readiness gate.
+The original Sprint 2 notes below remain the history of the channel-review and suppression
+foundation. The current end-to-end boundary is documented in
+[Sprint 3 solidification](../delivery/sprint-3-solidification.md).
+
 This note records the current implementation, not a future-state claim. Campaign, outreach,
 worker, retry, FikaTu client, and delivery-result models do not exist yet. Sprint 5–6 must use
 the records and gates below when those models are added.
@@ -111,3 +116,26 @@ Approval and dispatch:
 - leave WhatsApp disabled while the provider is absent.
 
 These are acceptance criteria for the sending sprint, not claims that sending is already safe.
+
+## 2026-10-27 solidification
+
+Migration `0004` adds `lead_compliance_evaluation`, provenance `source_name`, reviewed-input
+fingerprints, and import outcome counters. `ComplianceEvaluator` (rule `2026-10-27.1`) now
+derives one durable lead-level outcome: `eligible`, `needs_review`, `blocked`, or `invalid`.
+Data quality is stored separately as `complete`, `incomplete`, or `invalid`.
+
+An approval is current only while its channel review remains complete and its
+`reviewed_input_fingerprint` matches current contacts, source, provenance, and evidence.
+Stale human decisions stay in history but cannot make a lead eligible. Unchanged inputs reuse
+the same snapshot and do not append a repeated audit event.
+
+Imports automatically evaluate saved rows and return actual created, matched, duplicate,
+rejected, eligible, needs-review, blocked, invalid, provenance-incomplete, and row-review
+counts. The Lead Detail API and Lead Desk list expose the current snapshot and reasons.
+
+The canonical action boundary is `POST /leads/{id}/outreach-check/{channel}` or the bulk
+`POST /leads/outreach-check`. It forces re-evaluation immediately before the decision. This is
+still not a queue or send path. Sprint 5–6 must call it from every dispatch and retry.
+
+Inbound replies and automatic opt-out ingestion remain absent. A signed-in person records an
+opt-out or objection through the existing suppression endpoint.

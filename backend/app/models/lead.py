@@ -96,6 +96,12 @@ class Lead(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    compliance: Mapped["LeadComplianceEvaluation | None"] = relationship(  # noqa: F821
+        back_populates="lead",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        uselist=False,
+    )
     suppressions: Mapped[list["Suppression"]] = relationship(  # noqa: F821
         back_populates="lead",
         order_by="Suppression.created_at, Suppression.id",

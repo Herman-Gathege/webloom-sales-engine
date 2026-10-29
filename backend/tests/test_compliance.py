@@ -79,6 +79,19 @@ def review_payload(**overrides: object) -> dict[str, object]:
     return payload
 
 
+def attach_provenance(lead: Lead) -> None:
+    """Synthetic source facts required before an eligible channel decision."""
+    lead.provenance = LeadProvenance(
+        source_name="Synthetic directory listing",
+        source_url="https://example.test/business",
+        collection_date=None,
+        collection_method="Manual listing review",
+        intended_purpose="Business outreach",
+        contact_type="generic_business",
+        contact_name=None,
+    )
+
+
 def test_import_persists_provenance_batch_and_three_pending_channels(
     client: TestClient, session: Session
 ) -> None:
@@ -221,6 +234,7 @@ def test_channel_reviews_are_independent_and_audited(
     client: TestClient, session: Session, make_lead, admin_user
 ) -> None:
     lead = make_lead(email="owner@example.test")
+    attach_provenance(lead)
     session.add(lead)
     session.flush()
 
@@ -249,12 +263,41 @@ def test_channel_reviews_are_independent_and_audited(
         "rationale": "Direct request and relevant business context are recorded.",
     }
     assert "owner@example.test" not in json.dumps(audit.details)
+    email_review = next(row for row in lead.eligibility if row.channel == "email")
+    assert email_review.reviewed_input_fingerprint is not None
+    assert len(email_review.reviewed_input_fingerprint) == 64
+
+
+def test_eligible_review_requires_current_provenance_and_contact(
+    client: TestClient, session: Session, make_lead
+) -> None:
+    lead = make_lead(email="owner@example.test")
+    session.add(lead)
+    session.flush()
+
+    no_provenance = client.put(
+        f"/api/v1/leads/{lead.id}/eligibility/email",
+        json=review_payload(),
+    )
+    assert no_provenance.status_code == 409
+    assert "provenance" in no_provenance.json()["detail"].lower()
+
+    attach_provenance(lead)
+    lead.email = None
+    session.flush()
+    no_contact = client.put(
+        f"/api/v1/leads/{lead.id}/eligibility/email",
+        json=review_payload(),
+    )
+    assert no_contact.status_code == 409
+    assert "contact" in no_contact.json()["detail"].lower()
 
 
 def test_lawful_basis_uses_the_documented_categories(
     client: TestClient, session: Session, make_lead
 ) -> None:
     lead = make_lead(email="owner@example.test")
+    attach_provenance(lead)
     session.add(lead)
     session.flush()
 
@@ -287,6 +330,29 @@ def test_a_public_listing_alone_starts_pending_and_eligible_requires_evidence(
     )
     assert invalid.status_code == 422
     assert "Eligible reviews require" in json.dumps(invalid.json())
+
+
+def test_an_eligible_review_requires_a_usable_contact_and_provenance(
+    client: TestClient, session: Session, make_lead
+) -> None:
+    no_email = make_lead(email=None)
+    no_provenance = make_lead(email="owner@example.test")
+    session.add_all([no_email, no_provenance])
+    session.flush()
+
+    unavailable = client.put(
+        f"/api/v1/leads/{no_email.id}/eligibility/email",
+        json=review_payload(),
+    )
+    missing_source = client.put(
+        f"/api/v1/leads/{no_provenance.id}/eligibility/email",
+        json=review_payload(),
+    )
+
+    assert unavailable.status_code == 409
+    assert "usable EMAIL contact" in unavailable.json()["detail"]
+    assert missing_source.status_code == 409
+    assert "provenance" in missing_source.json()["detail"].lower()
 
 
 def test_channel_suppression_only_blocks_that_channel(

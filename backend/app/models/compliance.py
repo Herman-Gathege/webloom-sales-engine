@@ -1,9 +1,11 @@
 """Compliance records for provenance, channel review, and terminal suppression."""
 
+import re
 import uuid
 from datetime import date, datetime
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
@@ -14,7 +16,9 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
@@ -36,6 +40,16 @@ class ImportBatch(Base):
     accepted: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     rejected: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     duplicates: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    matched: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    eligible: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    needs_review: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    blocked: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    invalid: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    provenance_incomplete: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     review_required: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default="0"
     )
@@ -51,6 +65,15 @@ class ImportBatch(Base):
         CheckConstraint("accepted >= 0", name="accepted_non_negative"),
         CheckConstraint("rejected >= 0", name="rejected_non_negative"),
         CheckConstraint("duplicates >= 0", name="duplicates_non_negative"),
+        CheckConstraint("matched >= 0", name="matched_non_negative"),
+        CheckConstraint("eligible >= 0", name="eligible_non_negative"),
+        CheckConstraint("needs_review >= 0", name="needs_review_non_negative"),
+        CheckConstraint("blocked >= 0", name="blocked_non_negative"),
+        CheckConstraint("invalid >= 0", name="invalid_non_negative"),
+        CheckConstraint(
+            "provenance_incomplete >= 0",
+            name="provenance_incomplete_non_negative",
+        ),
         CheckConstraint("review_required >= 0", name="review_required_non_negative"),
     )
 
@@ -68,6 +91,7 @@ class LeadProvenance(Base):
         ForeignKey("import_batches.id", ondelete="SET NULL")
     )
     row_number: Mapped[int | None] = mapped_column(Integer)
+    source_name: Mapped[str | None] = mapped_column(Text)
     source_url: Mapped[str | None] = mapped_column(Text)
     collection_date: Mapped[date | None] = mapped_column(Date)
     collection_method: Mapped[str | None] = mapped_column(String(255))
@@ -110,6 +134,7 @@ class LeadChannelEligibility(Base):
     reviewer: Mapped[str | None] = mapped_column(String(64))
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     rationale: Mapped[str | None] = mapped_column(Text)
+    reviewed_input_fingerprint: Mapped[str | None] = mapped_column(String(64))
 
     lead: Mapped[Lead] = relationship(back_populates="eligibility")
 
@@ -127,10 +152,13 @@ class LeadChannelEligibility(Base):
     def technical_available(self) -> bool:
         """Whether the selected channel can use a contact currently on this lead."""
         if self.channel == "email":
-            return bool(self.lead.email)
+            return bool(
+                self.lead.email
+                and re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", self.lead.email)
+            )
 
         phone = self.lead.phone
-        if not phone:
+        if not phone or not re.fullmatch(r"\+254\d{9}", phone):
             return False
         if self.channel == "whatsapp":
             return self.lead.whatsapp_capable
@@ -161,6 +189,67 @@ class LeadChannelEligibility(Base):
             "contact_context IS NOT NULL AND reviewer IS NOT NULL AND "
             "reviewed_at IS NOT NULL AND rationale IS NOT NULL)",
             name="eligible_review_complete",
+        ),
+    )
+
+
+class LeadComplianceEvaluation(Base):
+    """The latest automatic compliance snapshot for one lead.
+
+    Human evidence remains in `LeadChannelEligibility`. This record stores the
+    derived lead-level outcome, its reasons, and the exact rule/input version so
+    unchanged decisions can be reused without another human review.
+    """
+
+    __tablename__ = "lead_compliance_evaluation"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    lead_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("leads.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    data_quality_status: Mapped[str] = mapped_column(String(16), nullable=False)
+    reason_codes: Mapped[list[str]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
+    explanation: Mapped[str] = mapped_column(Text, nullable=False)
+    eligible_channels: Mapped[list[str]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
+    suppressed_channels: Mapped[list[str]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
+    channel_results: Mapped[list[dict[str, object]]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
+    outreach_ready: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
+    evaluated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    rule_version: Mapped[str] = mapped_column(String(32), nullable=False)
+    input_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+
+    lead: Mapped[Lead] = relationship(back_populates="compliance")
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('eligible', 'needs_review', 'blocked', 'invalid')",
+            name="compliance_status_valid",
+        ),
+        CheckConstraint(
+            "data_quality_status IN ('complete', 'incomplete', 'invalid')",
+            name="data_quality_status_valid",
+        ),
+        CheckConstraint(
+            "outreach_ready = (status = 'eligible')",
+            name="outreach_ready_matches_eligible",
+        ),
+        CheckConstraint("explanation <> ''", name="explanation_not_blank"),
+        CheckConstraint("rule_version <> ''", name="rule_version_not_blank"),
+        CheckConstraint(
+            "length(input_fingerprint) = 64", name="input_fingerprint_length"
         ),
     )
 

@@ -24,6 +24,7 @@ from app.models import (
     LeadProvenance,
     LeadStatus,
 )
+from app.services.compliance_evaluator import ComplianceEvaluator
 
 SOURCE = "google_maps"
 
@@ -151,6 +152,7 @@ def build_sample_leads() -> list[Lead]:
             updated_at=created_at,
         )
         lead.provenance = LeadProvenance(
+            source_name="Google Maps listing",
             source_url=f"https://example.test/research/{index + 1}",
             collection_date=date(2026, 9, 23),
             collection_method="Synthetic research fixture",
@@ -187,6 +189,7 @@ def build_sample_leads() -> list[Lead]:
             )
         )
 
+        ComplianceEvaluator().evaluate(lead, record_activity=False)
         leads.append(lead)
 
     return leads
