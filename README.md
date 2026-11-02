@@ -142,4 +142,4 @@ matches FikaTu so the two systems share one set of conventions.
 
 Campaigns, drafts, approval, sending, replies, and reporting — Sprints 4 to 9 in the
 [sprint plan](docs/delivery/sprint-plan.md). The CI workflow is present, and `main` requires
-its Backend/Frontend checks and one approving review.
+its Backend/Frontend checks.

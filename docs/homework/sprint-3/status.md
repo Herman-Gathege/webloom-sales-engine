@@ -52,7 +52,7 @@ foundation with the CSV-to-outreach compliance boundary.
 6. **Bulk approval:** not implemented. Any future bulk action must preserve an individual
    current decision for every lead.
 7. **GitHub enforcement:** resolved after closure. `main` now requires the Backend/Frontend
-   checks and one approving review.
+   checks. Independent human review remains a team process gate.
 
 ## Missing provenance
 
