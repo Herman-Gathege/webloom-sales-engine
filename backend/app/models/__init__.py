@@ -1,4 +1,5 @@
 from app.models.activity import Activity
+from app.models.catalog import MessageTemplate, Offer, TemplateChannel
 from app.models.compliance import (
     ImportBatch,
     LeadChannelEligibility,
@@ -17,7 +18,10 @@ __all__ = [
     "LeadComplianceEvaluation",
     "LeadProvenance",
     "LeadStatus",
+    "MessageTemplate",
+    "Offer",
     "Suppression",
+    "TemplateChannel",
     "User",
     "UserRole",
 ]

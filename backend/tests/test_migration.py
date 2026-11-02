@@ -17,6 +17,8 @@ TABLES = {
     "lead_provenance",
     "lead_channel_eligibility",
     "lead_compliance_evaluation",
+    "message_templates",
+    "offers",
     "suppressions",
     "users",
 }
