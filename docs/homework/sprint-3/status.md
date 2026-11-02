@@ -1,7 +1,8 @@
 # Sprint 3 — exit review
 
-**Decision:** ready to close on merge of
-[PR #26](https://github.com/Herman-Gathege/webloom-sales-engine/pull/26).
+**Decision:** closed in
+[PR #26](https://github.com/Herman-Gathege/webloom-sales-engine/pull/26), merge commit
+`af537b3`.
 **Reviewed:** 2026-11-02 · **Branch:** `feature/sprint-3-solidification`
 
 This is the evidence behind the closeout decision. Sprint 3 combines the authentication
@@ -82,5 +83,5 @@ types. Every lead correctly remains in human review; no missing evidence was inv
 - [x] Sample seeding made explicit
 - [x] Backend, frontend and migration checks pass
 - [x] Documentation reconciled
-- [ ] PR #26 merged to `main`
-- [ ] `main` pulled, started and smoke-tested
+- [x] PR #26 merged to `main`
+- [x] `main` pulled, started and smoke-tested
