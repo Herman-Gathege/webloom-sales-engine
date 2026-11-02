@@ -17,6 +17,14 @@ docker compose exec api python -m app.catalog_seed
 
 The application must load at <http://localhost:5174>.
 
+If you need a Sales account for the role test:
+
+```bash
+BOOTSTRAP_ADMIN_PASSWORD='choose-a-temporary-password' \
+  docker compose run --rm -e BOOTSTRAP_ADMIN_PASSWORD \
+  api python -m app.bootstrap --sales reviewer@example.test
+```
+
 ## Admin acceptance
 
 1. Sign in as an Admin.
