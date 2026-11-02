@@ -8,12 +8,14 @@ individual pieces of work, with the acceptance criteria behind them. It is numbe
 and it is not part of the reading path. Open it when you want the detail on one specific
 thing.
 
-The first sprint is finished; its record is
-[the Sprint 1 closure](../homework/sprint-1/status.md). The sprint we are in now is
-[Sprint 2](../homework/sprint-2/README.md).
+The first three sprints are complete; their records are
+[Sprint 1](../homework/sprint-1/status.md), [Sprint 2](../homework/sprint-2/status.md) and
+[Sprint 3](../homework/sprint-3/status.md).
 
 | Document | What it is |
 |---|---|
 | [Sprint plan](sprint-plan.md) | The plan. Read this one. |
 | [Sprint 1 lead contract](sprint-1-lead-contract.md) | The exact Lead and Activity shapes the API and the screens agree on. |
+| [Sprint 3 authentication](sprint-3-auth.md) | Login, roles, bootstrap and security boundaries. |
+| [Sprint 3 solidification](sprint-3-solidification.md) | CSV import, compliance evaluation, responsive Lead Desk and the outreach boundary. |
 | [Sprint detail](sprint-detail.md) | Deep detail on every piece of work, sprint by sprint. Reference. |

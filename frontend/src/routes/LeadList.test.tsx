@@ -108,6 +108,18 @@ describe("LeadList", () => {
     expect(screen.queryByText(other.business_name)).toBeNull();
   });
 
+  it("toggles the compact filter panel", async () => {
+    renderAt("/leads");
+    await screen.findByText(sampleLeads[0].business_name);
+
+    const toggle = screen.getByRole("button", { name: /filters/i });
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+
+    fireEvent.click(toggle);
+
+    expect(toggle.getAttribute("aria-expanded")).toBe("true");
+  });
+
   it("clears every filter", async () => {
     const optician = sampleLeads.find((lead) => lead.sector === "Opticians and eyewear")!;
     const other = sampleLeads.find((lead) => lead.sector !== optician.sector)!;

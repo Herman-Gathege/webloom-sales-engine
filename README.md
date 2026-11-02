@@ -9,8 +9,7 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Sprints 1 and 2 are closed; Sprint 3 authentication is integrated and its
-solidification slice is in review.** The Lead Desk runs end to end with authentication in
+Pre-MVP. **Sprints 1–3 are closed.** The Lead Desk runs end to end with authentication in
 front of it: researched leads import into PostgreSQL, are automatically evaluated and
 filterable in React, and carry provenance, independent channel-review state, durable
 eligibility, terminal suppression history, and audit events.
@@ -41,8 +40,15 @@ The database is unhealthy for roughly the first minute and a half while `initdb`
 `up` waits for it — so a long silence at the start is not a hang.
 
 On first boot it creates both databases (`webloom_sales_engine` and
-`webloom_sales_engine_test`), runs the migration, loads the eight sample leads, and builds the
-UI. Then open:
+`webloom_sales_engine_test`), runs the migration, and builds the UI. The database starts empty
+so the first import is the source of truth. For a disposable demo, add the synthetic leads
+explicitly:
+
+```bash
+SEED_SAMPLE_DATA=true docker compose up --build
+```
+
+Then open:
 
 | What | URL |
 |---|---|
@@ -66,14 +72,14 @@ The traps we hit, and the decisions to agree before the next sprint, are in the
 
 ## If you are one of the four of us
 
-We are in **Sprint 3 — lock the door**, led by Mark. Your review assignment is in
-[`docs/homework/sprint-3/`](docs/homework/sprint-3/README.md); the scope is
-[Sprint 3 authentication](docs/delivery/sprint-3-auth.md). The whole plan is the
-[sprint plan](docs/delivery/sprint-plan.md).
+**Sprint 3 — lock the door** is complete. Its evidence is in the
+[Sprint 3 exit review](docs/homework/sprint-3/status.md). Sprint 4 — offers and templates —
+is the next planning slice. The whole plan is the [sprint plan](docs/delivery/sprint-plan.md).
 
-The first two sprints are kept as records:
+The first three sprints are kept as records:
 [Sprint 1](docs/homework/sprint-1/status.md) and
-[Sprint 2](docs/homework/sprint-2/status.md).
+[Sprint 2](docs/homework/sprint-2/status.md) and
+[Sprint 3](docs/homework/sprint-3/status.md).
 
 There are four administrator accounts and no public sign-up. Create them locally once:
 
@@ -116,7 +122,7 @@ implement it; a human reviews the result.** The short version is in
 | [Sprint plan](docs/delivery/sprint-plan.md) | The nine sprints, what each delivers, and who leads it. Read this one |
 | [Sprint 3 scope](docs/delivery/sprint-3-auth.md) | Login, roles, bootstrap, and what this sprint does not do |
 | [Sprint 3 solidification](docs/delivery/sprint-3-solidification.md) | CSV import outcomes, automatic eligibility, Lead Desk filters, and the current outreach boundary |
-| [Sprint 3 review homework](docs/homework/sprint-3/README.md) | What each of us is reviewing right now |
+| [Sprint 3 exit review](docs/homework/sprint-3/status.md) | Tests, accepted deviations and the closeout decision |
 | [Sprint 2 exit](docs/homework/sprint-2/status.md) · [Sprint 1 record](docs/homework/sprint-1/status.md) | How the first two sprints closed, with evidence |
 | [Lead API contract](docs/delivery/sprint-1-lead-contract.md) | The exact Lead and Activity shapes the API and UI agree on |
 | [Sprint detail](docs/delivery/sprint-detail.md) | Deep detail on every piece of work, sprint by sprint. Reference only |

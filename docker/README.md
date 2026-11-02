@@ -12,7 +12,7 @@ docker compose up --build
 | Service | Image | Job |
 |---|---|---|
 | `db` | `postgres:17` | PostgreSQL. On first boot it creates `webloom_sales_engine` and `webloom_sales_engine_test`. |
-| `api` | built from `backend/Dockerfile` | Runs `alembic upgrade head`, seeds the sample leads, then starts FastAPI. |
+| `api` | built from `backend/Dockerfile` | Runs `alembic upgrade head`, optionally seeds demo leads, then starts FastAPI. |
 | `frontend` | built from `frontend/Dockerfile` | Builds the SPA with Node 22 and serves it with Nginx, which also proxies `/api` to the API. |
 | `api-test` | same backend image, `test` profile | Runs the pytest suite inside the container. |
 
@@ -36,6 +36,7 @@ bundle.
 
 ```bash
 docker compose up --build       # start db + api + frontend; open http://localhost:5174
+SEED_SAMPLE_DATA=true docker compose up --build  # include the eight synthetic demo leads
 docker compose run --rm -e BOOTSTRAP_ADMIN_PASSWORD api python -m app.bootstrap  # create the four dev admins
 docker compose run --rm api-test   # run the backend tests in a container
 docker compose exec db psql -U postgres -d webloom_sales_engine   # inspect the app db
@@ -79,7 +80,7 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
   eight minutes for the first build on one machine, under a minute afterwards. `db`'s
   healthcheck has a 60s `start_period` and 30 retries precisely for this — with a tighter
   budget, `up` aborts on a clean clone before the API is ever started.
-- **`down -v` deletes the seeded data.** The named volume outlives `down`; only `down -v`
+- **`down -v` deletes the database volume.** The named volume outlives `down`; only `down -v`
   resets it.
 - **The init SQL runs only on a fresh volume.** `docker/postgres/init/` is executed the
   first time PostgreSQL creates an empty data directory. After that, changing the file has
@@ -87,9 +88,9 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 - **Inside Docker the database host is `db`, not `localhost`.** The compose file sets
   `DATABASE_URL` and `TEST_DATABASE_URL` accordingly; `backend/.env.example` is for running
   the backend by hand.
-- **Migrations and seed run on every API start.** Both are idempotent, so restarts are safe,
-  but they add a couple of seconds. The seed still refuses to run when
-  `ENVIRONMENT=production`.
+- **Migrations run on every API start.** Synthetic demo seeding is opt-in with
+  `SEED_SAMPLE_DATA=true`; normal restarts preserve the imported dataset. The seed command
+  still refuses to run when `ENVIRONMENT=production`.
 - **`api-test` runs the same image as `api`.** After changing backend code, rebuild before
   testing — `docker compose build api && docker compose run --rm api-test`. Running the tests
   against an old image is a green light that means nothing.

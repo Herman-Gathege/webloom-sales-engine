@@ -25,8 +25,9 @@ of us; the record is in [the Sprint 1 closure](../homework/sprint-1/status.md).
 **Sprint 2 is closed** — the lead desk is real, and the exit review is in
 [`docs/homework/sprint-2/status.md`](../homework/sprint-2/status.md).
 
-**Sprint 3 is implemented and awaits team review: lock the door**, owned by Mark. The scope
-and acceptance criteria are in [`sprint-3-auth.md`](sprint-3-auth.md); the review homework is in
+**Sprint 3 is complete: lock the door**, owned by Mark. The scope and acceptance criteria are
+in [`sprint-3-auth.md`](sprint-3-auth.md); the closeout evidence is in
+[`docs/homework/sprint-3/status.md`](../homework/sprint-3/status.md). The review homework is in
 [`docs/homework/sprint-3/`](../homework/sprint-3/README.md).
 
 One thing we carry forward: Sprint 1 cost more in setup friction than in product. **From now
@@ -67,7 +68,7 @@ FikaTu is not involved yet, and nothing here depends on another repository.
 Each is one small piece. **1 point ≈ half a focused day**, and the sizes compare sprints to
 each other — they are not a schedule.
 
-**Sprint 3 — Lock the door ← we are here.** Login and two roles, `admin` and `sales`. Only
+**Sprint 3 — Lock the door ✅ closed.** Login and two roles, `admin` and `sales`. Only
 the team can reach the pipeline, and the API enforces what each role may do. *Owner: Mark ·
 Reviewer: Herman · ~8 pts.* Full detail: [`sprint-3-auth.md`](sprint-3-auth.md).
 

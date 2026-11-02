@@ -56,6 +56,7 @@ Settings come from the environment, or from `backend/.env` if it exists:
 | `SQL_ECHO` | `false` | Log every SQL statement. |
 | `JWT_SECRET_KEY` | development placeholder | Signs access tokens. Replace it anywhere real; startup refuses the placeholder outside `development`. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `480` | Access-token lifetime (8 hours). |
+| `SEED_SAMPLE_DATA` | `false` | Set to `true` only for a disposable demo database. Normal startup leaves the database empty for a real import. |
 | `BOOTSTRAP_ADMIN_PASSWORD` | unset | Temporary password used only by `python -m app.bootstrap`. |
 
 ## Docker
@@ -69,8 +70,8 @@ docker compose up --build
 
 - Creates both databases on first boot: `webloom_sales_engine` and
   `webloom_sales_engine_test` (via `docker/postgres/init/01-create-databases.sql`).
-- Runs `alembic upgrade head` and `python -m app.seed` automatically, so the API serves the
-  eight sample leads on first boot.
+- Runs `alembic upgrade head` automatically. Synthetic sample leads are opt-in with
+  `SEED_SAMPLE_DATA=true`, so a normal restart cannot add demo data beside a real import.
 - Serves the API on host port **8001** (container port 8000). 8000 is not used because
   another project already owns it on some machines.
 - Keeps the database internal (no host port) to avoid clashing with a local PostgreSQL.
@@ -100,6 +101,14 @@ Run everything from `backend/`.
 ```
 
 Interactive docs are at <http://localhost:8001/docs> once the server is running.
+
+For a disposable demo through Docker, run:
+
+```bash
+SEED_SAMPLE_DATA=true docker compose up --build
+```
+
+Leave the flag unset when using imported leads.
 
 ## Authentication
 

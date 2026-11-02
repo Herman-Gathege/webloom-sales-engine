@@ -1,6 +1,6 @@
 # Sprint 3 solidification — CSV to the outreach boundary
 
-**Status:** implemented on `feature/sprint-3-solidification`; backend and frontend checks pass.
+**Status:** complete on `feature/sprint-3-solidification`; backend and frontend checks pass.
 This extends the Sprint 3 authentication work without replacing it.
 
 This slice turns an imported CSV into a reviewed, filterable pipeline. It deliberately stops

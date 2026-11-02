@@ -38,6 +38,9 @@ services:
       # value; override it in a real environment.
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-only-change-me-before-anything-real}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-480}
+      # Sample leads are opt-in so restarting the API can never contaminate a
+      # real import. Use `SEED_SAMPLE_DATA=true docker compose up` for demos.
+      SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA:-false}
       # Only read by `python -m app.bootstrap`; empty is fine.
       BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
     ports:

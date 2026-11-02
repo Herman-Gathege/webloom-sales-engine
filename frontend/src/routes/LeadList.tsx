@@ -1,5 +1,6 @@
+import { SlidersHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { getLeadFilterOptions, listLeads } from "@/api/leads";
 import type {
@@ -34,6 +35,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useMediaQuery } from "@/lib/use-media-query";
+import { cn } from "@/lib/utils";
 
 const ANY = "all";
 const PAGE_SIZE = 25;
@@ -75,6 +78,8 @@ export function LeadList() {
   const [response, setResponse] = useState<Loaded<LeadListResponse> | null>(null);
   const [options, setOptions] = useState<LeadFilterOptions | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const showLeadTable = useMediaQuery("(min-width: 768px)");
 
   const query = cleanParam(searchParams.get("q"));
   const sector = cleanParam(searchParams.get("sector"));
@@ -107,6 +112,7 @@ export function LeadList() {
     batchId,
   ];
   const hasFilter = filterValues.some(Boolean);
+  const activeFilterCount = filterValues.filter(Boolean).length;
 
   useEffect(() => {
     let cancelled = false;
@@ -210,168 +216,204 @@ export function LeadList() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
-            <Input
-              type="search"
-              aria-label="Search leads"
-              placeholder="Search business, phone, area"
-              value={query}
-              onChange={(event) => setParam("q", event.target.value)}
-              className="h-9 sm:col-span-2"
-            />
-
-            <Select value={sector || ANY} onValueChange={(value) => selectParam("sector", value)}>
-              <SelectTrigger aria-label="Filter by sector" className="h-9">
-                <SelectValue placeholder="Sector" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>All sectors</SelectItem>
-                {(options?.sectors ?? []).map((value) => (
-                  <SelectItem key={value} value={value}>{value}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={area || ANY} onValueChange={(value) => selectParam("area", value)}>
-              <SelectTrigger aria-label="Filter by area" className="h-9">
-                <SelectValue placeholder="Area" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>All areas</SelectItem>
-                {(options?.areas ?? []).map((value) => (
-                  <SelectItem key={value} value={value}>{value}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={complianceStatus || ANY}
-              onValueChange={(value) => selectParam("compliance_status", value)}
-            >
-              <SelectTrigger aria-label="Filter by compliance status" className="h-9">
-                <SelectValue placeholder="Compliance" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>Any compliance</SelectItem>
-                {(Object.keys(COMPLIANCE_LABELS) as ComplianceStatus[]).map((value) => (
-                  <SelectItem key={value} value={value}>{COMPLIANCE_LABELS[value]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={dataQuality || ANY}
-              onValueChange={(value) => selectParam("data_quality_status", value)}
-            >
-              <SelectTrigger aria-label="Filter by data quality" className="h-9">
-                <SelectValue placeholder="Data quality" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>Any data quality</SelectItem>
-                {(Object.keys(QUALITY_LABELS) as DataQualityStatus[]).map((value) => (
-                  <SelectItem key={value} value={value}>{QUALITY_LABELS[value]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={provenance || ANY} onValueChange={(value) => selectParam("provenance", value)}>
-              <SelectTrigger aria-label="Filter by provenance" className="h-9">
-                <SelectValue placeholder="Provenance" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>Any provenance</SelectItem>
-                <SelectItem value="available">Source available</SelectItem>
-                <SelectItem value="missing">Source missing</SelectItem>
-                <SelectItem value="incomplete">Source incomplete</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={outreachReady || ANY} onValueChange={(value) => selectParam("outreach_ready", value)}>
-              <SelectTrigger aria-label="Filter by outreach readiness" className="h-9">
-                <SelectValue placeholder="Outreach" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>Any readiness</SelectItem>
-                <SelectItem value="yes">Ready for outreach</SelectItem>
-                <SelectItem value="no">Not ready</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={hasSuppression || ANY} onValueChange={(value) => selectParam("has_suppression", value)}>
-              <SelectTrigger aria-label="Filter by suppression" className="h-9">
-                <SelectValue placeholder="Suppression" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>Any restriction</SelectItem>
-                <SelectItem value="yes">Has restriction</SelectItem>
-                <SelectItem value="no">No restriction</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={website || ANY} onValueChange={(value) => selectParam("website", value)}>
-              <SelectTrigger aria-label="Filter by website" className="h-9">
-                <SelectValue placeholder="Website" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>Any website</SelectItem>
-                <SelectItem value="no">No website</SelectItem>
-                <SelectItem value="yes">Has website</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={status || ANY} onValueChange={(value) => selectParam("status", value)}>
-              <SelectTrigger aria-label="Filter by status" className="h-9">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>Any status</SelectItem>
-                {(options?.statuses ?? []).map((value) => (
-                  <SelectItem key={value} value={value}>{STATUS_LABELS[value]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={source || ANY} onValueChange={(value) => selectParam("source", value)}>
-              <SelectTrigger aria-label="Filter by source" className="h-9">
-                <SelectValue placeholder="Source" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>Any source</SelectItem>
-                {(options?.sources ?? []).map((value) => (
-                  <SelectItem key={value} value={value}>{value}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={batchId || ANY} onValueChange={(value) => selectParam("batch_id", value)}>
-              <SelectTrigger aria-label="Filter by import batch" className="h-9">
-                <SelectValue placeholder="Import batch" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY}>Any import batch</SelectItem>
-                {(options?.import_batches ?? []).map((batch) => (
-                  <SelectItem key={batch.id} value={batch.id}>{batch.filename}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={sort} onValueChange={(value) => selectParam("sort", value === "newest" ? "" : value)}>
-              <SelectTrigger aria-label="Sort leads" className="h-9">
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest first</SelectItem>
-                <SelectItem value="oldest">Oldest first</SelectItem>
-                <SelectItem value="business_name">Business name</SelectItem>
-                <SelectItem value="compliance_status">Compliance priority</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {hasFilter && (
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                Clear
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Input
+                type="search"
+                aria-label="Search leads"
+                placeholder="Search business, phone, area"
+                value={query}
+                onChange={(event) => setParam("q", event.target.value)}
+                className="h-9 min-w-0 flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0 md:hidden"
+                aria-expanded={filtersOpen}
+                aria-controls="lead-filters"
+                aria-label={
+                  activeFilterCount > 0
+                    ? `Filters, ${activeFilterCount} active`
+                    : "Filters"
+                }
+                onClick={() => setFiltersOpen((open) => !open)}
+              >
+                <SlidersHorizontal className="size-4" />
+                <span className="hidden sm:inline">Filters</span>
               </Button>
-            )}
+            </div>
+
+            <div
+              id="lead-filters"
+              className={cn(
+                "grid gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4",
+                filtersOpen ? "grid" : "hidden md:grid",
+              )}
+            >
+              <Select value={sector || ANY} onValueChange={(value) => selectParam("sector", value)}>
+                <SelectTrigger aria-label="Filter by sector" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Sector" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>All sectors</SelectItem>
+                  {(options?.sectors ?? []).map((value) => (
+                    <SelectItem key={value} value={value}>{value}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={area || ANY} onValueChange={(value) => selectParam("area", value)}>
+                <SelectTrigger aria-label="Filter by area" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Area" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>All areas</SelectItem>
+                  {(options?.areas ?? []).map((value) => (
+                    <SelectItem key={value} value={value}>{value}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={complianceStatus || ANY}
+                onValueChange={(value) => selectParam("compliance_status", value)}
+              >
+                <SelectTrigger
+                  aria-label="Filter by compliance status"
+                  className="h-9 w-full min-w-0"
+                >
+                  <SelectValue placeholder="Compliance" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any compliance</SelectItem>
+                  {(Object.keys(COMPLIANCE_LABELS) as ComplianceStatus[]).map((value) => (
+                    <SelectItem key={value} value={value}>{COMPLIANCE_LABELS[value]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={dataQuality || ANY}
+                onValueChange={(value) => selectParam("data_quality_status", value)}
+              >
+                <SelectTrigger aria-label="Filter by data quality" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Data quality" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any data quality</SelectItem>
+                  {(Object.keys(QUALITY_LABELS) as DataQualityStatus[]).map((value) => (
+                    <SelectItem key={value} value={value}>{QUALITY_LABELS[value]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={provenance || ANY} onValueChange={(value) => selectParam("provenance", value)}>
+                <SelectTrigger aria-label="Filter by provenance" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Provenance" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any provenance</SelectItem>
+                  <SelectItem value="available">Source available</SelectItem>
+                  <SelectItem value="missing">Source missing</SelectItem>
+                  <SelectItem value="incomplete">Source incomplete</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={outreachReady || ANY} onValueChange={(value) => selectParam("outreach_ready", value)}>
+                <SelectTrigger aria-label="Filter by outreach readiness" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Outreach" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any readiness</SelectItem>
+                  <SelectItem value="yes">Ready for outreach</SelectItem>
+                  <SelectItem value="no">Not ready</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={hasSuppression || ANY} onValueChange={(value) => selectParam("has_suppression", value)}>
+                <SelectTrigger aria-label="Filter by suppression" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Suppression" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any restriction</SelectItem>
+                  <SelectItem value="yes">Has restriction</SelectItem>
+                  <SelectItem value="no">No restriction</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={website || ANY} onValueChange={(value) => selectParam("website", value)}>
+                <SelectTrigger aria-label="Filter by website" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Website" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any website</SelectItem>
+                  <SelectItem value="no">No website</SelectItem>
+                  <SelectItem value="yes">Has website</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={status || ANY} onValueChange={(value) => selectParam("status", value)}>
+                <SelectTrigger aria-label="Filter by status" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any status</SelectItem>
+                  {(options?.statuses ?? []).map((value) => (
+                    <SelectItem key={value} value={value}>{STATUS_LABELS[value]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={source || ANY} onValueChange={(value) => selectParam("source", value)}>
+                <SelectTrigger aria-label="Filter by source" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any source</SelectItem>
+                  {(options?.sources ?? []).map((value) => (
+                    <SelectItem key={value} value={value}>{value}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={batchId || ANY} onValueChange={(value) => selectParam("batch_id", value)}>
+                <SelectTrigger aria-label="Filter by import batch" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Import batch" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any import batch</SelectItem>
+                  {(options?.import_batches ?? []).map((batch) => (
+                    <SelectItem key={batch.id} value={batch.id}>{batch.filename}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={sort} onValueChange={(value) => selectParam("sort", value === "newest" ? "" : value)}>
+                <SelectTrigger aria-label="Sort leads" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest first</SelectItem>
+                  <SelectItem value="oldest">Oldest first</SelectItem>
+                  <SelectItem value="business_name">Business name</SelectItem>
+                  <SelectItem value="compliance_status">Compliance priority</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {hasFilter && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="justify-self-start"
+                  onClick={clearFilters}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
           </div>
 
           {error && (
@@ -404,55 +446,84 @@ export function LeadList() {
 
           {!error && leads && leads.length > 0 && (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Business</TableHead>
-                    <TableHead className="hidden lg:table-cell">Sector</TableHead>
-                    <TableHead className="hidden lg:table-cell">Area</TableHead>
-                    <TableHead className="hidden xl:table-cell">Phone</TableHead>
-                    <TableHead>Compliance</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leads.map((lead) => (
-                    <TableRow
-                      key={lead.id}
-                      tabIndex={0}
-                      role="link"
-                      className="cursor-pointer align-top"
-                      onClick={() => navigate(`/leads/${lead.id}`)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") navigate(`/leads/${lead.id}`);
-                      }}
+              {!showLeadTable && <ul className="space-y-2">
+                {leads.map((lead) => (
+                  <li key={lead.id}>
+                    <Link
+                      to={`/leads/${lead.id}`}
+                      className="block rounded-xl border border-border bg-card p-4 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                     >
-                      <TableCell className="max-w-[260px] font-medium">
-                        <span className="block truncate">{lead.business_name}</span>
-                        <span className="mt-1 block truncate text-xs font-normal text-muted-foreground">
-                          {lead.email ?? lead.phone ?? "No contact"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="hidden max-w-[150px] truncate lg:table-cell">
-                        {lead.sector ?? "—"}
-                      </TableCell>
-                      <TableCell className="hidden max-w-[150px] truncate lg:table-cell">
-                        {lead.area ?? "—"}
-                      </TableCell>
-                      <TableCell className="hidden font-mono text-xs whitespace-nowrap xl:table-cell">
-                        {lead.phone ?? "—"}
-                      </TableCell>
-                      <TableCell className="max-w-[300px]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium leading-snug">{lead.business_name}</p>
+                          <p className="mt-1 truncate text-xs text-muted-foreground">
+                            {lead.email ?? lead.phone ?? "No contact"}
+                          </p>
+                        </div>
+                        <StatusBadge status={lead.status} />
+                      </div>
+                      <div className="mt-3 space-y-1.5 border-t border-border pt-3">
                         <ComplianceStatusBadge status={lead.compliance.status} />
-                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                        <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
                           {lead.compliance.explanation}
                         </p>
-                      </TableCell>
-                      <TableCell><StatusBadge status={lead.status} /></TableCell>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>}
+
+              {showLeadTable && <div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Business</TableHead>
+                      <TableHead className="hidden lg:table-cell">Sector</TableHead>
+                      <TableHead className="hidden lg:table-cell">Area</TableHead>
+                      <TableHead className="hidden xl:table-cell">Phone</TableHead>
+                      <TableHead>Compliance</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {leads.map((lead) => (
+                      <TableRow
+                        key={lead.id}
+                        tabIndex={0}
+                        role="link"
+                        className="cursor-pointer align-top"
+                        onClick={() => navigate(`/leads/${lead.id}`)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") navigate(`/leads/${lead.id}`);
+                        }}
+                      >
+                        <TableCell className="max-w-[260px] font-medium">
+                          <span className="block truncate">{lead.business_name}</span>
+                          <span className="mt-1 block truncate text-xs font-normal text-muted-foreground">
+                            {lead.email ?? lead.phone ?? "No contact"}
+                          </span>
+                        </TableCell>
+                        <TableCell className="hidden max-w-[150px] truncate lg:table-cell">
+                          {lead.sector ?? "—"}
+                        </TableCell>
+                        <TableCell className="hidden max-w-[150px] truncate lg:table-cell">
+                          {lead.area ?? "—"}
+                        </TableCell>
+                        <TableCell className="hidden font-mono text-xs whitespace-nowrap xl:table-cell">
+                          {lead.phone ?? "—"}
+                        </TableCell>
+                        <TableCell className="max-w-[300px]">
+                          <ComplianceStatusBadge status={lead.compliance.status} />
+                          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                            {lead.compliance.explanation}
+                          </p>
+                        </TableCell>
+                        <TableCell><StatusBadge status={lead.status} /></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>}
 
               {total > PAGE_SIZE && (
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
