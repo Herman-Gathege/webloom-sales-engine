@@ -73,9 +73,9 @@ Each is one small piece. **1 point ≈ half a focused day**, and the sizes compa
 each other — they are not a schedule.
 
 **Sprint 4 — What we sell, in the system.** Offers (website packages first, other services
-later) and message templates with variants — all editable without a code change. Contract
-[proposed for team review](sprint-4-offers-templates.md). *Owner: Sharon · Reviewer: Mark ·
-~11 pts.*
+later) and message templates with variants — all editable without a code change.
+[Implemented and awaiting manual acceptance](sprint-4-offers-templates.md). *Owner: Sharon ·
+Reviewer: Mark · ~11 pts.*
 
 **Sprint 5 — Campaigns and drafts.** A campaign is a batch of leads, one offer, one template.
 It produces one personalised draft per eligible lead and skips the ones it cannot fill.

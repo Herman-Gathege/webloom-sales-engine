@@ -1,6 +1,6 @@
 # Sprint 4 — offers and templates
 
-**Status:** ready for team review · **Owner:** Sharon · **Reviewer:** Mark
+**Status:** implemented; ready for manual acceptance · **Owner:** Sharon · **Reviewer:** Mark
 **Branch:** `sprint/4-offers-templates` · **Updated:** 2026-11-02
 
 ## Goal
@@ -63,8 +63,12 @@ Initial catalogue:
 3. Custom Website
 4. FikaTu Notification Platform
 
-Price values must come from the team. The model permits blank price guidance for
-discovery-first offers; no pricing is invented in the seed.
+Starter Website is seeded at **KES 40,000**. Business Website and Custom Website remain
+unpriced until the team supplies their guidance. The model permits blank price guidance for
+discovery-first offers; no other pricing is invented in the seed.
+
+Currency accepts any uppercase three-letter code. The editor offers KES, USD, EUR, GBP, ZAR,
+UGX and TZS without restricting the API to that display list.
 
 ## Templates
 
@@ -186,8 +190,8 @@ Each variant stays under the channel limit and includes `{{opt_out}}`.
 ## Seed data
 
 Provide an idempotent catalogue seed command separate from demo lead seeding. It installs the
-four offers and approved starter templates only when their slugs/keys do not already exist.
-It never rewrites an edited record.
+four offers, Starter Website at KES 40,000, and safe starter SMS/email templates only when
+their keys do not already exist. It never rewrites an edited record.
 
 Exact pricing and copy are required team inputs before the seed is considered complete.
 
@@ -244,25 +248,19 @@ From a clean clone:
 Sprint 5 snapshots each rendered draft, so later template edits cannot alter historical
 outreach.
 
-## Review decisions
-
-These are the defaults proposed in this contract. They remain proposed until the team agrees
-them in the Sprint 4 review.
+## Confirmed decisions
 
 1. **Permissions:** `admin` manages the catalogue; `sales` has read-only access to active
    offers and templates.
-2. **Prices:** Anne supplies approved price guidance for Starter, Business and Custom
-   websites. No price is invented in seed data.
+2. **Prices:** Starter Website is KES 40,000. Business and Custom website guidance remains
+   open.
 3. **Discovery-first offers:** both price fields may be blank when the approved copy avoids
    making a price claim.
-4. **Currency:** `KES` is the default and only pilot currency, while the field remains stored
-   explicitly so another currency can be added later.
-5. **Navigation:** Sales users see Catalog in read-only mode rather than hiding the section.
+4. **Currency:** the API accepts uppercase three-letter currency codes; KES remains the
+   default.
+5. **Navigation:** Sales users see Catalog in read-only mode.
 
-Sprint 4 is approved when these five decisions are accepted or corrected, and the demo and
-acceptance criteria below are accepted without a scope change.
+## Manual acceptance
 
-## After approval
-
-Only after approval, the next step is a task-level implementation plan and four homework
-cards. Product code does not start before then.
+Use [the Sprint 4 test guide](../homework/sprint-4/README.md). Campaigns, drafts, sending and
+FikaTu remain outside this sprint.

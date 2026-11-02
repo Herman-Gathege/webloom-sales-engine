@@ -18,5 +18,5 @@ The first three sprints are complete; their records are
 | [Sprint 1 lead contract](sprint-1-lead-contract.md) | The exact Lead and Activity shapes the API and the screens agree on. |
 | [Sprint 3 authentication](sprint-3-auth.md) | Login, roles, bootstrap and security boundaries. |
 | [Sprint 3 solidification](sprint-3-solidification.md) | CSV import, compliance evaluation, responsive Lead Desk and the outreach boundary. |
-| [Sprint 4 offers and templates](sprint-4-offers-templates.md) | Proposed catalogue, template, permission and variable contracts. |
+| [Sprint 4 offers and templates](sprint-4-offers-templates.md) | Catalogue, template, permission, variable and manual acceptance contract. |
 | [Sprint detail](sprint-detail.md) | Deep detail on every piece of work, sprint by sprint. Reference. |

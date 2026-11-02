@@ -13,8 +13,8 @@ because nobody could tell which branch was safe to pull.
 
 ### Your turn
 
-1. `git switch sprint/4-offers-templates && git pull` — start only after the Sprint 4
-   contract and homework cards are approved.
+1. `git switch sprint/4-offers-templates && git pull` — review and test the approved Sprint 4
+   implementation.
 2. Run `docker compose up --build`. If the last hand-off is broken, say so before adding
    anything.
 3. Do only what your card says.
@@ -61,4 +61,4 @@ Re-run the checks, push, then hand off. Never leave a conflict for the next pers
 - [Sprint 1](sprint-1/README.md) — finished.
 - [Sprint 2](sprint-2/README.md) — finished; exit review in [status.md](sprint-2/status.md).
 - [Sprint 3](sprint-3/status.md) — finished; authentication and compliance boundary.
-- Sprint 4 — contract in review; homework cards follow approval.
+- [Sprint 4](sprint-4/README.md) — implementation ready for manual acceptance.

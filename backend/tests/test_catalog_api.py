@@ -62,7 +62,8 @@ def test_catalog_endpoints_require_authentication(anonymous_client: TestClient) 
 def test_sales_can_read_but_not_write(
     session: Session, sales_client: TestClient
 ) -> None:
-    session.add(Offer(name="Starter Website", slug="starter-website"))
+    offer = Offer(name="Starter Website", slug="starter-website")
+    session.add(offer)
     session.commit()
 
     assert sales_client.get("/api/v1/offers").status_code == 200
@@ -71,6 +72,19 @@ def test_sales_can_read_but_not_write(
         json={"name": "Blocked", "slug": "blocked", "currency": "KES"},
     )
     assert forbidden.status_code == 403
+    forbidden_template = sales_client.post(
+        "/api/v1/templates",
+        json={
+            "offer_id": str(offer.id),
+            "channel": "sms",
+            "name": "Blocked",
+            "variant": "A",
+            "body": "Hi {{business_name}} {{opt_out}}",
+            "variables": ["business_name", "opt_out"],
+            "is_active": True,
+        },
+    )
+    assert forbidden_template.status_code == 403
 
 
 def test_sales_only_sees_active_records(

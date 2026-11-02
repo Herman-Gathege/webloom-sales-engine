@@ -120,7 +120,12 @@ class MessageTemplate(Base):
         CheckConstraint("variant <> ''", name="variant_not_blank"),
         CheckConstraint("body <> ''", name="body_not_blank"),
         CheckConstraint("jsonb_typeof(variables) = 'array'", name="variables_array"),
-        UniqueConstraint("offer_id", "channel", "variant", name="offer_channel_variant"),
+        UniqueConstraint(
+            "offer_id",
+            "channel",
+            "variant",
+            name="uq_message_templates_offer_channel_variant",
+        ),
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debugging aid

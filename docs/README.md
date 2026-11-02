@@ -6,7 +6,7 @@ Start with the document that matches what you are about to do.
 |---|---|
 | what we are building, and what is out of scope | [scope spec](superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) |
 | the whole plan: nine sprints, and who leads each | [sprint plan](delivery/sprint-plan.md) |
-| the next sprint's proposed scope, roles and acceptance criteria | [Sprint 4 offers and templates](delivery/sprint-4-offers-templates.md) |
+| the current sprint's scope, roles and manual acceptance criteria | [Sprint 4 offers and templates](delivery/sprint-4-offers-templates.md) |
 | the CSV-to-outreach compliance flow, statuses, filters, and current boundary | [Sprint 3 solidification](delivery/sprint-3-solidification.md) |
 | how the last three sprints went | [Sprint 3](homework/sprint-3/status.md) · [Sprint 2](homework/sprint-2/status.md) · [Sprint 1](homework/sprint-1/status.md) |
 | deep detail on every piece of work | [sprint detail](delivery/sprint-detail.md) — reference only |

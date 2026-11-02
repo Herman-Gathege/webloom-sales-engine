@@ -9,7 +9,8 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Sprints 1–3 are closed; Sprint 4 is in contract review.** The Lead Desk runs end to end with authentication in
+Pre-MVP. **Sprints 1–3 are closed; Sprint 4 is implemented and ready for manual acceptance.**
+The Lead Desk runs end to end with authentication in
 front of it: researched leads import into PostgreSQL, are automatically evaluated and
 filterable in React, and carry provenance, independent channel-review state, durable
 eligibility, terminal suppression history, and audit events.
@@ -20,7 +21,7 @@ eligibility, terminal suppression history, and audit events.
   JWT authentication with `admin`/`sales` roles.
 - [`docker-compose.yml`](docker-compose.yml) — one command starts all three.
 
-There is no sending yet. The next proposed slice is
+There is no sending yet. The current slice is
 [Sprint 4 offers and templates](docs/delivery/sprint-4-offers-templates.md). The completed
 CSV-to-outreach boundary is described in
 [Sprint 3 solidification](docs/delivery/sprint-3-solidification.md).
@@ -71,8 +72,8 @@ The traps we hit, and the decisions to agree before the next sprint, are in the
 
 ## If you are one of the four of us
 
-**Sprint 3 — lock the door** is complete. Sprint 4 — offers and templates — is in contract
-review at [Sprint 4 offers and templates](docs/delivery/sprint-4-offers-templates.md). The
+**Sprint 3 — lock the door** is complete. Sprint 4 — offers and templates — is ready for
+manual acceptance at [Sprint 4 offers and templates](docs/delivery/sprint-4-offers-templates.md). The
 whole plan is the [sprint plan](docs/delivery/sprint-plan.md).
 
 The first three sprints are kept as records:

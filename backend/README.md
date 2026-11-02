@@ -95,6 +95,7 @@ Run everything from `backend/`.
 .venv/bin/alembic downgrade base    # reverse the migration — it is not one-way
 .venv/bin/alembic check             # fail if the models and the migration have drifted
 .venv/bin/python -m app.seed        # load the synthetic sample leads (safe to re-run)
+.venv/bin/python -m app.catalog_seed # install initial offers/templates (safe to re-run)
 .venv/bin/python -m app.bootstrap   # create the four development admins (safe to re-run)
 .venv/bin/uvicorn app.main:app --reload --port 8001   # the API the frontend proxies to
 .venv/bin/python -m pytest -v       # the test suite (needs TEST_DATABASE_URL)
@@ -119,11 +120,18 @@ Two roles, no permission matrix:
 | `admin` | Everything `sales` may, plus `GET /api/v1/users` |
 | `sales` | Sign in and work the lead desk (list, detail, import, compliance review) |
 
+Both roles can read active offers and templates. Only `admin` can create, edit or deactivate
+them.
+
 - `POST /api/v1/auth/login` — email + password, returns a bearer token and the user.
 - `GET /api/v1/auth/me` — the signed-in user.
 - `POST /api/v1/auth/logout` — bumps the user's `token_version`, invalidating issued tokens.
 - `POST /api/v1/auth/change-password` — returns a fresh token.
 - `GET /api/v1/users` — administrators only.
+- `GET /api/v1/offers` — active catalogue; admins may include inactive rows.
+- `POST /api/v1/offers`, `PATCH /api/v1/offers/{id}` — administrators only.
+- `GET /api/v1/templates` — active templates with offer/channel filters.
+- `POST /api/v1/templates`, `PATCH /api/v1/templates/{id}` — administrators only.
 
 Every `/api/v1/leads` route requires a token. Wrong password and unknown email return the
 same `401`. A bootstrapped account must change its password before it can read business data;
@@ -139,6 +147,15 @@ BOOTSTRAP_ADMIN_PASSWORD='choose-a-temporary-password' .venv/bin/python -m app.b
 ```
 
 Rerunning it never duplicates an account and never resets a password that already exists.
+
+Install the initial commercial catalogue separately:
+
+```bash
+docker compose exec api python -m app.catalog_seed
+```
+
+It creates Starter Website at KES 40,000, three other initial offers and safe starter
+SMS/email templates. Rerunning it preserves existing records.
 
 ## The API
 
