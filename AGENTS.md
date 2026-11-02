@@ -73,10 +73,10 @@ for its subject — edit the document, not a copy of it.
 | The whole plan: nine sprints, what each delivers, who leads it | `docs/delivery/sprint-plan.md` |
 | The exact Lead and Activity shapes the frontend and backend agree on | `docs/delivery/sprint-1-lead-contract.md` |
 | The detail behind each sprint: the pieces of work and their acceptance criteria | `docs/delivery/sprint-detail.md` |
-| What each of us is doing right now | `docs/homework/sprint-3/` |
+| The next sprint, ready for team review | `docs/delivery/sprint-4-offers-templates.md` |
 | Sprint 3's scope, roles, and acceptance criteria | `docs/delivery/sprint-3-auth.md` |
 | How a hand-off works: the branch, the steps, the checks | `docs/homework/README.md` |
-| How the first two sprints closed | `docs/homework/sprint-1/status.md`, `docs/homework/sprint-2/status.md` |
+| How the first three sprints closed | `docs/homework/sprint-1/status.md`, `docs/homework/sprint-2/status.md`, `docs/homework/sprint-3/status.md` |
 | Branching, PRs, review, definition of done, disagreements | `docs/team/how-we-work.md` |
 | How to talk to FikaTu (endpoints, events, token flow, gaps) | `docs/research/2026-10-08-fikatu-integration-notes.md` |
 | What the current lead list actually contains | `docs/research/2026-10-08-lead-list-audit.md` |
@@ -108,15 +108,16 @@ human can review and convert.
 
 ## Current state
 
-**Sprints 1–3 are closed.** The exit reviews are `docs/homework/sprint-1/status.md`,
-`docs/homework/sprint-2/status.md` and `docs/homework/sprint-3/status.md`; the plan is
-`docs/delivery/sprint-plan.md`; Sprint 3's scope is `docs/delivery/sprint-3-auth.md`.
+**Sprints 1–3 are closed; Sprint 4 is awaiting contract approval.** The exit reviews are
+`docs/homework/sprint-1/status.md`, `docs/homework/sprint-2/status.md` and
+`docs/homework/sprint-3/status.md`; the plan is `docs/delivery/sprint-plan.md`; the proposed
+Sprint 4 scope is `docs/delivery/sprint-4-offers-templates.md`.
 
 Sprint 2 shipped the CSV importer (PRs #16 and #17), Anne's seller review (PR #19), the filters
 and import screen (#20–#23), the Wadi identity, and the compliance hardening below. Two
 accepted deviations are recorded in its exit review: the 62 pre-compliance leads have no
 provenance rows (all are `needs_review`), and list filtering is client-side over up to 200
-leads. CI exists; requiring its checks in GitHub remains an administrator step.
+leads. CI now requires the Backend and Frontend checks in GitHub.
 
 Sprint 3 adds email/password login, `admin` and `sales` roles enforced on the API, logout that
 invalidates issued tokens, a forced first-login password change, and an idempotent
@@ -141,7 +142,7 @@ Sprint 5–6 acceptance gates in `docs/compliance/implementation-notes.md`.
   the UI together from a clean clone. Ports and traps are in `docker/README.md`.
 - **Verified:** 181/181 backend tests green against PostgreSQL 17 and Python 3.12; the
   frontend builds in the Node 22 container and passes its 39 tests plus lint locally.
-- **Not built yet:** sending, campaigns, and the other eleven screens.
+- **Not built yet:** offers, templates, sending, campaigns, and the remaining screens.
   `docs/delivery/sprint-plan.md` says which sprint brings each.
 - The shapes the two halves must agree on are frozen in
   `docs/delivery/sprint-1-lead-contract.md`. Change that document and

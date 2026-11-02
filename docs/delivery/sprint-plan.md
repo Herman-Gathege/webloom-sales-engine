@@ -73,8 +73,9 @@ the team can reach the pipeline, and the API enforces what each role may do. *Ow
 Reviewer: Herman · ~8 pts.* Full detail: [`sprint-3-auth.md`](sprint-3-auth.md).
 
 **Sprint 4 — What we sell, in the system.** Offers (website packages first, other services
-later) and message templates with variants — all editable without a code change. *Owner:
-Sharon · Reviewer: Mark · ~11 pts.*
+later) and message templates with variants — all editable without a code change. Contract
+[proposed for team review](sprint-4-offers-templates.md). *Owner: Sharon · Reviewer: Mark ·
+~11 pts.*
 
 **Sprint 5 — Campaigns and drafts.** A campaign is a batch of leads, one offer, one template.
 It produces one personalised draft per eligible lead and skips the ones it cannot fill.
