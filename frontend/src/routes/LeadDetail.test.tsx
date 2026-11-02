@@ -45,6 +45,9 @@ describe("LeadDetail", () => {
     expect(screen.getAllByLabelText("Activity details").length).toBeGreaterThan(0);
     expect(screen.getAllByText("eligible").length).toBeGreaterThan(0);
     expect(screen.getAllByText("suppressed").length).toBeGreaterThan(0);
+    expect(screen.getByText("Automatic eligibility result")).toBeTruthy();
+    expect(screen.getByText(/Rule 2026-10-27.1/)).toBeTruthy();
+    expect(screen.getByText("Ready on email")).toBeTruthy();
     expect(screen.getByText(/suppresses every available marketing channel/i)).toBeTruthy();
     expect(screen.getByText(/Review controls are disabled/i)).toBeTruthy();
   });

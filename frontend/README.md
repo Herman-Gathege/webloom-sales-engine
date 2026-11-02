@@ -1,7 +1,7 @@
 # Frontend
 
-The React shell for Wadi. It has a login screen, the searchable Lead List, Lead Detail with
-activity history and a practical compliance review card, the CSV import screen, and an
+The React shell for Wadi. It has a login screen, a server-filtered Lead List, Lead Detail with
+activity history and a practical compliance review card, the CSV import summary, and an
 administrator-only user list.
 
 ## Signing in
@@ -61,9 +61,25 @@ The contract these fields follow is
 
 ## Compliance controls
 
-Lead Detail shows provenance, separate email/SMS/WhatsApp eligibility, terminal suppression
-history, and forms for recording human reviews or opt-outs. Mutation controls are deliberately
-disabled while sample fixtures are shown so a local demo cannot look like a persisted decision.
-Read [`docs/compliance/outreach-sop.md`](../docs/compliance/outreach-sop.md) for the operator
-workflow. Authentication and the `admin`/`sales` roles are in place; both roles can see contact
-details because both work the lead desk.
+The Lead List combines search, existing sector/area/website/status filters, and compliance,
+data-quality, provenance, outreach-readiness, suppression, source, import-batch, and sort
+controls. It displays the automatic outcome and concise reason per row, and URL state retains
+the filters.
+
+The import result reports created, matched, duplicate, refused, eligible, needs-review,
+blocked, invalid, and provenance-incomplete counts, with batch-filtered next-action links and
+row-level reasons.
+
+Lead Detail shows the durable automatic result, its rule version and timestamp, data quality,
+outreach readiness, per-channel gate results, provenance, separate email/SMS/WhatsApp human
+eligibility, terminal suppression history, and forms for recording reviews or opt-outs.
+Mutation controls are deliberately disabled while sample fixtures are shown so a local demo
+cannot look like a persisted decision.
+
+The UI does not queue or send. The individual and bulk outreach-check API exists for the future
+Sprint 5–6 action boundary. Read
+[`docs/delivery/sprint-3-solidification.md`](../docs/delivery/sprint-3-solidification.md) for
+the status meanings and current gaps, and
+[`docs/compliance/outreach-sop.md`](../docs/compliance/outreach-sop.md) for the operator
+workflow. Authentication and the `admin`/`sales` roles are in place; both roles work the lead
+desk.

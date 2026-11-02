@@ -39,7 +39,7 @@ describe("LeadList", () => {
 
     expect(await screen.findByText(optician.business_name)).toBeTruthy();
     expect(screen.queryByText(other.business_name)).toBeNull();
-    expect(screen.getByText(/showing 1 of/i)).toBeTruthy();
+    expect(screen.getByText(/1 match the current filters/i)).toBeTruthy();
   });
 
   it("searches business name, phone and area", async () => {
@@ -82,6 +82,17 @@ describe("LeadList", () => {
     expect(await screen.findByText(/nothing down this path/i)).toBeTruthy();
   });
 
+  it("filters by compliance outcome and shows the reason", async () => {
+    const eligible = sampleLeads.find((lead) => lead.compliance.status === "eligible")!;
+    const blocked = sampleLeads.find((lead) => lead.compliance.status === "blocked")!;
+
+    renderAt("/leads?compliance_status=eligible");
+
+    expect(await screen.findByText(eligible.business_name)).toBeTruthy();
+    expect(screen.queryByText(blocked.business_name)).toBeNull();
+    expect(screen.getByText(eligible.compliance.explanation)).toBeTruthy();
+  });
+
   it("filters as the seller types", async () => {
     const match = sampleLeads.find((lead) => lead.business_name === "Baraka Chemist")!;
     const other = sampleLeads[0];
@@ -95,6 +106,18 @@ describe("LeadList", () => {
 
     expect(await screen.findByText(match.business_name)).toBeTruthy();
     expect(screen.queryByText(other.business_name)).toBeNull();
+  });
+
+  it("toggles the compact filter panel", async () => {
+    renderAt("/leads");
+    await screen.findByText(sampleLeads[0].business_name);
+
+    const toggle = screen.getByRole("button", { name: /filters/i });
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+
+    fireEvent.click(toggle);
+
+    expect(toggle.getAttribute("aria-expanded")).toBe("true");
   });
 
   it("clears every filter", async () => {

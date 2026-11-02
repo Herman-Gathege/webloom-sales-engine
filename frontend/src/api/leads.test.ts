@@ -4,6 +4,7 @@ import { sampleLeads } from "./fixtures";
 import {
   ApiError,
   getLead,
+  getLeadFilterOptions,
   listLeads,
   recordSuppression,
   rejectedRowsCsv,
@@ -30,6 +31,30 @@ describe("listLeads", () => {
     expect(loaded.data.items).toHaveLength(2);
     expect(loaded.data.items[0].id).toBe(sampleLeads[1].id);
   });
+
+  it("applies compliance and readiness filters in sample fallback", async () => {
+    const loaded = await listLeads({
+      compliance_status: "blocked",
+      outreach_ready: false,
+    });
+
+    expect(loaded.data.items).toHaveLength(1);
+    expect(loaded.data.items[0].compliance.status).toBe("blocked");
+    expect(loaded.data.items[0].compliance.outreach_ready).toBe(false);
+  });
+
+  it("derives sample filter options from the bundled leads", async () => {
+    const loaded = await getLeadFilterOptions();
+
+    expect(loaded.source).toBe("sample");
+    expect(loaded.data.sectors).toContain("Opticians and eyewear");
+    expect(loaded.data.compliance_statuses).toEqual([
+      "eligible",
+      "needs_review",
+      "blocked",
+      "invalid",
+    ]);
+  });
 });
 
 describe("rejectedRowsCsv", () => {
@@ -39,8 +64,15 @@ describe("rejectedRowsCsv", () => {
       batch_id: "30000000-0000-4000-8000-000000000001",
       row_count: 2,
       accepted: 0,
+      created: 0,
       rejected: 2,
+      matched: 1,
       duplicates: 1,
+      eligible: 0,
+      needs_review: 0,
+      blocked: 0,
+      invalid: 2,
+      provenance_incomplete: 0,
       requiring_review: 0,
       rejected_rows: [
         {
@@ -56,6 +88,7 @@ describe("rejectedRowsCsv", () => {
           reason: "No phone number, so this lead cannot be contacted.",
         },
       ],
+      review_rows: [],
       warnings: [],
     });
 
@@ -178,6 +211,7 @@ describe("the Lead contract", () => {
         "status",
         "created_at",
         "updated_at",
+        "compliance",
         "activity",
         "provenance",
         "eligibility",

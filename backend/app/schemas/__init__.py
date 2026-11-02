@@ -1,25 +1,45 @@
 from app.schemas.activity import ActivityRead
 from app.schemas.lead import (
+    ChannelComplianceResultRead,
     ChannelEligibilityRead,
     EligibilityReviewRequest,
+    ImportBatchOptionRead,
+    LeadComplianceRead,
     LeadDetailRead,
+    LeadFilterOptionsRead,
     LeadListRead,
     LeadProvenanceRead,
     LeadRead,
+    OutreachCheckRequest,
+    OutreachCheckResponse,
+    OutreachGateResultRead,
     SuppressionCreate,
     SuppressionRead,
 )
-from app.schemas.lead_import import ImportSummary, RefusedRowRead, RowWarningRead
+from app.schemas.lead_import import (
+    ImportReviewRowRead,
+    ImportSummary,
+    RefusedRowRead,
+    RowWarningRead,
+)
 
 __all__ = [
     "ActivityRead",
     "ChannelEligibilityRead",
+    "ChannelComplianceResultRead",
     "EligibilityReviewRequest",
     "ImportSummary",
+    "ImportReviewRowRead",
+    "ImportBatchOptionRead",
+    "LeadComplianceRead",
     "LeadDetailRead",
+    "LeadFilterOptionsRead",
     "LeadListRead",
     "LeadProvenanceRead",
     "LeadRead",
+    "OutreachCheckRequest",
+    "OutreachCheckResponse",
+    "OutreachGateResultRead",
     "RefusedRowRead",
     "RowWarningRead",
     "SuppressionCreate",

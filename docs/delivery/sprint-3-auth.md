@@ -1,6 +1,6 @@
 # Sprint 3 — lock the door
 
-**Status:** implemented, awaiting team review · **Owner:** Mark · **Reviewer:** Herman
+**Status:** closed in Sprint 3 · **Owner:** Mark · **Reviewer:** Herman
 
 The first thing that has ever protected this application. One login, two roles, and the
 backend as the authority.

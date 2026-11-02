@@ -12,6 +12,7 @@ from app.services.lead_import import (
     refused_rows_csv,
 )
 from app.services.lead_service import LeadNotFoundError, LeadPage, LeadService
+from app.services.outreach_gate import OutreachGateResult, OutreachGateService
 
 __all__ = [
     "MAX_UPLOAD_BYTES",
@@ -24,6 +25,8 @@ __all__ = [
     "LeadNotFoundError",
     "LeadPage",
     "LeadService",
+    "OutreachGateResult",
+    "OutreachGateService",
     "SuppressionDecision",
     "refused_rows_csv",
 ]

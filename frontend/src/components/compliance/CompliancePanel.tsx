@@ -10,6 +10,7 @@ import type {
   SuppressionReason,
   SuppressionScope,
 } from "@/api/types";
+import { ComplianceStatusBadge } from "@/components/compliance/ComplianceStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -418,10 +419,73 @@ export function CompliancePanel({
           </p>
         )}
 
+        <div className="rounded-lg border bg-muted/20 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-medium">Automatic eligibility result</h3>
+              <p className="text-xs text-muted-foreground">
+                Rule {lead.compliance.rule_version} · evaluated{" "}
+                {new Date(lead.compliance.evaluated_at).toLocaleString()}
+              </p>
+            </div>
+            <ComplianceStatusBadge status={lead.compliance.status} />
+          </div>
+          <p className="mt-3 text-sm">{lead.compliance.explanation}</p>
+          <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className={labelClass()}>Data quality</dt>
+              <dd>{label(lead.compliance.data_quality_status)}</dd>
+            </div>
+            <div>
+              <dt className={labelClass()}>Outreach readiness</dt>
+              <dd>
+                {lead.compliance.outreach_ready
+                  ? `Ready on ${lead.compliance.eligible_channels.join(", ")}`
+                  : "Not ready for outreach"}
+              </dd>
+            </div>
+          </dl>
+          <div className="mt-3 flex flex-wrap gap-1">
+            {lead.compliance.reason_codes.map((reason) => (
+              <Badge key={reason} variant="outline" className="font-mono text-[11px]">
+                {reason}
+              </Badge>
+            ))}
+          </div>
+          {!lead.compliance.outreach_ready && (
+            <p className="mt-3 text-sm text-red-800">
+              This lead cannot enter the outreach workflow until its current blocking or
+              review reasons are resolved.
+            </p>
+          )}
+        </div>
+
+        <div>
+          <h3 className="mb-2 text-sm font-medium">Automatic channel gate</h3>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {lead.compliance.channel_results.map((result) => (
+              <div key={result.channel} className="rounded-md border p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium uppercase">{result.channel}</span>
+                  <ComplianceStatusBadge status={result.status} />
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">{result.explanation}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {result.decision_current ? "Current human decision" : "Human decision not current"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div>
           <h3 className="mb-3 text-sm font-medium">Provenance</h3>
           {lead.provenance ? (
             <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <dt className={labelClass()}>Source name</dt>
+                <dd>{lead.provenance.source_name ?? "Not recorded"}</dd>
+              </div>
               <div>
                 <dt className={labelClass()}>Collection</dt>
                 <dd>{lead.provenance.collection_method ?? "Unknown"}</dd>

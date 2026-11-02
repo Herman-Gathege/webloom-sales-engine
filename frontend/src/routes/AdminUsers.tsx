@@ -13,10 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 export function AdminUsers() {
   const [users, setUsers] = useState<AuthUser[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const showUserTable = useMediaQuery("(min-width: 768px)");
 
   useEffect(() => {
     let cancelled = false;
@@ -56,41 +58,74 @@ export function AdminUsers() {
         )}
 
         {!error && users && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden sm:table-cell">Password</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            {!showUserTable && <ul className="space-y-2">
               {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.email}</TableCell>
-                  <TableCell>
+                <li key={user.id} className="rounded-xl border border-border bg-card p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="min-w-0 break-all font-medium">{user.email}</p>
                     <Badge
                       variant="outline"
                       className={
                         user.role === "admin"
-                          ? "border-transparent bg-[#b4d665] text-[#063326]"
-                          : "border-transparent bg-[#eff5e0] text-[#084734]"
+                          ? "shrink-0 border-transparent bg-[#b4d665] text-[#063326]"
+                          : "shrink-0 border-transparent bg-[#eff5e0] text-[#084734]"
                       }
                     >
                       {user.role}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {user.is_active ? "Active" : "Disabled"}
-                  </TableCell>
-                  <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
-                    {user.must_change_password ? "Temporary — must change" : "Set by the user"}
-                  </TableCell>
-                </TableRow>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-3 text-xs text-muted-foreground">
+                    <span>{user.is_active ? "Active" : "Disabled"}</span>
+                    <span>
+                      {user.must_change_password
+                        ? "Temporary password — must change"
+                        : "Password set by user"}
+                    </span>
+                  </div>
+                </li>
               ))}
-            </TableBody>
-          </Table>
+            </ul>}
+            {showUserTable && <div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Password</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="max-w-[16rem] break-all font-medium">
+                        {user.email}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            user.role === "admin"
+                              ? "border-transparent bg-[#b4d665] text-[#063326]"
+                              : "border-transparent bg-[#eff5e0] text-[#084734]"
+                          }
+                        >
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {user.is_active ? "Active" : "Disabled"}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {user.must_change_password ? "Temporary — must change" : "Set by the user"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>}
+          </>
         )}
       </CardContent>
     </Card>

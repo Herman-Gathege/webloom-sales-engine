@@ -1,10 +1,10 @@
 # Backend — Webloom Sales Engine
 
-The sales backend: Lead and Activity tables, import batches, provenance, independent channel
-eligibility review, terminal suppression, reversible migrations, a repeatable synthetic seed,
-read/review endpoints, the CSV importer, and — since Sprint 3 — authentication with `admin`
-and `sales` roles. It is the piece that replaces the frontend's **"Sample data"** banner with
-real leads.
+The sales backend: Lead and Activity tables, import batches, provenance, automatic durable
+compliance evaluation, independent channel review, terminal suppression, reversible
+migrations, a repeatable synthetic seed, read/review endpoints, the CSV importer, and — since
+Sprint 3 — authentication with `admin` and `sales` roles. It is the piece that replaces the
+frontend's **"Sample data"** banner with real leads.
 
 Deliberately **not** here yet: sending, campaigns, exports, background jobs, and FikaTu
 delivery. The containers live at the repo root — see
@@ -56,6 +56,7 @@ Settings come from the environment, or from `backend/.env` if it exists:
 | `SQL_ECHO` | `false` | Log every SQL statement. |
 | `JWT_SECRET_KEY` | development placeholder | Signs access tokens. Replace it anywhere real; startup refuses the placeholder outside `development`. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `480` | Access-token lifetime (8 hours). |
+| `SEED_SAMPLE_DATA` | `false` | Set to `true` only for a disposable demo database. Normal startup leaves the database empty for a real import. |
 | `BOOTSTRAP_ADMIN_PASSWORD` | unset | Temporary password used only by `python -m app.bootstrap`. |
 
 ## Docker
@@ -69,8 +70,8 @@ docker compose up --build
 
 - Creates both databases on first boot: `webloom_sales_engine` and
   `webloom_sales_engine_test` (via `docker/postgres/init/01-create-databases.sql`).
-- Runs `alembic upgrade head` and `python -m app.seed` automatically, so the API serves the
-  eight sample leads on first boot.
+- Runs `alembic upgrade head` automatically. Synthetic sample leads are opt-in with
+  `SEED_SAMPLE_DATA=true`, so a normal restart cannot add demo data beside a real import.
 - Serves the API on host port **8001** (container port 8000). 8000 is not used because
   another project already owns it on some machines.
 - Keeps the database internal (no host port) to avoid clashing with a local PostgreSQL.
@@ -100,6 +101,14 @@ Run everything from `backend/`.
 ```
 
 Interactive docs are at <http://localhost:8001/docs> once the server is running.
+
+For a disposable demo through Docker, run:
+
+```bash
+SEED_SAMPLE_DATA=true docker compose up --build
+```
+
+Leave the flag unset when using imported leads.
 
 ## Authentication
 
@@ -138,6 +147,12 @@ Rerunning it never duplicates an account and never resets a password that alread
 One page of leads, newest first (`created_at` descending, with the id as a tie-breaker so a
 page boundary can never repeat or skip a lead).
 
+Filters are applied before `total` and pagination: `q`, `sector`, `area`, `source`,
+`website=yes|no`, `status`, `compliance_status`, `data_quality_status`,
+`provenance=available|missing|incomplete`, `outreach_ready`, `has_suppression`, `batch_id`,
+and `sort=newest|oldest|business_name|compliance_status`. Assignment and temperature filters
+are not present because those fields do not exist.
+
 - `limit` defaults to **50** and is capped at **200** — a larger request comes back with
   `limit: 200` and 200 rows, not an error
 - `offset` defaults to **0**
@@ -159,7 +174,19 @@ page boundary can never repeat or skip a lead).
       "source": "google_maps",
       "status": "new",
       "created_at": "2026-09-23T09:07:00Z",
-      "updated_at": "2026-09-23T09:07:00Z"
+      "updated_at": "2026-09-23T09:07:00Z",
+      "compliance": {
+        "status": "needs_review",
+        "data_quality_status": "complete",
+        "reason_codes": ["human_review_required:email"],
+        "explanation": "Needs review: email needs a human decision before outreach.",
+        "eligible_channels": [],
+        "suppressed_channels": [],
+        "channel_results": [],
+        "outreach_ready": false,
+        "evaluated_at": "2026-09-23T09:07:30Z",
+        "rule_version": "2026-10-27.1"
+      }
     }
   ],
   "total": 8,
@@ -167,6 +194,9 @@ page boundary can never repeat or skip a lead).
   "offset": 0
 }
 ```
+
+`GET /api/v1/leads/filter-options` returns the real distinct sectors, areas, sources, lead
+statuses, compliance statuses, data-quality statuses, and import batches for the Lead Desk.
 
 ### `GET /api/v1/leads/{id}`
 
@@ -216,9 +246,9 @@ database.
 ### `POST /api/v1/leads/import`
 
 The importer: one multipart `file` part holding the research list as a UTF-8 CSV, answered with
-what happened to every row — accepted, refused with a reason, or warned about. Good rows import
-even when other rows are refused; `?format=csv` answers the refused rows as a downloadable
-report instead of JSON.
+what happened to every row — created, matched without overwrite, refused with a reason, or
+warned about. Good rows import even when other rows are refused; `?format=csv` answers the
+refused rows as a downloadable report instead of JSON.
 
 ```bash
 curl -F "file=@../data/webloom-lead-list.csv" http://localhost:8001/api/v1/leads/import
@@ -227,8 +257,10 @@ curl -F "file=@../data/webloom-lead-list.csv" http://localhost:8001/api/v1/leads
 ```json
 {"filename": "webloom-lead-list.csv",
  "batch_id": "3f7b0ee2-c3c1-4a02-a8a5-c773f9c24e29",
- "row_count": 52, "accepted": 52, "rejected": 0, "duplicates": 0,
- "requiring_review": 52, "rejected_rows": [], "warnings": []}
+ "row_count": 52, "created": 50, "accepted": 50, "matched": 1, "rejected": 2,
+ "duplicates": 1, "eligible": 0, "needs_review": 48, "blocked": 1, "invalid": 3,
+ "provenance_incomplete": 4, "requiring_review": 48,
+ "rejected_rows": [], "review_rows": [], "warnings": []}
 ```
 
 ### Channel review and opt-outs
@@ -237,6 +269,12 @@ curl -F "file=@../data/webloom-lead-list.csv" http://localhost:8001/api/v1/leads
   decision. An `eligible` decision requires its lawful basis and evidence.
 - `POST /api/v1/leads/{id}/suppressions` records a channel or all-marketing opt-out. It is
   terminal, idempotent, and returns the updated Lead Detail.
+- `POST /api/v1/leads/{id}/outreach-check/{channel}` re-evaluates one lead at the action
+  boundary. `POST /api/v1/leads/outreach-check` performs the same check for 1–200 leads.
+
+Neither outreach-check route queues or sends. Campaign, queue, approval, dispatch, FikaTu, and
+inbound reply processing are still absent. See
+[`docs/delivery/sprint-3-solidification.md`](../docs/delivery/sprint-3-solidification.md).
 
 `GET /api/v1/leads/{id}` includes `provenance`, three independent `eligibility` records, and
 safe `suppressions` history. Audit details never expose contact fingerprints or raw message

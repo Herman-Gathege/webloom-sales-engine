@@ -28,6 +28,7 @@ from app.models import (
     LeadStatus,
 )
 from app.repositories import LeadRepository
+from app.services.compliance_evaluator import ComplianceEvaluator
 from app.services.contact_identity import contact_fingerprint, normalize_email, valid_email
 
 # Bigger than this is refused rather than read into memory. The real list is
@@ -172,11 +173,30 @@ class ImportResult:
     batch_id: uuid.UUID
     row_count: int
     accepted: int
+    created: int
     rejected: int
+    matched: int
     duplicates: int
+    eligible: int
+    needs_review: int
+    blocked: int
+    invalid: int
+    provenance_incomplete: int
     requiring_review: int
     refused: list[RefusedRow]
+    review_rows: list["ImportReviewRow"]
     warnings: list[RowWarning]
+
+
+@dataclass(frozen=True)
+class ImportReviewRow:
+    """One saved lead that automated checks put in a non-eligible outcome."""
+
+    row: int
+    business_name: str
+    compliance_status: str
+    reason_codes: list[str]
+    explanation: str
 
 
 @dataclass(frozen=True)
@@ -193,6 +213,7 @@ class _MappedRow:
     website_status: str | None
     has_website: bool
     source: str
+    source_name: str
     source_url: str | None
     collection_date: date | None
     collection_method: str | None
@@ -279,6 +300,11 @@ def normalise_source(raw: str) -> tuple[str, bool]:
     return re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_"), False
 
 
+def normalise_text(raw: str) -> str:
+    """Collapse whitespace while preserving the supplied words and casing."""
+    return " ".join(raw.split())
+
+
 def is_landline(phone: str) -> bool:
     return len(phone) > 4 and phone.startswith("+254") and phone[4] in LANDLINE_FIRST_DIGITS
 
@@ -289,7 +315,7 @@ def refusal_for(line: int, row: dict[str, str]) -> RefusedRow | None:
     Checked in a fixed order — business name, phone, source — so a row with
     several problems always reports the same one.
     """
-    business_name = row["Business"].strip()
+    business_name = normalise_text(row["Business"])
     if not business_name:
         return RefusedRow(line, "", "blank_business_name", REFUSAL_REASONS["blank_business_name"])
 
@@ -320,7 +346,7 @@ def map_row(line: int, row: dict[str, str]) -> tuple[_MappedRow, list[RowWarning
     def warn(field: str, value: str, code: str) -> None:
         warnings.append(RowWarning(line, field, value, code, WARNING_MESSAGES[code]))
 
-    business_name = row["Business"].strip()
+    business_name = normalise_text(row["Business"])
     phone = normalise_phone(row["Phone"].strip())
     landline = is_landline(phone)
 
@@ -328,7 +354,7 @@ def map_row(line: int, row: dict[str, str]) -> tuple[_MappedRow, list[RowWarning
     # later sprint's decision, so it is stored exactly as written: with no
     # vocabulary to check a value against there is no such thing as an unmapped
     # sector, and nothing to report about one.
-    sector = row["Sector"].strip() or None
+    sector = normalise_text(row["Sector"]) or None
 
     whatsapp_raw = row["WhatsApp capable"].strip()
     whatsapp_capable = WHATSAPP_VALUES.get(whatsapp_raw.lower())
@@ -343,12 +369,12 @@ def map_row(line: int, row: dict[str, str]) -> tuple[_MappedRow, list[RowWarning
         warn("whatsapp_capable", whatsapp_raw, "landline_marked_whatsapp")
         whatsapp_capable = False
 
-    website_status = row["Website status"].strip()
+    website_status = normalise_text(row["Website status"])
     has_website, understood = parse_website_status(website_status)
     if not understood:
         warn("website_status", website_status, "website_status_unclassified")
 
-    source_raw = row["Source"].strip()
+    source_raw = normalise_text(row["Source"])
     source, source_understood = normalise_source(source_raw)
     if not source_understood:
         warn("source", source_raw, "source_unrecognised")
@@ -383,15 +409,15 @@ def map_row(line: int, row: dict[str, str]) -> tuple[_MappedRow, list[RowWarning
     if contact_type_raw and contact_type == "unknown" and contact_type_raw.lower() != "unknown":
         warn("contact_type", contact_type_raw, "contact_type_unrecognised")
 
-    contact_name = row.get("Contact name", "").strip() or None
+    contact_name = normalise_text(row.get("Contact name", "")) or None
     if contact_name and len(contact_name) > 255:
         warn("contact_name", "", "contact_name_too_long")
         contact_name = None
 
     collection_method = (
-        row.get("Collection method", "").strip() or source_raw or None
+        normalise_text(row.get("Collection method", "")) or source_raw or None
     )
-    intended_purpose = row.get("Intended purpose", "").strip() or None
+    intended_purpose = normalise_text(row.get("Intended purpose", "")) or None
 
     mapped = _MappedRow(
         line=line,
@@ -399,13 +425,14 @@ def map_row(line: int, row: dict[str, str]) -> tuple[_MappedRow, list[RowWarning
         # Both are free text in the contract, so they are stored as written; any
         # controlled vocabulary is a later sprint's decision, not a guess here.
         sector=sector,
-        area=row["Area"].strip() or None,
+        area=normalise_text(row["Area"]) or None,
         phone=phone,
         email=email,
         whatsapp_capable=whatsapp_capable,
         website_status=website_status or None,
         has_website=has_website,
         source=source,
+        source_name=source_raw,
         source_url=source_url,
         collection_date=collection_date,
         collection_method=collection_method,
@@ -474,7 +501,7 @@ class LeadImportService:
             candidates.append(mapped)
 
         candidates = self._drop_suppressed_contacts(candidates, refused)
-        accepted = self._drop_known_phones(candidates, refused)
+        accepted, matched = self._drop_known_phones(candidates, refused)
 
         batch = ImportBatch(
             filename=filename,
@@ -482,12 +509,63 @@ class LeadImportService:
             row_count=len(rows),
             accepted=len(accepted),
             rejected=len(refused),
+            matched=matched,
             duplicates=sum(row.code == DUPLICATE_PHONE_CODE for row in refused),
-            review_required=len(accepted),
+            review_required=0,
         )
         self.repository.add_import_batch(batch)
         self.repository.flush()
-        self._save(accepted, imported_at, batch.id)
+        saved = self._save(accepted, imported_at, batch.id)
+        self.repository.flush()
+
+        evaluator = ComplianceEvaluator(self.repository)
+        for lead in saved:
+            evaluator.evaluate(lead, record_activity=False)
+
+        evaluations = [lead.compliance for lead in saved if lead.compliance is not None]
+        needs_review = sum(item.status == "needs_review" for item in evaluations)
+        eligible = sum(item.status == "eligible" for item in evaluations)
+        blocked_evaluations = sum(item.status == "blocked" for item in evaluations)
+        invalid_evaluations = sum(item.status == "invalid" for item in evaluations)
+        blocked_refusals = sum(row.code == "suppressed_contact" for row in refused)
+        invalid_refusals = sum(
+            row.code
+            in {
+                "blank_business_name",
+                "missing_phone",
+                "unparseable_phone",
+                "blank_source",
+            }
+            for row in refused
+        )
+        provenance_incomplete = sum(
+            "missing_provenance" in item.reason_codes
+            or "incomplete_provenance" in item.reason_codes
+            for item in evaluations
+        )
+
+        batch.eligible = eligible
+        batch.needs_review = needs_review
+        batch.blocked = blocked_evaluations + blocked_refusals
+        batch.invalid = invalid_evaluations + invalid_refusals
+        batch.provenance_incomplete = provenance_incomplete
+        batch.review_required = needs_review
+
+        review_rows: list[ImportReviewRow] = []
+        for lead in saved:
+            if lead.compliance is None or lead.compliance.status == "eligible":
+                continue
+            if lead.provenance is None or lead.provenance.row_number is None:
+                continue
+            review_rows.append(
+                ImportReviewRow(
+                    row=lead.provenance.row_number,
+                    business_name=lead.business_name,
+                    compliance_status=lead.compliance.status,
+                    reason_codes=list(lead.compliance.reason_codes),
+                    explanation=lead.compliance.explanation,
+                )
+            )
         self.repository.commit()
         refused.sort(key=lambda row: row.row)
 
@@ -496,21 +574,31 @@ class LeadImportService:
             batch_id=batch.id,
             row_count=len(rows),
             accepted=len(accepted),
+            created=len(accepted),
             rejected=len(refused),
+            matched=matched,
             duplicates=batch.duplicates,
+            eligible=eligible,
+            needs_review=needs_review,
+            blocked=batch.blocked,
+            invalid=batch.invalid,
+            provenance_incomplete=provenance_incomplete,
             requiring_review=batch.review_required,
             refused=refused,
+            review_rows=review_rows,
             warnings=warnings,
         )
 
     def _drop_known_phones(
         self, candidates: list[_MappedRow], refused: list[RefusedRow]
-    ) -> list[_MappedRow]:
+    ) -> tuple[list[_MappedRow], int]:
         """Keep the numbers we do not already hold, refusing the ones we do."""
         already_held = self.repository.existing_phones([row.phone for row in candidates])
         accepted: list[_MappedRow] = []
+        matched = 0
         for mapped in candidates:
             if mapped.phone in already_held:
+                matched += 1
                 refused.append(
                     RefusedRow(
                         mapped.line,
@@ -521,7 +609,7 @@ class LeadImportService:
                 )
                 continue
             accepted.append(mapped)
-        return accepted
+        return accepted, matched
 
     def _drop_suppressed_contacts(
         self, candidates: list[_MappedRow], refused: list[RefusedRow]
@@ -563,7 +651,7 @@ class LeadImportService:
         accepted: Sequence[_MappedRow],
         imported_at: datetime,
         batch_id: uuid.UUID,
-    ) -> None:
+    ) -> list[Lead]:
         """Write every accepted lead in one transaction.
 
         The accepted rows are one second apart, the file's first row newest, so
@@ -571,6 +659,7 @@ class LeadImportService:
         twice produces the same order. The whole file commits once, so a rejected
         row cannot take a good one down with it.
         """
+        saved: list[Lead] = []
         for index, mapped in enumerate(accepted):
             created_at = imported_at - timedelta(seconds=index)
             lead = Lead(
@@ -590,6 +679,7 @@ class LeadImportService:
             lead.provenance = LeadProvenance(
                 import_batch_id=batch_id,
                 row_number=mapped.line,
+                source_name=mapped.source_name,
                 source_url=mapped.source_url,
                 collection_date=mapped.collection_date,
                 collection_method=mapped.collection_method,
@@ -626,3 +716,5 @@ class LeadImportService:
                 )
             )
             self.repository.add(lead)
+            saved.append(lead)
+        return saved

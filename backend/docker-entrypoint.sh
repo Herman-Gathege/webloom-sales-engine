@@ -17,8 +17,12 @@ until alembic upgrade head; do
   sleep 2
 done
 
-echo "==> Seeding sample leads"
-python -m app.seed
+if [ "${SEED_SAMPLE_DATA:-false}" = "true" ]; then
+  echo "==> Seeding sample leads"
+  python -m app.seed
+else
+  echo "==> Skipping sample leads (set SEED_SAMPLE_DATA=true to opt in)"
+fi
 
 echo "==> Starting: $*"
 exec "$@"

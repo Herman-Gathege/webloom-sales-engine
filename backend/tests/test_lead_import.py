@@ -33,6 +33,11 @@ def test_the_clean_file_imports_every_row(session: Session) -> None:
     result = import_fixture(session, "import_clean.csv")
 
     assert (result.row_count, result.accepted, result.rejected) == (3, 3, 0)
+    assert result.created == 3
+    assert result.matched == 0
+    assert result.needs_review == 3
+    assert result.eligible == result.blocked == result.invalid == 0
+    assert len(result.review_rows) == 3
     assert result.refused == []
     assert result.warnings == []
 
@@ -142,6 +147,7 @@ def test_a_number_we_already_hold_is_refused(session: Session, make_lead) -> Non
     result = import_fixture(session, "import_duplicate_of_existing.csv")
 
     assert (result.row_count, result.accepted, result.rejected) == (1, 0, 1)
+    assert result.matched == 1
     assert result.refused[0].row == 2
     assert result.refused[0].code == "duplicate_phone"
     assert result.refused[0].reason == "This phone number is already in the system."

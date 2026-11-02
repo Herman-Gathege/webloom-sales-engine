@@ -108,11 +108,9 @@ human can review and convert.
 
 ## Current state
 
-**Sprints 1 and 2 are closed; Sprint 3 is implemented and awaiting team review.** The first
-two sprints and the containers are merged. The exit reviews are
-`docs/homework/sprint-1/status.md` and `docs/homework/sprint-2/status.md`; the plan is
-`docs/delivery/sprint-plan.md`; Sprint 3's scope is `docs/delivery/sprint-3-auth.md` and its
-review homework is `docs/homework/sprint-3/`.
+**Sprints 1–3 are closed.** The exit reviews are `docs/homework/sprint-1/status.md`,
+`docs/homework/sprint-2/status.md` and `docs/homework/sprint-3/status.md`; the plan is
+`docs/delivery/sprint-plan.md`; Sprint 3's scope is `docs/delivery/sprint-3-auth.md`.
 
 Sprint 2 shipped the CSV importer (PRs #16 and #17), Anne's seller review (PR #19), the filters
 and import screen (#20–#23), the Wadi identity, and the compliance hardening below. Two
@@ -135,14 +133,14 @@ Sprint 5–6 acceptance gates in `docs/compliance/implementation-notes.md`.
   Lead List → Lead Detail with activity history, and a client that falls back to bundled
   sample data until the API answers. See `frontend/README.md`.
 - **Built:** `backend/` — the Lead and Activity model, the compliance models, reversible
-  migrations `0001`–`0003`, an idempotent synthetic seed, the read/import/compliance
+  migrations `0001`–`0004`, an opt-in synthetic seed, the read/import/compliance
   endpoints, authentication with `admin`/`sales` roles, the bootstrap command, and a pytest
   suite. See `backend/README.md`, `docs/delivery/sprint-2-import-contract.md` and
   `docs/delivery/sprint-3-auth.md`.
 - **Built:** the containers — `docker compose up --build` starts the database, the API and
   the UI together from a clean clone. Ports and traps are in `docker/README.md`.
-- **Verified:** 150/150 backend tests green against PostgreSQL 17 and Python 3.12; the
-  frontend builds in the Node 22 container and passes its 34 tests plus lint locally.
+- **Verified:** 181/181 backend tests green against PostgreSQL 17 and Python 3.12; the
+  frontend builds in the Node 22 container and passes its 39 tests plus lint locally.
 - **Not built yet:** sending, campaigns, and the other eleven screens.
   `docs/delivery/sprint-plan.md` says which sprint brings each.
 - The shapes the two halves must agree on are frozen in

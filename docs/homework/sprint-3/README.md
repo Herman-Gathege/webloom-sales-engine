@@ -3,6 +3,10 @@
 **What this is:** one review pass on the authentication sprint. Nobody implements a second
 auth system. You are looking for what is wrong, missing, or risky in what is already here.
 
+The follow-up CSV-to-outreach-boundary review is in
+[solidification-review.md](solidification-review.md). Use both passes for the Sprint 3 overall
+review; the auth contract below remains the source for login and role behaviour.
+
 Read these first, in this order:
 
 1. [Sprint 2 exit review](../sprint-2/status.md) — what closed, and what was left open.

@@ -51,6 +51,9 @@ def test_seeded_leads_follow_the_contract(session: Session) -> None:
     assert any(lead.has_website for lead in leads)
     assert any(not lead.whatsapp_capable for lead in leads)
     assert all(lead.provenance is not None for lead in leads)
+    assert all(lead.provenance.source_name == "Google Maps listing" for lead in leads)
+    assert all(lead.compliance is not None for lead in leads)
+    assert {lead.compliance.status for lead in leads} == {"needs_review"}
     assert all(
         {row.channel for row in lead.eligibility} == {"email", "sms", "whatsapp"}
         for lead in leads

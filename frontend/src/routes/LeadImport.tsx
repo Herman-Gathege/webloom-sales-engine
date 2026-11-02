@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { importLeads, rejectedRowsCsv } from "@/api/leads";
 import type { ImportSummary } from "@/api/types";
 import { Scout } from "@/components/Scout";
+import { ComplianceStatusBadge } from "@/components/compliance/ComplianceStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 type Phase = "idle" | "uploading" | "working" | "done" | "error";
 
@@ -38,6 +40,7 @@ export function LeadImport() {
   const [percent, setPercent] = useState(0);
   const [summary, setSummary] = useState<ImportSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const showResultTables = useMediaQuery("(min-width: 768px)");
 
   const busy = phase === "uploading" || phase === "working";
   const mood =
@@ -158,18 +161,17 @@ export function LeadImport() {
                   <span className="font-medium">{summary.row_count}</span> rows read
                 </span>
                 <span className="text-emerald-700">
-                  <span className="font-medium">{summary.accepted}</span> imported
+                  <span className="font-medium">{summary.created}</span> created
                 </span>
                 <span className={summary.rejected > 0 ? "text-amber-700" : "text-muted-foreground"}>
                   <span className="font-medium">{summary.rejected}</span> refused
                 </span>
                 <span className="text-muted-foreground">
-                  <span className="font-medium">{summary.duplicates}</span> duplicate
-                  {summary.duplicates === 1 ? "" : "s"}
+                  <span className="font-medium">{summary.matched}</span> matched existing
                 </span>
-                <span className="text-amber-700">
-                  <span className="font-medium">{summary.requiring_review}</span> need
-                  compliance review
+                <span className="text-muted-foreground">
+                  <span className="font-medium">{summary.duplicates}</span> duplicate
+                  {summary.duplicates === 1 ? "" : "s"} in upload
                 </span>
                 {summary.warnings.length > 0 && (
                   <span className="text-muted-foreground">
@@ -178,9 +180,45 @@ export function LeadImport() {
                 )}
               </div>
 
+              <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+                <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
+                  <p className="text-xs font-medium text-emerald-800">Eligible</p>
+                  <p className="text-xl font-semibold text-emerald-900">{summary.eligible}</p>
+                </div>
+                <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
+                  <p className="text-xs font-medium text-amber-800">Needs review</p>
+                  <p className="text-xl font-semibold text-amber-900">{summary.needs_review}</p>
+                </div>
+                <div className="rounded-md border border-red-200 bg-red-50 p-3">
+                  <p className="text-xs font-medium text-red-800">Blocked / suppressed</p>
+                  <p className="text-xl font-semibold text-red-900">{summary.blocked}</p>
+                </div>
+                <div className="rounded-md border bg-slate-50 p-3">
+                  <p className="text-xs font-medium text-slate-700">Invalid / incomplete</p>
+                  <p className="text-xl font-semibold text-slate-900">{summary.invalid}</p>
+                </div>
+              </div>
+
               <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm">
-                  <Link to="/leads">View leads</Link>
+                <Button asChild size="sm" variant={summary.eligible > 0 ? "default" : "outline"}>
+                  <Link to={`/leads?batch_id=${summary.batch_id}&compliance_status=eligible`}>
+                    View eligible leads
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link to={`/leads?batch_id=${summary.batch_id}&compliance_status=needs_review`}>
+                    Review exceptions
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link to={`/leads?batch_id=${summary.batch_id}&compliance_status=blocked`}>
+                    Inspect blocked
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link to={`/leads?batch_id=${summary.batch_id}&compliance_status=invalid`}>
+                    Correct invalid rows
+                  </Link>
                 </Button>
                 <Button
                   size="sm"
@@ -192,32 +230,115 @@ export function LeadImport() {
                 </Button>
               </div>
 
+              <p className="text-xs text-muted-foreground">
+                {summary.provenance_incomplete} saved lead
+                {summary.provenance_incomplete === 1 ? "" : "s"} have incomplete source
+                or provenance.
+              </p>
+
+              {summary.review_rows.length > 0 && (
+                <div className="space-y-2">
+                  <h2 className="text-sm font-medium">Rows needing attention</h2>
+                  {!showResultTables && <ul className="space-y-2">
+                    {summary.review_rows.map((row) => (
+                      <li
+                        key={`${row.row}-${row.compliance_status}`}
+                        className="rounded-xl border border-border bg-card p-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-medium leading-snug">
+                              {row.business_name || "Unnamed business"}
+                            </p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              CSV row {row.row}
+                            </p>
+                          </div>
+                          <ComplianceStatusBadge status={row.compliance_status} />
+                        </div>
+                        <p className="mt-3 text-sm leading-relaxed">{row.explanation}</p>
+                        <p className="mt-2 break-words font-mono text-[11px] text-muted-foreground">
+                          {row.reason_codes.join(", ")}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>}
+                  {showResultTables && <div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-16">Row</TableHead>
+                          <TableHead>Business</TableHead>
+                          <TableHead>Outcome</TableHead>
+                          <TableHead>Why</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {summary.review_rows.map((row) => (
+                          <TableRow key={`${row.row}-${row.compliance_status}`}>
+                            <TableCell className="font-mono text-xs">{row.row}</TableCell>
+                            <TableCell className="font-medium">{row.business_name}</TableCell>
+                            <TableCell>
+                              <ComplianceStatusBadge status={row.compliance_status} />
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {row.explanation}
+                              <span className="mt-1 block font-mono text-[11px] text-muted-foreground">
+                                {row.reason_codes.join(", ")}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>}
+                </div>
+              )}
+
               {summary.rejected > 0 && (
                 <div className="space-y-2">
                   <h2 className="text-sm font-medium">Refused rows</h2>
                   <p className="text-xs text-muted-foreground">
                     The row number is the line in your file, counting the header as line 1.
                   </p>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-16">Row</TableHead>
-                        <TableHead>Business</TableHead>
-                        <TableHead>Why</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {summary.rejected_rows.map((row) => (
-                        <TableRow key={`${row.row}-${row.code}`}>
-                          <TableCell className="font-mono text-xs">{row.row}</TableCell>
-                          <TableCell className="font-medium">
-                            {row.business_name || "—"}
-                          </TableCell>
-                          <TableCell className="text-sm">{row.reason}</TableCell>
+                  {!showResultTables && <ul className="space-y-2">
+                    {summary.rejected_rows.map((row) => (
+                      <li
+                        key={`${row.row}-${row.code}`}
+                        className="rounded-xl border border-border bg-card p-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="font-medium">{row.business_name || "Unnamed row"}</p>
+                          <Badge variant="secondary" className="shrink-0 font-mono text-[11px]">
+                            row {row.row}
+                          </Badge>
+                        </div>
+                        <p className="mt-2 text-sm leading-relaxed">{row.reason}</p>
+                      </li>
+                    ))}
+                  </ul>}
+                  {showResultTables && <div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-16">Row</TableHead>
+                          <TableHead>Business</TableHead>
+                          <TableHead>Why</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {summary.rejected_rows.map((row) => (
+                          <TableRow key={`${row.row}-${row.code}`}>
+                            <TableCell className="font-mono text-xs">{row.row}</TableCell>
+                            <TableCell className="font-medium">
+                              {row.business_name || "—"}
+                            </TableCell>
+                            <TableCell className="text-sm">{row.reason}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>}
                 </div>
               )}
 

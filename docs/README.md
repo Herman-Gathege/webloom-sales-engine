@@ -8,6 +8,7 @@ Start with the document that matches what you are about to do.
 | the whole plan: nine sprints, and who leads each | [sprint plan](delivery/sprint-plan.md) |
 | what each of us is doing right now | [Sprint 3 review homework](homework/sprint-3/README.md) |
 | the current sprint's scope, roles and acceptance criteria | [Sprint 3 authentication](delivery/sprint-3-auth.md) |
+| the CSV-to-outreach compliance flow, statuses, filters, and current boundary | [Sprint 3 solidification](delivery/sprint-3-solidification.md) |
 | how the last two sprints went | [Sprint 2 exit](homework/sprint-2/status.md) · [Sprint 1 record](homework/sprint-1/status.md) |
 | deep detail on every piece of work | [sprint detail](delivery/sprint-detail.md) — reference only |
 | how we branch, review, and merge | [how we work](team/how-we-work.md) |

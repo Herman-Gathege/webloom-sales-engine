@@ -2,6 +2,7 @@ from app.models.activity import Activity
 from app.models.compliance import (
     ImportBatch,
     LeadChannelEligibility,
+    LeadComplianceEvaluation,
     LeadProvenance,
     Suppression,
 )
@@ -13,6 +14,7 @@ __all__ = [
     "ImportBatch",
     "Lead",
     "LeadChannelEligibility",
+    "LeadComplianceEvaluation",
     "LeadProvenance",
     "LeadStatus",
     "Suppression",

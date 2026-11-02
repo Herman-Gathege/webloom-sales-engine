@@ -17,8 +17,15 @@ const summary: ImportSummary = {
   batch_id: "30000000-0000-4000-8000-000000000001",
   row_count: 52,
   accepted: 50,
+  created: 50,
   rejected: 2,
+  matched: 1,
   duplicates: 1,
+  eligible: 0,
+  needs_review: 50,
+  blocked: 0,
+  invalid: 2,
+  provenance_incomplete: 4,
   requiring_review: 50,
   rejected_rows: [
     {
@@ -32,6 +39,15 @@ const summary: ImportSummary = {
       business_name: "Riverside Dental",
       code: "missing_phone",
       reason: "No phone number, so this lead cannot be contacted.",
+    },
+  ],
+  review_rows: [
+    {
+      row: 12,
+      business_name: "Synthetic Needs Review",
+      compliance_status: "needs_review",
+      reason_codes: ["human_review_required:email"],
+      explanation: "Needs review: a human decision and evidence are required.",
     },
   ],
   warnings: [
@@ -91,10 +107,13 @@ describe("LeadImport", () => {
       .map((element) => element.textContent ?? "")
       .join(" ");
     expect(counts).toContain("52 rows read");
-    expect(counts).toContain("50 imported");
+    expect(counts).toContain("50 created");
     expect(counts).toContain("2 refused");
+    expect(counts).toContain("1 matched existing");
     expect(counts).toContain("1 duplicate");
-    expect(counts).toContain("50 need compliance review");
+    expect(screen.getAllByText("Needs review").length).toBeGreaterThan(0);
+    expect(screen.getByText(/4 saved leads have incomplete source/i)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Review exceptions" })).toBeTruthy();
 
     expect(screen.getByText("Mwangaza Hardware")).toBeTruthy();
     expect(screen.getByText("This phone number is already on row 3 of the file.")).toBeTruthy();

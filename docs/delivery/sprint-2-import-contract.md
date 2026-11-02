@@ -1,6 +1,7 @@
 # Sprint 2 — CSV import contract
 
-**Status:** implemented for Sprint 2 and extended by the 2026-10-21 compliance foundation.
+**Status:** implemented for Sprint 2, extended by the 2026-10-21 compliance foundation and the
+2026-10-27 Sprint 3 solidification.
 This document and `frontend/src/api/types.ts` move together — the same rule
 [the Sprint 1 contract](sprint-1-lead-contract.md) set for the Lead shape. The compliance
 boundary and operating workflow are in [`docs/compliance/`](../compliance/README.md).
@@ -47,14 +48,14 @@ for collection date and the written `Source` is the fallback for collection meth
 
 | Column | Becomes | Rule |
 |---|---|---|
-| `Business` | `business_name` | As written. Empty is a refusal. |
+| `Business` | `business_name` | Trimmed and repeated whitespace collapsed. Empty is a refusal. |
 | `Phone` | `phone` | `0NNN NNNNNN` → `+254…`; `020 NNNNNNN` → `+25420…`; an existing `+254…` is kept. Anything else is a refusal — this is the de-duplication key, so it is never guessed at. |
 | `WhatsApp capable` | `whatsapp_capable` | `Yes` → true, `Call only` → false. Any other value is reported and worked out from the number instead. |
 | `Website status` | `website_status` | The raw string, verbatim, exactly as Sprint 1's contract promises. |
 | `Website status` | `has_website` | `no website` / `New listing` / `Facebook page only` / `Instagram only` → false; `has a website` / `http` / `www.` → true; anything else is reported and left false. |
-| `Source` | `source` | `Google Maps listing` → `google_maps`. An unknown value is turned into a lowercase slug and reported. Empty is a refusal. |
-| `Sector` | `sector` | As written. There is no controlled vocabulary this sprint — Sprint 1's contract defers it — so no sector value is ever reported or rewritten. |
-| `Area` | `area` | As written; empty becomes `null`. |
+| `Source` | `source` plus provenance `source_name` | `Google Maps listing` → `source=google_maps` while the supplied text is preserved as `source_name`. An unknown value is slugified and reported. Empty is a refusal. |
+| `Sector` | `sector` | Trimmed and whitespace-collapsed. There is no controlled vocabulary this sprint — Sprint 1's contract defers it — so no sector value is reported or rewritten. |
+| `Area` | `area` | Trimmed and whitespace-collapsed; empty becomes `null`. |
 | `Email` | `email` | Lower-cased when valid; malformed values are left blank with a warning. |
 | `Contact name` | provenance `contact_name` | Optional named person, where research identified one. |
 | `Contact type` | provenance `contact_type` | `generic_business`, `named_individual`, or `unknown`. |
@@ -64,9 +65,10 @@ for collection date and the written `Source` is the fallback for collection meth
 | `Intended purpose` | provenance `intended_purpose` | Why the contact was collected; empty stays unknown. |
 
 Every imported lead is `status: "new"`, gets an `import_batches` row and row-numbered
-provenance, and starts `needs_review` independently for email, SMS, and WhatsApp. It gets the
-same two timeline entries a seeded lead gets: `lead.created` ("Imported from the Google Maps
-list") and `lead.researched` with the research string.
+provenance, starts `needs_review` independently for email, SMS, and WhatsApp, and is
+immediately passed through the automatic compliance evaluator. It gets the same two timeline
+entries a seeded lead gets: `lead.created` ("Imported from the Google Maps list") and
+`lead.researched` with the research string.
 
 **A landline is never WhatsApp-capable.** `020 NNNNNNN` in the list is `+2542…` once
 normalised (and `041`, `043` and the other fixed-line ranges behave the same way), so
@@ -82,16 +84,32 @@ disagrees is reported rather than believed.
   "filename": "webloom-lead-list.csv",
   "batch_id": "3f7b0ee2-c3c1-4a02-a8a5-c773f9c24e29",
   "row_count": 52,
+  "created": 50,
   "accepted": 50,
   "rejected": 2,
+  "matched": 1,
   "duplicates": 1,
-  "requiring_review": 50,
+  "eligible": 0,
+  "needs_review": 48,
+  "blocked": 1,
+  "invalid": 3,
+  "provenance_incomplete": 4,
+  "requiring_review": 48,
   "rejected_rows": [
     {
       "row": 7,
       "business_name": "Mwangaza Hardware",
       "code": "duplicate_phone",
       "reason": "This phone number is already on row 3 of the file."
+    }
+  ],
+  "review_rows": [
+    {
+      "row": 4,
+      "business_name": "Synthetic Review Business",
+      "compliance_status": "needs_review",
+      "reason_codes": ["human_review_required:email"],
+      "explanation": "Needs review: email requires a human decision before outreach."
     }
   ],
   "warnings": [
@@ -108,6 +126,16 @@ disagrees is reported rather than believed.
 
 - `row_count == accepted + rejected`, always. Every row in the file is either a lead or a
   refusal with a reason.
+- `created` equals `accepted`; it is explicit for screens that distinguish a new lead from an
+  existing match.
+- `matched` counts rows whose normalised phone already exists. They are not overwritten and
+  also appear in `duplicates` for compatibility.
+- `duplicates` remains the count of all `duplicate_phone` refusals, whether the match was in
+  the upload or the system.
+- `eligible`, `needs_review`, `blocked`, and `invalid` are calculated from the saved
+  compliance snapshots after automatic evaluation. `blocked` and `invalid` also include
+  suppressed/validation rows refused before a lead was saved.
+- `review_rows` explains every saved non-eligible lead by CSV row.
 - `row` is the **physical line in the file**, with the header as line 1 — the number the
   person sees in Excel beside the row they have to fix.
 - `warnings` never reduce `accepted`: a value we could not classify is kept as written and
@@ -185,7 +213,11 @@ suppression rows survive through their contact fingerprints.
 const body = new FormData();
 body.append("file", csvFile);                  // the File from the <input type="file">
 
-const response = await fetch("/api/v1/leads/import", { method: "POST", body });
+const response = await fetch("/api/v1/leads/import", {
+  method: "POST",
+  body,
+  headers: { Authorization: `Bearer ${sessionToken}` },
+});
 const summary = await response.json();         // the shape above
 ```
 

@@ -1,6 +1,7 @@
 # Compliance foundation
 
-**Status:** Sprint 2 foundation · **Not legal certification or a definitive legal opinion**
+**Status:** Sprint 2 foundation, extended in Sprint 3 with durable automatic evaluation and an
+outreach readiness gate · **Not legal certification or a definitive legal opinion**
 
 This folder is the operating summary for lead research, CSV import, channel review,
 campaign approval, outreach, replies, and opt-outs. It covers the Kenya Data Protection Act,
@@ -29,6 +30,8 @@ direct marketing. All B2B contexts are not automatically exempt.
 - [Outreach SOP](outreach-sop.md) for the practical workflow.
 - [Implementation notes](implementation-notes.md) for architecture, tests, limitations, and
   Sprint 5–6 gates.
+- [Sprint 3 solidification](../delivery/sprint-3-solidification.md) for the CSV-to-outreach
+  boundary, status meanings, filters, and current gaps.
 - [CSV import contract](../delivery/sprint-2-import-contract.md) for exact import behavior.
 - [FikaTu integration research](../research/2026-10-08-fikatu-integration-notes.md) for the
   verified delivery surface.
@@ -42,6 +45,7 @@ direct marketing. All B2B contexts are not automatically exempt.
 | `eligible` | An authorised human recorded a lawful basis and the required context for one channel |
 | `suppressed` | A terminal opt-out, objection, or manual restriction overrides the saved review |
 | All-marketing opt-out | Suppresses every available marketing contact, not only the channel where it was received |
+| Lead compliance evaluation | The latest automatic lead-level snapshot, with data quality, reason codes, eligible/suppressed channels, timestamp, rule version, and input fingerprint |
 
 Eligibility is independent for email, SMS, and WhatsApp. A decision for one channel never
 approves another.
