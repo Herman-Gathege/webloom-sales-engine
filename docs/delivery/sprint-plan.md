@@ -1,6 +1,6 @@
 # Webloom Sales Engine — Sprint Plan
 
-**Updated:** 2026-10-27 · **Owner:** Herman Gathege · **Reviewed by:** Mark Mwenesi
+**Updated:** 2026-11-02 · **Owner:** Herman Gathege · **Reviewed by:** Mark Mwenesi
 **Scope:** [scope spec](../superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) ·
 **Detail:** [sprint detail](sprint-detail.md) · **Rules:** [how we work](../team/how-we-work.md)
 
@@ -29,6 +29,10 @@ of us; the record is in [the Sprint 1 closure](../homework/sprint-1/status.md).
 in [`sprint-3-auth.md`](sprint-3-auth.md); the closeout evidence is in
 [`docs/homework/sprint-3/status.md`](../homework/sprint-3/status.md). The review homework is in
 [`docs/homework/sprint-3/`](../homework/sprint-3/README.md).
+
+**Sprint 4 is in contract review.** Offers and templates are proposed in
+[`sprint-4-offers-templates.md`](sprint-4-offers-templates.md). No implementation starts
+until the five review decisions are accepted or corrected and the homework cards exist.
 
 One thing we carry forward: Sprint 1 cost more in setup friction than in product. **From now
 on, the first task of a sprint is "a new person can run it", not the last.**
@@ -63,14 +67,10 @@ FikaTu is not involved yet, and nothing here depends on another repository.
 
 ---
 
-## Sprints 3 to 9
+## Sprints 4 to 9
 
 Each is one small piece. **1 point ≈ half a focused day**, and the sizes compare sprints to
 each other — they are not a schedule.
-
-**Sprint 3 — Lock the door ✅ closed.** Login and two roles, `admin` and `sales`. Only
-the team can reach the pipeline, and the API enforces what each role may do. *Owner: Mark ·
-Reviewer: Herman · ~8 pts.* Full detail: [`sprint-3-auth.md`](sprint-3-auth.md).
 
 **Sprint 4 — What we sell, in the system.** Offers (website packages first, other services
 later) and message templates with variants — all editable without a code change. Contract
@@ -95,12 +95,25 @@ source and which message actually converts. *Owner: Herman · Reviewer: Mark · 
 **Sprint 9 — Pilot and harden.** One real campaign run end to end, then security review,
 deployment and backups. *Owner: Mark · Reviewer: Anne · ~32 pts.*
 
+## Who leads what
+
+Every sprint has one owner and one reviewer. The owner is accountable for the sprint's demo
+and hand-off, not for writing every line. Sprint 1 was shared by all four.
+
+| Person | Leads | Also carries |
+|---|---|---|
+| **Mark** | Sprint 6 (approve + send), Sprint 9 (pilot + harden); closed Sprint 3 | Architecture, schema, the FikaTu seam, security review |
+| **Sharon** | Sprint 4 (offers + templates); closed Sprint 2 | Backend features end-to-end, migrations, tests |
+| **Herman** | Sprint 5 (campaigns + drafts), Sprint 8 (funnel + reports) | Product, backlog, frontend, documentation |
+| **Anne** | Sprint 7 (replies + handoff) | Sales workflow, copy, compliance wording, the pilot |
+
+This spreads ownership deliberately: nobody leads two sprints in a row, and Mark reviews
+rather than absorbs the work he would otherwise be expected to carry.
+
 ## Order, and what blocks what
 
-- **Sprint 2 first.** Everything after it needs leads that came from a real spreadsheet, and
-  CI before more people write code.
-- **Sprint 3 can run alongside Sprint 2** — different files — but it must land before
-  anything is reachable outside our four machines.
+- **Sprints 1–3 are closed.** They established the working slice, the real Lead Desk and CI,
+  authentication, and the compliance gate. Everything below assumes them.
 - **Sprints 4 → 5 → 6 are a chain.** Offers and templates, then campaigns and drafts, then
   approval and sending. They do not parallelise.
 - **Sprint 6 needs one change outside this repository.** FikaTu's event registry is
@@ -128,8 +141,8 @@ before anyone builds it.
 
 Flagged, not invented. Settle each before the sprint it affects.
 
-1. Does the 13-screen inventory land in Sprint 2 or Sprint 3? Proposed: Sprint 2, because
-   Sprint 2 already changes the Lead Desk.
+1. Where does the 13-screen inventory land now? Both Sprint 2 and Sprint 3 closed without it.
+   It should be settled before Sprint 5 builds campaigns against the Lead Desk.
 2. Is outcome capture the end of Sprint 7 or the start of Sprint 8? It produces the data
    Sprint 8 reports on.
 3. Does Sprint 9 split into "run the pilot" and "harden and deploy"?
