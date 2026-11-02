@@ -141,5 +141,5 @@ matches FikaTu so the two systems share one set of conventions.
 ## Not built yet
 
 Campaigns, drafts, approval, sending, replies, and reporting — Sprints 4 to 9 in the
-[sprint plan](docs/delivery/sprint-plan.md). The CI workflow is present; its checks still need
-to be marked required in GitHub branch protection.
+[sprint plan](docs/delivery/sprint-plan.md). The CI workflow is present, and `main` requires
+its Backend/Frontend checks and one approving review.
