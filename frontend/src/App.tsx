@@ -11,12 +11,14 @@ import { LeadList } from "@/routes/LeadList";
 import { Login } from "@/routes/Login";
 import { OfferCatalog } from "@/routes/OfferCatalog";
 import { TemplateCatalog } from "@/routes/TemplateCatalog";
+import { WorkflowLanding } from "@/routes/WorkflowLanding";
 
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
         {/* Public */}
+        <Route index element={<WorkflowLanding />} />
         <Route path="login" element={<Login />} />
 
         {/* Signed in, but outside the shell: the forced first password change. */}
@@ -37,7 +39,6 @@ export default function App() {
             </RequireAuth>
           }
         >
-          <Route index element={<Navigate to="/leads" replace />} />
           <Route path="leads" element={<LeadList />} />
           <Route path="leads/import" element={<LeadImport />} />
           <Route path="leads/:id" element={<LeadDetail />} />

@@ -3,6 +3,17 @@
 Every sprint has a folder. Open your own card, do that piece, and hand the line to the
 next person.
 
+## Shared Wadi orientation
+
+Spend five minutes here before a sprint review:
+
+1. Open the [visual Wadi workflow](../workflow.html).
+2. Read the [stage-by-stage workflow](../workflow-description.md).
+3. Skim the [full Wadi guide](../full-wadi-documentation.md) for status, gaps and roadmap.
+
+This is the shared map. Individual homework should send each person back to the part that
+affects their review, not ask them to reread everything.
+
 ## One branch, one line
 
 We use **one shared branch per sprint**. No personal branches. Think of a car line: one

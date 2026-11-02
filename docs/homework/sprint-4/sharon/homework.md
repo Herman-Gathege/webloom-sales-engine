@@ -1,5 +1,12 @@
 # Sharon — Sprint 4
 
+## Start here
+
+Open [workflow.html](../../../workflow.html), then read
+[workflow-description.md](../../../workflow-description.md). Skim the
+[full Wadi guide](../../../full-wadi-documentation.md) for current gaps. Focus on how catalogue
+data will feed Sprint 5 without bypassing compliance.
+
 ## Your mission
 
 Deliver the catalogue data, APIs and idempotent seed.

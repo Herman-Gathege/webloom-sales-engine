@@ -1,10 +1,20 @@
 # Documentation
 
-Start with the document that matches what you are about to do.
+New to Wadi or returning after a break? Start with the five-minute orientation:
+
+1. Open the [visual workflow](workflow.html) for the whole journey in one view.
+2. Read the [workflow description](workflow-description.md) for inputs, human decisions and
+   stop conditions.
+3. Use the [full Wadi guide](full-wadi-documentation.md) for current status, architecture,
+   gaps and the road ahead.
+
+Then open the document that matches what you are about to do.
 
 | If you want to know… | Read |
 |---|---|
 | what we are building, and what is out of scope | [scope spec](superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) |
+| where Wadi has been, where it is and where it is going | [full Wadi guide](full-wadi-documentation.md) |
+| one lead's journey, with human and automation boundaries | [workflow description](workflow-description.md) |
 | the whole plan: nine sprints, and who leads each | [sprint plan](delivery/sprint-plan.md) |
 | the current sprint's scope, roles and manual acceptance criteria | [Sprint 4 offers and templates](delivery/sprint-4-offers-templates.md) |
 | the CSV-to-outreach compliance flow, statuses, filters, and current boundary | [Sprint 3 solidification](delivery/sprint-3-solidification.md) |
@@ -24,6 +34,9 @@ Start with the document that matches what you are about to do.
 
 ```
 docs/
+├── workflow.html             public visual orientation and app landing page
+├── workflow-description.md   the canonical stage-by-stage journey
+├── full-wadi-documentation.md  the complete project snapshot
 ├── superpowers/specs/   the scope spec — the gate
 ├── delivery/            the sprint plan, and the detailed backlog behind it
 ├── homework/sprint-1/   the finished first sprint: its cards, and its record

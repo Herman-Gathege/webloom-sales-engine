@@ -1,5 +1,12 @@
 # Anne — Sprint 4
 
+## Start here
+
+Open [workflow.html](../../../workflow.html), then read
+[workflow-description.md](../../../workflow-description.md). Skim the
+[full Wadi guide](../../../full-wadi-documentation.md) for context. Focus on the seller handoff
+and the copy decisions that still require a human.
+
 ## Your mission
 
 Confirm the offer and template language is useful to a seller.

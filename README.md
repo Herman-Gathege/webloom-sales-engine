@@ -10,10 +10,9 @@ Websites are the offer we start with, not the limit of what this can sell.
 ## Status
 
 Pre-MVP. **Sprints 1–3 are closed; Sprint 4 is implemented and ready for manual acceptance.**
-The Lead Desk runs end to end with authentication in
-front of it: researched leads import into PostgreSQL, are automatically evaluated and
-filterable in React, and carry provenance, independent channel-review state, durable
-eligibility, terminal suppression history, and audit events.
+Start with the [visual workflow](docs/workflow.html) and
+[full Wadi guide](docs/full-wadi-documentation.md) for the current system, boundaries and
+roadmap.
 
 - [`frontend/`](frontend/) — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui.
 - [`backend/`](backend/README.md) — FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL 17, with
@@ -21,10 +20,7 @@ eligibility, terminal suppression history, and audit events.
   JWT authentication with `admin`/`sales` roles.
 - [`docker-compose.yml`](docker-compose.yml) — one command starts all three.
 
-There is no sending yet. The current slice is
-[Sprint 4 offers and templates](docs/delivery/sprint-4-offers-templates.md). The completed
-CSV-to-outreach boundary is described in
-[Sprint 3 solidification](docs/delivery/sprint-3-solidification.md).
+There is no sending yet. Sprint 4 owns the current offer/template slice.
 
 ## Run it
 
@@ -72,14 +68,9 @@ The traps we hit, and the decisions to agree before the next sprint, are in the
 
 ## If you are one of the four of us
 
-**Sprint 3 — lock the door** is complete. Sprint 4 — offers and templates — is ready for
-manual acceptance at [Sprint 4 offers and templates](docs/delivery/sprint-4-offers-templates.md). The
-whole plan is the [sprint plan](docs/delivery/sprint-plan.md).
-
-The first three sprints are kept as records:
-[Sprint 1](docs/homework/sprint-1/status.md) and
-[Sprint 2](docs/homework/sprint-2/status.md) and
-[Sprint 3](docs/homework/sprint-3/status.md).
+Read the [Sprint 4 contract](docs/delivery/sprint-4-offers-templates.md) and your
+[homework card](docs/homework/README.md). The whole plan remains the
+[sprint plan](docs/delivery/sprint-plan.md).
 
 There are four administrator accounts and no public sign-up. Create them locally once:
 
@@ -118,6 +109,9 @@ implement it; a human reviews the result.** The short version is in
 
 | Read this | For |
 |---|---|
+| [Workflow](docs/workflow.html) | A fast visual explanation of how Wadi works |
+| [Workflow description](docs/workflow-description.md) | Exact stage rules, human decisions and stop conditions |
+| [Full Wadi guide](docs/full-wadi-documentation.md) | Current state, architecture, gaps and roadmap |
 | [Scope spec](docs/superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) | What we are building, what is out of scope, and the design |
 | [Sprint plan](docs/delivery/sprint-plan.md) | The nine sprints, what each delivers, and who leads it. Read this one |
 | [Sprint 3 scope](docs/delivery/sprint-3-auth.md) | Login, roles, bootstrap, and what this sprint does not do |

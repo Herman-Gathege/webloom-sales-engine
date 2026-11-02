@@ -58,6 +58,12 @@ describe("authentication", () => {
     mocks.getToken.mockReturnValue(null);
   });
 
+  it("shows the public Wadi workflow at the root before login", () => {
+    renderAt("/");
+
+    expect(screen.getByTitle("How Wadi works").getAttribute("src")).toBe("/workflow.html");
+  });
+
   it("sends an anonymous visitor to the login page", async () => {
     renderAt("/leads");
 
