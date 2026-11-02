@@ -68,6 +68,7 @@ describe("authentication", () => {
     renderAt("/leads");
 
     expect(await screen.findByRole("heading", { name: "Sign in" }, { timeout: 5000 })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "How Wadi works" }).getAttribute("href")).toBe("/");
   });
 
   it("signs in and lands on the lead desk", async () => {
