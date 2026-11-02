@@ -51,8 +51,8 @@ foundation with the CSV-to-outreach compliance boundary.
    remain Sprint 5–7 work. Sprint 3 ends at the outreach-readiness gate.
 6. **Bulk approval:** not implemented. Any future bulk action must preserve an individual
    current decision for every lead.
-7. **GitHub enforcement:** CI checks are green but branch protection remains an
-   administrator action.
+7. **GitHub enforcement:** resolved after closure. `main` now requires the Backend/Frontend
+   checks. Independent human review remains a team process gate.
 
 ## Missing provenance
 

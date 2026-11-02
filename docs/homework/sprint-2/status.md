@@ -37,7 +37,7 @@ implementation differs from the written criteria, it says so below.
 | Lead desk works | Met — list, detail, timeline and compliance panel served from PostgreSQL |
 | Import works, rejects explained | Met — covered by importer tests and the live import review |
 | Tests and frontend checks pass | Met |
-| CI runs on every PR | Met (workflow). Requiring the checks in branch protection is an admin action and is **not** done. |
+| CI runs on every PR | Met (workflow). The required-check gap was later closed on 2026-11-02. |
 | Filters, search and pagination | Partly met — filters/search are client-side over up to 200 leads; the API paginates but does not filter. |
 | Contact details hidden by role | Deferred by decision to Sprint 3 — **implemented there** (see the Sprint 3 record). |
 | 13-screen inventory signed off | Not done; still an open question in the sprint detail. |
@@ -54,7 +54,7 @@ implementation differs from the written criteria, it says so below.
    browser. Correct for the current 62, and a scaling limit rather than a bug.
 3. **Role-gated contact visibility was deferred to Sprint 3**, which now implements
    `admin`/`sales` and backend enforcement.
-4. **No branch protection.** The CI workflow is not yet a required check in GitHub.
+4. **Branch protection.** This was an exit deviation and was resolved on 2026-11-02.
 5. **No screen inventory sign-off.** The 13-surface list remains an open team question.
 
 ## Why this is safe to close
