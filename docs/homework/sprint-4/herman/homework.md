@@ -1,5 +1,12 @@
 # Herman — Sprint 4
 
+## Start here
+
+Open [workflow.html](../../../workflow.html), then read
+[workflow-description.md](../../../workflow-description.md). Skim the
+[full Wadi guide](../../../full-wadi-documentation.md) for status and roadmap context. You are
+reviewing the Catalog as the product driver, not redesigning the application.
+
 ## Your mission
 
 Make the Catalog feel like part of Wadi and confirm it works at every screen size.

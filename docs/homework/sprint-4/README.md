@@ -2,6 +2,17 @@
 
 **Testing branch:** `sprint/4-offers-templates`
 
+Before testing, spend five minutes with the shared orientation:
+
+1. Open the [visual Wadi workflow](../../workflow.html).
+2. Read the [stage-by-stage workflow](../../workflow-description.md).
+3. Use the [full Wadi guide](../../full-wadi-documentation.md) when you need status,
+   architecture, gaps or roadmap context.
+
+The one-sentence orientation: Wadi currently takes leads from CSV through provenance and
+human compliance review to an outreach gate, and now has offers/templates; campaigns, approval
+and sending are still future work.
+
 Read the [Sprint 4 contract](../../delivery/sprint-4-offers-templates.md), then use this page
 as the manual acceptance script. Campaigns and sending are outside this test.
 

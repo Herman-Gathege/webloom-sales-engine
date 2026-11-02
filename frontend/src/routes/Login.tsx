@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/auth/context";
+import { PublicNav } from "@/components/layout/PublicNav";
 import { Scout } from "@/components/Scout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,30 +48,24 @@ export function Login() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-background px-4 py-10">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <Scout size={84} />
-          <div>
-            <h1
-              className="text-3xl leading-none text-foreground"
-              style={{ fontFamily: "var(--wadi-display)" }}
-            >
-              wadi
-            </h1>
-            <p className="mt-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-              sales scout
+    <div className="min-h-screen bg-background">
+      <PublicNav />
+      <div className="grid min-h-[calc(100dvh-4rem)] place-items-center px-4 py-10">
+        <div className="w-full max-w-sm">
+          <div className="mb-6 flex flex-col items-center gap-3 text-center">
+            <Scout size={72} />
+            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+              Team access
             </p>
           </div>
-        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign in</CardTitle>
-            <CardDescription>The lead desk is for the team only.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <Card>
+            <CardHeader>
+              <CardTitle>Sign in</CardTitle>
+              <CardDescription>The lead desk is for the team only.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div className="space-y-1.5">
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -111,13 +106,14 @@ export function Login() {
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? "Signing in…" : "Sign in"}
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+              </form>
+            </CardContent>
+          </Card>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          No account? Ask Herman to add you.
-        </p>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            No account? Ask Herman to add you.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/auth/context";
-import { Scout } from "@/components/Scout";
+import { PublicNav } from "@/components/layout/PublicNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -47,16 +47,11 @@ export function ChangePassword() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-background px-4 py-10">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <Scout size={72} />
-          <p className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-            wadi · sales scout
-          </p>
-        </div>
-
-        <Card>
+    <div className="min-h-screen bg-background">
+      <PublicNav />
+      <div className="grid min-h-[calc(100dvh-4rem)] place-items-center px-4 py-10">
+        <div className="w-full max-w-sm">
+          <Card>
           <CardHeader>
             <CardTitle>{forced ? "Choose your password" : "Change password"}</CardTitle>
             <CardDescription>
@@ -131,7 +126,8 @@ export function ChangePassword() {
               </Button>
             </form>
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,12 @@
 # Mark — Sprint 4
 
+## Start here
+
+Open [workflow.html](../../../workflow.html), then read
+[workflow-description.md](../../../workflow-description.md). Skim the
+[full Wadi guide](../../../full-wadi-documentation.md) for architecture and gaps. Focus on where
+the current boundary stops before campaign and send work.
+
 ## Your mission
 
 Review the catalogue boundaries, migration and authorization before release.

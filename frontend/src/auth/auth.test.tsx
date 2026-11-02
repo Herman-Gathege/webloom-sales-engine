@@ -58,10 +58,17 @@ describe("authentication", () => {
     mocks.getToken.mockReturnValue(null);
   });
 
+  it("shows the public Wadi workflow at the root before login", () => {
+    renderAt("/");
+
+    expect(screen.getByTitle("How Wadi works").getAttribute("src")).toBe("/workflow.html");
+  });
+
   it("sends an anonymous visitor to the login page", async () => {
     renderAt("/leads");
 
     expect(await screen.findByRole("heading", { name: "Sign in" }, { timeout: 5000 })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "How Wadi works" }).getAttribute("href")).toBe("/");
   });
 
   it("signs in and lands on the lead desk", async () => {
