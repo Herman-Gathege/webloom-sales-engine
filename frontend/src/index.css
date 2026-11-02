@@ -10,7 +10,7 @@
    * assets/css/system/tokens.css in the marketing site. */
   --wadi-ink: #0b1f18;
   --wadi-ink-soft: #3d5148;
-  --wadi-muted: #6a7b72;
+  --wadi-muted: #52645b;
   --wadi-paper: #f8f8f5;
   --wadi-surface: #ffffff;
   --wadi-line: #e3e7e2;
@@ -133,6 +133,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--wadi-body);
+    font-size: 1rem;
+    line-height: 1.55;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -144,12 +146,27 @@
     font-family: var(--wadi-display);
     font-weight: 700;
     letter-spacing: -0.015em;
+    line-height: 1.22;
+    text-wrap: balance;
+  }
+
+  h3,
+  h4 {
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
   }
 
   [data-slot="card-title"] {
     font-family: var(--wadi-display);
     font-weight: 700;
     letter-spacing: -0.01em;
+    line-height: 1.28;
   }
 
   /* Tables: a lime header band and a quiet hover, so a row reads as a row. */
@@ -172,5 +189,23 @@
   ::selection {
     background: var(--wadi-accent);
     color: var(--wadi-brand-deep);
+  }
+}
+
+/* Keep secondary interface text readable without changing the visual hierarchy. */
+:where(
+    [class*="text-[9px]"],
+    [class*="text-[10px]"],
+    [class*="text-[11px]"]
+  ) {
+  font-size: 0.75rem;
+  line-height: 1.15rem;
+}
+
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
   }
 }

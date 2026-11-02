@@ -133,12 +133,13 @@ As a team, we want the 13 screens sketched and agreed, so builds match a shared 
 
 Tasks: wireframes (Herman, 8h) · sales workflow review session (Anne, 4h). **Total 12h.**
 
-*Open question:* this may move to Sprint 3. It is listed here because Sprint 2 already changes the
-Lead Desk. The team decides.
+*Carried forward:* this was not delivered in Sprint 2 or Sprint 3; the Sprint 2 exit review
+records it as still open. It needs a home before Sprint 5 builds campaigns against the Lead
+Desk.
 
 ---
 
-## Sprint 3 — lock the door ← we are here
+## Sprint 3 — lock the door ✅ closed
 
 **Owner:** Mark · **Reviewer:** Herman. Login, and two roles: `admin` and `sales`.
 
@@ -156,9 +157,13 @@ stays honest:
 
 ---
 
-## Sprint 4 — what we sell, in the system
+## Sprint 4 — what we sell, in the system ← contract in review
 
 **Owner:** Sharon · **Reviewer:** Mark. Offers and message templates become data, not code.
+
+The proposed scope, API contract, permissions and acceptance criteria are in
+[`sprint-4-offers-templates.md`](sprint-4-offers-templates.md). That document governs once
+the team accepts its five review decisions; the story detail below is the original backlog.
 
 ### Offer catalogue with seeded website packages
 *Owner: Sharon · Reviewer: Mark · ~3 pts*

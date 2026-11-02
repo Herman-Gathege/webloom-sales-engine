@@ -1,3 +1,9 @@
+from app.services.catalog_service import (
+    CatalogConflictError,
+    CatalogNotFoundError,
+    CatalogService,
+    CatalogValidationError,
+)
 from app.services.compliance_service import (
     ComplianceService,
     ComplianceTargetError,
@@ -16,6 +22,10 @@ from app.services.outreach_gate import OutreachGateResult, OutreachGateService
 
 __all__ = [
     "MAX_UPLOAD_BYTES",
+    "CatalogConflictError",
+    "CatalogNotFoundError",
+    "CatalogService",
+    "CatalogValidationError",
     "ComplianceService",
     "ComplianceTargetError",
     "EligibilityDecision",

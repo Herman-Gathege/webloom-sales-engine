@@ -1,4 +1,12 @@
 from app.schemas.activity import ActivityRead
+from app.schemas.catalog import (
+    OfferCreate,
+    OfferRead,
+    OfferUpdate,
+    TemplateCreate,
+    TemplateRead,
+    TemplateUpdate,
+)
 from app.schemas.lead import (
     ChannelComplianceResultRead,
     ChannelEligibilityRead,
@@ -25,6 +33,9 @@ from app.schemas.lead_import import (
 
 __all__ = [
     "ActivityRead",
+    "OfferCreate",
+    "OfferRead",
+    "OfferUpdate",
     "ChannelEligibilityRead",
     "ChannelComplianceResultRead",
     "EligibilityReviewRequest",
@@ -44,4 +55,7 @@ __all__ = [
     "RowWarningRead",
     "SuppressionCreate",
     "SuppressionRead",
+    "TemplateCreate",
+    "TemplateRead",
+    "TemplateUpdate",
 ]

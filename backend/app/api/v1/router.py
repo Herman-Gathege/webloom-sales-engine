@@ -2,12 +2,13 @@
 
 from fastapi import APIRouter, Depends
 
-from app.api.v1 import auth, health, leads, users
+from app.api.v1 import auth, catalog, health, leads, users
 from app.auth import require_password_current
 
 api_router = APIRouter()
 api_router.include_router(health.router)
 api_router.include_router(auth.router)
+api_router.include_router(catalog.router, dependencies=[Depends(require_password_current)])
 # Administrators only: the route itself also depends on `require_admin`, this
 # keeps the prefix honest at a glance.
 api_router.include_router(users.router)

@@ -1,8 +1,8 @@
 # Frontend
 
 The React shell for Wadi. It has a login screen, a server-filtered Lead List, Lead Detail with
-activity history and a practical compliance review card, the CSV import summary, and an
-administrator-only user list.
+activity history and a practical compliance review card, the CSV import summary, responsive
+offer/template catalogues, and an administrator-only user list.
 
 ## Signing in
 

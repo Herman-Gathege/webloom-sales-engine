@@ -9,6 +9,8 @@ import { LeadDetail } from "@/routes/LeadDetail";
 import { LeadImport } from "@/routes/LeadImport";
 import { LeadList } from "@/routes/LeadList";
 import { Login } from "@/routes/Login";
+import { OfferCatalog } from "@/routes/OfferCatalog";
+import { TemplateCatalog } from "@/routes/TemplateCatalog";
 
 export default function App() {
   return (
@@ -39,6 +41,8 @@ export default function App() {
           <Route path="leads" element={<LeadList />} />
           <Route path="leads/import" element={<LeadImport />} />
           <Route path="leads/:id" element={<LeadDetail />} />
+          <Route path="catalog/offers" element={<OfferCatalog />} />
+          <Route path="catalog/templates" element={<TemplateCatalog />} />
           <Route
             path="admin/users"
             element={
