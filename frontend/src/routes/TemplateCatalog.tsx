@@ -1,4 +1,4 @@
-import { Pencil, Plus, Power, X } from "lucide-react";
+import { Pencil, Plus, Power } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
@@ -16,6 +16,13 @@ import { useAuth } from "@/auth/context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
 const ALLOWED_VARIABLES = [
@@ -92,15 +99,18 @@ export function TemplateCatalog() {
     setFormOpen(false);
     setEditingId(null);
     setForm({ ...EMPTY_FORM, offer_id: offers[0]?.id ?? "" });
+    setError(null);
   }
 
   function openNewForm() {
     setEditingId(null);
     setForm({ ...EMPTY_FORM, offer_id: offers[0]?.id ?? "" });
+    setError(null);
     setFormOpen(true);
   }
 
   function editTemplate(template: MessageTemplate) {
+    setError(null);
     setEditingId(template.id);
     setForm({
       offer_id: template.offer_id,
@@ -184,7 +194,7 @@ export function TemplateCatalog() {
               Reusable email and SMS copy for each offer.
             </CardDescription>
           </div>
-          {canManage && !formOpen && (
+          {canManage && (
             <Button size="sm" onClick={openNewForm}>
               <Plus className="size-4" />
               New template
@@ -192,118 +202,127 @@ export function TemplateCatalog() {
           )}
         </CardHeader>
         <CardContent className="space-y-4">
-          {error && (
+          {error && !formOpen && (
             <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
               {error}
             </p>
           )}
 
-          {formOpen && canManage && (
-            <form onSubmit={saveTemplate} className="rounded-xl border border-border bg-muted/30 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-base font-semibold">
-                  {editingId ? "Edit template" : "New template"}
-                </h2>
-                <Button type="button" size="icon-sm" variant="ghost" onClick={closeForm}>
-                  <X className="size-4" />
-                  <span className="sr-only">Close form</span>
-                </Button>
-              </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <label className="space-y-1 text-sm">
-                  <span className="font-medium">Offer</span>
-                  <select
-                    required
-                    aria-label="Template offer"
-                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-                    value={form.offer_id}
-                    onChange={(event) => setForm({ ...form, offer_id: event.target.value })}
-                  >
-                    {offers.map((offer) => (
-                      <option key={offer.id} value={offer.id}>
-                        {offer.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-1 text-sm">
-                  <span className="font-medium">Channel</span>
-                  <select
-                    aria-label="Template channel"
-                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-                    value={form.channel}
-                    onChange={(event) =>
-                      setForm({
-                        ...form,
-                        channel: event.target.value as TemplateChannel,
-                      })
-                    }
-                  >
-                    <option value="sms">SMS</option>
-                    <option value="email">Email</option>
-                  </select>
-                </label>
-                <label className="space-y-1 text-sm">
-                  <span className="font-medium">Name</span>
-                  <Input
-                    required
-                    value={form.name}
-                    onChange={(event) => setForm({ ...form, name: event.target.value })}
-                  />
-                </label>
-                <label className="space-y-1 text-sm">
-                  <span className="font-medium">Variant</span>
-                  <Input
-                    required
-                    maxLength={16}
-                    value={form.variant}
-                    onChange={(event) => setForm({ ...form, variant: event.target.value })}
-                  />
-                </label>
-                <label className="space-y-1 text-sm sm:col-span-2">
-                  <span className="font-medium">Body</span>
-                  <textarea
-                    required
-                    aria-label="Template body"
-                    className="min-h-44 w-full rounded-md border border-input bg-transparent px-3 py-2 font-mono text-sm leading-relaxed"
-                    value={form.body}
-                    onChange={(event) => setForm({ ...form, body: event.target.value })}
-                  />
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.is_active}
-                    onChange={(event) =>
-                      setForm({ ...form, is_active: event.target.checked })
-                    }
-                  />
-                  Active
-                </label>
-              </div>
-              <div className="mt-4 rounded-lg border border-border bg-background p-3 text-xs">
-                <p className="font-medium">Variables detected</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {variablesInBody(form.body).map((variable) => (
-                    <Badge key={variable} variant="outline" className="font-mono font-normal">
-                      {variable}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="mt-3 text-muted-foreground">
-                  Allowed: {ALLOWED_VARIABLES.join(", ")}
+          <Dialog
+            open={formOpen && canManage}
+            onOpenChange={(open) => {
+              if (!open) closeForm();
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingId ? "Edit template" : "New template"}</DialogTitle>
+                <DialogDescription>
+                  Prepare reusable copy and validate its personalisation variables.
+                </DialogDescription>
+              </DialogHeader>
+              {error && (
+                <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                  {error}
                 </p>
-              </div>
-              <div className="mt-4 flex gap-2">
-                <Button type="submit" disabled={saving}>
-                  {saving ? "Saving…" : editingId ? "Save changes" : "Create template"}
-                </Button>
-                <Button type="button" variant="outline" onClick={closeForm}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          )}
+              )}
+              <form onSubmit={saveTemplate} className="grid gap-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="space-y-1.5 text-sm">
+                    <span className="font-medium">Offer</span>
+                    <select
+                      required
+                      aria-label="Template offer"
+                      className="h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                      value={form.offer_id}
+                      onChange={(event) => setForm({ ...form, offer_id: event.target.value })}
+                    >
+                      {offers.map((offer) => (
+                        <option key={offer.id} value={offer.id}>
+                          {offer.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="font-medium">Channel</span>
+                    <select
+                      aria-label="Template channel"
+                      className="h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                      value={form.channel}
+                      onChange={(event) =>
+                        setForm({
+                          ...form,
+                          channel: event.target.value as TemplateChannel,
+                        })
+                      }
+                    >
+                      <option value="sms">SMS</option>
+                      <option value="email">Email</option>
+                    </select>
+                  </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="font-medium">Name</span>
+                    <Input
+                      required
+                      value={form.name}
+                      onChange={(event) => setForm({ ...form, name: event.target.value })}
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="font-medium">Variant</span>
+                    <Input
+                      required
+                      maxLength={16}
+                      value={form.variant}
+                      onChange={(event) => setForm({ ...form, variant: event.target.value })}
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm sm:col-span-2">
+                    <span className="font-medium">Body</span>
+                    <textarea
+                      required
+                      aria-label="Template body"
+                      className="min-h-44 w-full rounded-md border border-input bg-transparent px-3 py-2 font-mono text-sm leading-relaxed"
+                      value={form.body}
+                      onChange={(event) => setForm({ ...form, body: event.target.value })}
+                    />
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={form.is_active}
+                      onChange={(event) =>
+                        setForm({ ...form, is_active: event.target.checked })
+                      }
+                    />
+                    Active
+                  </label>
+                </div>
+                <div className="rounded-lg border border-border bg-background p-3 text-xs">
+                  <p className="font-medium">Variables detected</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {variablesInBody(form.body).map((variable) => (
+                      <Badge key={variable} variant="outline" className="font-mono font-normal">
+                        {variable}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="mt-3 leading-relaxed text-muted-foreground">
+                    Allowed: {ALLOWED_VARIABLES.join(", ")}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="submit" disabled={saving}>
+                    {saving ? "Saving…" : editingId ? "Save changes" : "Create template"}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={closeForm}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
 
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="space-y-1 text-sm">

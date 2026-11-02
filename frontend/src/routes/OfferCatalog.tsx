@@ -1,4 +1,4 @@
-import { Pencil, Plus, Power, X } from "lucide-react";
+import { Pencil, Plus, Power } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
@@ -13,6 +13,13 @@ import { useAuth } from "@/auth/context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
 const CURRENCIES = ["KES", "USD", "EUR", "GBP", "ZAR", "UGX", "TZS"];
@@ -80,9 +87,18 @@ export function OfferCatalog() {
     setFormOpen(false);
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setError(null);
+  }
+
+  function openNewForm() {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setError(null);
+    setFormOpen(true);
   }
 
   function editOffer(offer: Offer) {
+    setError(null);
     setEditingId(offer.id);
     setFormOpen(true);
     setForm({
@@ -152,132 +168,141 @@ export function OfferCatalog() {
               Website packages and other services Webloom can sell.
             </CardDescription>
           </div>
-          {canManage && !formOpen && (
-            <Button size="sm" onClick={() => setFormOpen(true)}>
+          {canManage && (
+            <Button size="sm" onClick={openNewForm}>
               <Plus className="size-4" />
               New offer
             </Button>
           )}
         </CardHeader>
         <CardContent className="space-y-4">
-          {error && (
+          {error && !formOpen && (
             <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
               {error}
             </p>
           )}
 
-          {formOpen && canManage && (
-            <form onSubmit={saveOffer} className="rounded-xl border border-border bg-muted/30 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-base font-semibold">
-                  {editingId ? "Edit offer" : "New offer"}
-                </h2>
-                <Button type="button" size="icon-sm" variant="ghost" onClick={closeForm}>
-                  <X className="size-4" />
-                  <span className="sr-only">Close form</span>
-                </Button>
-              </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <label className="space-y-1 text-sm">
-                  <span className="font-medium">Name</span>
-                  <Input
-                    required
-                    value={form.name}
-                    onChange={(event) => setForm({ ...form, name: event.target.value })}
-                  />
-                </label>
-                <label className="space-y-1 text-sm">
-                  <span className="font-medium">Slug</span>
-                  <Input
-                    required
-                    pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-                    placeholder="starter-website"
-                    value={form.slug}
-                    onChange={(event) => setForm({ ...form, slug: event.target.value })}
-                  />
-                </label>
-                <label className="space-y-1 text-sm sm:col-span-2">
-                  <span className="font-medium">Description</span>
-                  <textarea
-                    aria-label="Offer description"
-                    className="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-                    value={form.description}
-                    onChange={(event) =>
-                      setForm({ ...form, description: event.target.value })
-                    }
-                  />
-                </label>
-                <label className="space-y-1 text-sm">
-                  <span className="font-medium">Minimum price</span>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.price_min}
-                    onChange={(event) =>
-                      setForm({ ...form, price_min: event.target.value })
-                    }
-                  />
-                </label>
-                <label className="space-y-1 text-sm">
-                  <span className="font-medium">Maximum price</span>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.price_max}
-                    onChange={(event) =>
-                      setForm({ ...form, price_max: event.target.value })
-                    }
-                  />
-                </label>
-                <label className="space-y-1 text-sm">
-                  <span className="font-medium">Currency</span>
-                  <select
-                    aria-label="Offer currency"
-                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-                    value={form.currency}
-                    onChange={(event) => setForm({ ...form, currency: event.target.value })}
-                  >
-                    {CURRENCIES.map((currency) => (
-                      <option key={currency} value={currency}>
-                        {currency}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="flex items-end gap-2 pb-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.is_active}
-                    onChange={(event) =>
-                      setForm({ ...form, is_active: event.target.checked })
-                    }
-                  />
-                  Active
-                </label>
-                <label className="space-y-1 text-sm sm:col-span-2">
-                  <span className="font-medium">Pitch angle</span>
-                  <textarea
-                    aria-label="Pitch angle"
-                    className="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-                    value={form.pitch_angle}
-                    onChange={(event) =>
-                      setForm({ ...form, pitch_angle: event.target.value })
-                    }
-                  />
-                </label>
-              </div>
-              <div className="mt-4 flex gap-2">
-                <Button type="submit" disabled={saving}>
-                  {saving ? "Saving…" : editingId ? "Save changes" : "Create offer"}
-                </Button>
-                <Button type="button" variant="outline" onClick={closeForm}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          )}
+          <Dialog
+            open={formOpen && canManage}
+            onOpenChange={(open) => {
+              if (!open) closeForm();
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingId ? "Edit offer" : "New offer"}</DialogTitle>
+                <DialogDescription>
+                  Set the commercial details used by future campaigns.
+                </DialogDescription>
+              </DialogHeader>
+              {error && (
+                <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                  {error}
+                </p>
+              )}
+              <form onSubmit={saveOffer} className="grid gap-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="space-y-1.5 text-sm">
+                    <span className="font-medium">Name</span>
+                    <Input
+                      required
+                      value={form.name}
+                      onChange={(event) => setForm({ ...form, name: event.target.value })}
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="font-medium">Slug</span>
+                    <Input
+                      required
+                      pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                      placeholder="starter-website"
+                      value={form.slug}
+                      onChange={(event) => setForm({ ...form, slug: event.target.value })}
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm sm:col-span-2">
+                    <span className="font-medium">Description</span>
+                    <textarea
+                      aria-label="Offer description"
+                      className="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                      value={form.description}
+                      onChange={(event) =>
+                        setForm({ ...form, description: event.target.value })
+                      }
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="font-medium">Minimum price</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.price_min}
+                      onChange={(event) =>
+                        setForm({ ...form, price_min: event.target.value })
+                      }
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="font-medium">Maximum price</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.price_max}
+                      onChange={(event) =>
+                        setForm({ ...form, price_max: event.target.value })
+                      }
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="font-medium">Currency</span>
+                    <select
+                      aria-label="Offer currency"
+                      className="h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                      value={form.currency}
+                      onChange={(event) => setForm({ ...form, currency: event.target.value })}
+                    >
+                      {CURRENCIES.map((currency) => (
+                        <option key={currency} value={currency}>
+                          {currency}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="flex items-center gap-2 self-end pb-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={form.is_active}
+                      onChange={(event) =>
+                        setForm({ ...form, is_active: event.target.checked })
+                      }
+                    />
+                    Active
+                  </label>
+                  <label className="space-y-1.5 text-sm sm:col-span-2">
+                    <span className="font-medium">Pitch angle</span>
+                    <textarea
+                      aria-label="Pitch angle"
+                      className="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                      value={form.pitch_angle}
+                      onChange={(event) =>
+                        setForm({ ...form, pitch_angle: event.target.value })
+                      }
+                    />
+                  </label>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="submit" disabled={saving}>
+                    {saving ? "Saving…" : editingId ? "Save changes" : "Create offer"}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={closeForm}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
 
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading offers…</p>

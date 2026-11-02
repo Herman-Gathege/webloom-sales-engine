@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -50,7 +50,9 @@ describe("OfferCatalog", () => {
     );
 
     expect(await screen.findByText("Starter Website")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "New offer" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "New offer" }));
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "New offer" })).toBeTruthy();
     expect(screen.getByText(/40,000/)).toBeTruthy();
   });
 

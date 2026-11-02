@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TemplateCatalog } from "./TemplateCatalog";
@@ -63,7 +63,9 @@ describe("TemplateCatalog", () => {
 
     expect(await screen.findByText("Website starter A")).toBeTruthy();
     expect(screen.getByText("business_name")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "New template" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "New template" }));
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "New template" })).toBeTruthy();
   });
 
   it("hides mutation controls from sales users", async () => {
