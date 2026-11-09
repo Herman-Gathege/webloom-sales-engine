@@ -91,6 +91,7 @@ export function LeadList() {
   const dataQuality = cleanParam(searchParams.get("data_quality_status"));
   const provenance = cleanParam(searchParams.get("provenance"));
   const outreachReady = cleanParam(searchParams.get("outreach_ready"));
+  const exceptionReview = cleanParam(searchParams.get("exception_review"));
   const hasSuppression = cleanParam(searchParams.get("has_suppression"));
   const batchId = cleanParam(searchParams.get("batch_id"));
   const sort = cleanParam(searchParams.get("sort")) || "newest";
@@ -108,6 +109,7 @@ export function LeadList() {
     dataQuality,
     provenance,
     outreachReady,
+    exceptionReview,
     hasSuppression,
     batchId,
   ];
@@ -141,6 +143,8 @@ export function LeadList() {
       provenance: (provenance || undefined) as LeadListParams["provenance"],
       outreach_ready:
         outreachReady === "yes" ? true : outreachReady === "no" ? false : undefined,
+      exception_review:
+        exceptionReview === "true" ? true : exceptionReview === "false" ? false : undefined,
       has_suppression:
         hasSuppression === "yes" ? true : hasSuppression === "no" ? false : undefined,
       batch_id: batchId || undefined,
@@ -165,6 +169,7 @@ export function LeadList() {
     batchId,
     complianceStatus,
     dataQuality,
+    exceptionReview,
     hasSuppression,
     outreachReady,
     page,
@@ -329,6 +334,17 @@ export function LeadList() {
                   <SelectItem value={ANY}>Any readiness</SelectItem>
                   <SelectItem value="yes">Ready for outreach</SelectItem>
                   <SelectItem value="no">Not ready</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={exceptionReview || ANY} onValueChange={(value) => selectParam("exception_review", value)}>
+                <SelectTrigger aria-label="Filter by exception review" className="h-9 w-full min-w-0">
+                  <SelectValue placeholder="Exception review" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>Any exceptions</SelectItem>
+                  <SelectItem value="true">Needs exception review</SelectItem>
+                  <SelectItem value="false">No exception review</SelectItem>
                 </SelectContent>
               </Select>
 

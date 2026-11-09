@@ -40,7 +40,11 @@ class ImportReviewRowRead(BaseModel):
 
     row: int
     business_name: str
-    compliance_status: Literal["needs_review", "blocked", "invalid"]
+    compliance_status: Literal["eligible", "needs_review", "blocked", "invalid"]
+    eligible_channels: list[Literal["email", "sms", "whatsapp"]]
+    needs_review_channels: list[Literal["email", "sms", "whatsapp"]]
+    blocked_channels: list[Literal["email", "sms", "whatsapp"]]
+    invalid_channels: list[Literal["email", "sms", "whatsapp"]]
     reason_codes: list[str]
     explanation: str
 
@@ -66,6 +70,9 @@ class ImportSummary(BaseModel):
     invalid: int
     provenance_incomplete: int
     requiring_review: int
+    automated_eligible: int
+    suppressed_contacts: int
+    incomplete_data: int
     rejected_rows: list[RefusedRowRead]
     review_rows: list[ImportReviewRowRead]
     warnings: list[RowWarningRead]

@@ -31,11 +31,14 @@ class CatalogRepository:
         offer_id: uuid.UUID | None = None,
         channel: str | None = None,
     ) -> list[MessageTemplate]:
-        statement = select(MessageTemplate).order_by(
+        statement = select(MessageTemplate).join(MessageTemplate.offer).order_by(
             MessageTemplate.name, MessageTemplate.variant, MessageTemplate.id
         )
         if not include_inactive:
-            statement = statement.where(MessageTemplate.is_active.is_(True))
+            statement = statement.where(
+                MessageTemplate.is_active.is_(True),
+                Offer.is_active.is_(True),
+            )
         if offer_id is not None:
             statement = statement.where(MessageTemplate.offer_id == offer_id)
         if channel is not None:

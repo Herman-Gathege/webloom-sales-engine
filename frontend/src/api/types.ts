@@ -26,12 +26,22 @@ export type LeadStatus = (typeof LEAD_STATUSES)[number];
 export type ComplianceStatus = "eligible" | "needs_review" | "blocked" | "invalid";
 export type DataQualityStatus = "complete" | "incomplete" | "invalid";
 export type Channel = "email" | "sms" | "whatsapp";
+export type ChannelDecisionType = "automated_policy" | "human_review" | "none";
 
 export interface ChannelComplianceResult {
   channel: Channel;
   status: ComplianceStatus;
   technical_available: boolean;
   decision_current: boolean;
+  decision_type: ChannelDecisionType;
+  policy_id: string | null;
+  policy_version: string | null;
+  policy_fingerprint: string | null;
+  policy_approved_by: string | null;
+  policy_approval_reference: string | null;
+  decision_at: string | null;
+  evidence_references: string[];
+  input_fingerprint: string | null;
   reason_codes: string[];
   explanation: string;
 }
@@ -109,6 +119,7 @@ export interface LeadListParams {
   data_quality_status?: DataQualityStatus;
   provenance?: "available" | "missing" | "incomplete";
   outreach_ready?: boolean;
+  exception_review?: boolean;
   has_suppression?: boolean;
   batch_id?: string;
   sort?: "newest" | "oldest" | "business_name" | "compliance_status";
@@ -259,6 +270,9 @@ export interface ImportSummary {
   invalid: number;
   provenance_incomplete: number;
   requiring_review: number;
+  automated_eligible: number;
+  suppressed_contacts: number;
+  incomplete_data: number;
   rejected_rows: RefusedRow[];
   review_rows: ImportReviewRow[];
   warnings: RowWarning[];
@@ -267,7 +281,11 @@ export interface ImportSummary {
 export interface ImportReviewRow {
   row: number;
   business_name: string;
-  compliance_status: Exclude<ComplianceStatus, "eligible">;
+  compliance_status: ComplianceStatus;
+  eligible_channels: Channel[];
+  needs_review_channels: Channel[];
+  blocked_channels: Channel[];
+  invalid_channels: Channel[];
   reason_codes: string[];
   explanation: string;
 }

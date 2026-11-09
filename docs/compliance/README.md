@@ -1,7 +1,7 @@
 # Compliance foundation
 
-**Status:** Sprint 2 foundation, extended in Sprint 3 with durable automatic evaluation and an
-outreach readiness gate · **Not legal certification or a definitive legal opinion**
+**Status:** Sprint 2 foundation, extended with durable evaluation, policy-based eligibility and
+an outreach readiness gate · **Not legal certification or a definitive legal opinion**
 
 This folder is the operating summary for lead research, CSV import, channel review,
 campaign approval, outreach, replies, and opt-outs. It covers the Kenya Data Protection Act,
@@ -19,7 +19,7 @@ person. Compliance controls protect that work; they are not a separate product.
 |---|---|---|
 | Wadi / Sales Engine | Lead provenance, duplicate checks, channel eligibility review, suppression, campaign approval, the human send decision, and decision history | Provider delivery, retries, templates, and channel infrastructure |
 | FikaTu | Events, templates, channel providers, delivery, provider retries, and delivery status | Whether a sales prospect is eligible or a campaign is approved |
-| People | Source review, truthful evidence, eligibility decisions, campaign approval, reply handling, and opt-out recording | Bypassing terminal suppression or the approved state machine |
+| People | Approve central policies, review genuine exceptions, record truthful evidence, approve campaigns, handle replies and record opt-outs | Bypassing terminal suppression or the approved state machine |
 
 A research CSV contains candidates. It is not consent, proof of a lawful basis, or campaign
 approval. A publicly visible phone number or email address does not automatically authorise
@@ -30,6 +30,8 @@ direct marketing. All B2B contexts are not automatically exempt.
 - [Outreach SOP](outreach-sop.md) for the practical workflow.
 - [Implementation notes](implementation-notes.md) for architecture, tests, limitations, and
   Sprint 5–6 gates.
+- [Policy approval worksheet](policy-approval-worksheet.md) for the fields a compliance owner
+  must confirm before enabling automatic eligibility.
 - [Sprint 3 solidification](../delivery/sprint-3-solidification.md) for the CSV-to-outreach
   boundary, status meanings, filters, and current gaps.
 - [CSV import contract](../delivery/sprint-2-import-contract.md) for exact import behavior.
@@ -41,8 +43,8 @@ direct marketing. All B2B contexts are not automatically exempt.
 | Term | Meaning |
 |---|---|
 | Provenance | Traceable source, collection method/date, contact context, and intended purpose |
-| `needs_review` | No positive channel decision exists; the lead may be useful but cannot be dispatched |
-| `eligible` | An authorised human recorded a lawful basis and the required context for one channel |
+| `needs_review` | Neither a matching approved policy nor a current human decision supports the channel |
+| `eligible` | A matching approved policy or an authorised human recorded a lawful basis and the required context for one channel |
 | `suppressed` | A terminal opt-out, objection, or manual restriction overrides the saved review |
 | All-marketing opt-out | Suppresses every available marketing contact, not only the channel where it was received |
 | Lead compliance evaluation | The latest automatic lead-level snapshot, with data quality, reason codes, eligible/suppressed channels, timestamp, rule version, and input fingerprint |
@@ -71,7 +73,8 @@ Source links:
 **Internal operating rules in this repository**
 
 - Every lead records source and an honestly described basis; missing evidence stays visible.
-- Imports cannot mark a channel eligible.
+- An import does not infer permission. It may apply a central policy that was explicitly
+  approved for the matching source, purpose, contact type, method and channel.
 - Suppression is terminal and checked before import, campaign preparation, and every future
   send or retry.
 - Audit details identify decisions and reasons without raw contact values or message bodies.
@@ -87,6 +90,59 @@ Source links:
   requests.
 - Processor terms and cross-border arrangements for FikaTu and its providers.
 - The exact wording and timing required for effective channel-specific opt-out notices.
+
+## Central eligibility policy
+
+The versioned policy file is
+[`backend/app/config/compliance_policy.json`](../../backend/app/config/compliance_policy.json).
+Policy `2026-11-09.1` enables SMS only for generic business contacts collected through
+`Public business directory review` from `yellow_pages_kenya_listing`, under
+`legitimate_interests`. Email, WhatsApp and unmatched contexts remain in review. Invalid or
+missing configuration fails closed.
+
+Each enabled rule must identify:
+
+- the channel: email, SMS or WhatsApp;
+- the exact source value and intended purpose;
+- the accepted collection methods and contact types;
+- the required provenance fields;
+- the documented lawful-basis category, rationale and approval reference;
+- the approval owner and approval date.
+
+Public availability, AGPO registration and ODPC registration are not blanket marketing
+permission. The company's compliance lead or qualified adviser must approve every enabled
+rule. A change to the rule set forces new fingerprinting and evaluation; no automatic
+decision may override an opt-out or suppression.
+
+The file shape is:
+
+```json
+{
+  "schema_version": 1,
+  "version": "team-approved-version",
+  "policies": [
+    {
+      "id": "stable-rule-id",
+      "version": "1",
+      "channel": "email",
+      "source": "google_maps",
+      "intended_purpose": "exact recorded purpose",
+      "contact_types": ["generic_business"],
+      "collection_methods": ["exact recorded method"],
+      "required_provenance_fields": ["source", "source_url", "collection_date"],
+      "lawful_basis": "documented_category",
+      "rationale": "approved rationale",
+      "approved_by": "compliance owner",
+      "approved_at": "YYYY-MM-DD",
+      "approval_reference": "approval record",
+      "enabled": true
+    }
+  ]
+}
+```
+
+This is a shape reference, not an approved policy. The blank approval values or invented
+values must not be used to enable production eligibility.
 
 ## Review cadence
 

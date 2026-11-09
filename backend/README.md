@@ -1,10 +1,10 @@
 # Backend — Webloom Sales Engine
 
 The sales backend: Lead and Activity tables, import batches, provenance, automatic durable
-compliance evaluation, independent channel review, terminal suppression, reversible
-migrations, a repeatable synthetic seed, read/review endpoints, the CSV importer, and — since
-Sprint 3 — authentication with `admin` and `sales` roles. It is the piece that replaces the
-frontend's **"Sample data"** banner with real leads.
+compliance evaluation, a central approved-policy file, exception-level channel review,
+terminal suppression, reversible migrations, a repeatable synthetic seed, read/review
+endpoints, the CSV importer, and — since Sprint 3 — authentication with `admin` and `sales`
+roles. It is the piece that replaces the frontend's **"Sample data"** banner with real leads.
 
 Deliberately **not** here yet: sending, campaigns, exports, background jobs, and FikaTu
 delivery. The containers live at the repo root — see
@@ -58,6 +58,7 @@ Settings come from the environment, or from `backend/.env` if it exists:
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `480` | Access-token lifetime (8 hours). |
 | `SEED_SAMPLE_DATA` | `false` | Set to `true` only for a disposable demo database. Normal startup leaves the database empty for a real import. |
 | `BOOTSTRAP_ADMIN_PASSWORD` | unset | Temporary password used only by `python -m app.bootstrap`. |
+| `COMPLIANCE_POLICY_PATH` | `app/config/compliance_policy.json` | Optional centrally mounted policy file. Invalid or missing files fail startup. |
 
 ## Docker
 
@@ -166,9 +167,10 @@ page boundary can never repeat or skip a lead).
 
 Filters are applied before `total` and pagination: `q`, `sector`, `area`, `source`,
 `website=yes|no`, `status`, `compliance_status`, `data_quality_status`,
-`provenance=available|missing|incomplete`, `outreach_ready`, `has_suppression`, `batch_id`,
-and `sort=newest|oldest|business_name|compliance_status`. Assignment and temperature filters
-are not present because those fields do not exist.
+`provenance=available|missing|incomplete`, `outreach_ready`, `exception_review`,
+`has_suppression`, `batch_id`, and
+`sort=newest|oldest|business_name|compliance_status`. Assignment and temperature filters are
+not present because those fields do not exist.
 
 - `limit` defaults to **50** and is capped at **200** — a larger request comes back with
   `limit: 200` and 200 rows, not an error
@@ -282,8 +284,12 @@ curl -F "file=@../data/webloom-lead-list.csv" http://localhost:8001/api/v1/leads
 
 ### Channel review and opt-outs
 
+- The versioned policy file is `app/config/compliance_policy.json`. Policy `2026-11-09.1`
+  enables SMS for `yellow_pages_kenya_listing` generic business contacts under
+  `legitimate_interests`; unmatched contexts remain in review. Invalid configuration fails
+  startup.
 - `PUT /api/v1/leads/{id}/eligibility/{channel}` records a human email, SMS, or WhatsApp
-  decision. An `eligible` decision requires its lawful basis and evidence.
+  decision or explicit hold. An `eligible` decision requires its lawful basis and evidence.
 - `POST /api/v1/leads/{id}/suppressions` records a channel or all-marketing opt-out. It is
   terminal, idempotent, and returns the updated Lead Detail.
 - `POST /api/v1/leads/{id}/outreach-check/{channel}` re-evaluates one lead at the action
@@ -365,11 +371,14 @@ by itself.
 
 - **Nothing moves a lead off `new`.** Nothing sends yet, so status is always `new` in this
   sprint; the long-term rule that status is derived from evidence is not implemented.
-- **No auth.** Every caller sees contact details. Sprint 1 runs locally for the four of us;
-  the role-gating rule starts applying in the login sprint.
 - **No send path yet.** Campaign approval, dispatch, queue cancellation, FikaTu retries, and
   delivery-result auditing arrive in Sprints 5–6. The send-time safeguards are documented as
   blocking acceptance gates rather than falsely claimed as implemented here.
+- **Catalogue copy is partial.** The seed has one SMS and one email starter variant; the
+  remaining A/B, social-only, channel-length and final opt-out copy pack is Sprint 5 work.
+- **Catalogue history is limited.** Template edits have no version history and catalogue CUD
+  actions do not write a cross-product audit feed. Sprint 5 snapshots rendered drafts; full
+  catalogue history remains later work.
 - **`activities` is not `activity_events`.** This is the per-lead timeline the detail screen
   shows; the scope spec's `activity_events` is the wider audit feed for a later sprint.
 - **Not the final schema.** The contract is a small subset of the scope spec's data model —

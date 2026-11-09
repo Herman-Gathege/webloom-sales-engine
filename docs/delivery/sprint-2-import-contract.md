@@ -1,7 +1,7 @@
 # Sprint 2 — CSV import contract
 
-**Status:** implemented for Sprint 2, extended by the 2026-10-21 compliance foundation and the
-2026-10-27 Sprint 3 solidification.
+**Status:** implemented for Sprint 2, extended by the compliance foundation, Sprint 3
+solidification and the 2026-11-09 central-policy evaluator.
 This document and `frontend/src/api/types.ts` move together — the same rule
 [the Sprint 1 contract](sprint-1-lead-contract.md) set for the Lead shape. The compliance
 boundary and operating workflow are in [`docs/compliance/`](../compliance/README.md).
@@ -39,8 +39,9 @@ names them.
 
 Optional provenance columns are `Email`, `Contact name`, `Contact type`, `Source URL`,
 `Collection date`, `Collection method`, and `Intended purpose`. Their absence never refuses an
-otherwise valid lead; it leaves all channels in `needs_review`. `Date added` is the fallback
-for collection date and the written `Source` is the fallback for collection method.
+otherwise valid lead. Channels remain in `needs_review` unless an explicitly approved policy
+matches the available, non-invented evidence. `Date added` is the fallback for collection date
+and the written `Source` is the fallback for collection method.
 
 `Opening message` and the remaining unused columns are still not stored.
 
@@ -65,8 +66,9 @@ for collection date and the written `Source` is the fallback for collection meth
 | `Intended purpose` | provenance `intended_purpose` | Why the contact was collected; empty stays unknown. |
 
 Every imported lead is `status: "new"`, gets an `import_batches` row and row-numbered
-provenance, starts `needs_review` independently for email, SMS, and WhatsApp, and is
-immediately passed through the automatic compliance evaluator. It gets the same two timeline
+provenance, receives the existing independent human-review records in `needs_review`, and is
+immediately passed through the automatic compliance evaluator. An approved policy may make a
+channel eligible without fabricating a human review. The lead gets the same two timeline
 entries a seeded lead gets: `lead.created` ("Imported from the Google Maps list") and
 `lead.researched` with the research string.
 
@@ -89,12 +91,15 @@ disagrees is reported rather than believed.
   "rejected": 2,
   "matched": 1,
   "duplicates": 1,
-  "eligible": 0,
-  "needs_review": 48,
+  "eligible": 31,
+  "needs_review": 17,
   "blocked": 1,
   "invalid": 3,
   "provenance_incomplete": 4,
-  "requiring_review": 48,
+  "requiring_review": 18,
+  "automated_eligible": 31,
+  "suppressed_contacts": 1,
+  "incomplete_data": 4,
   "rejected_rows": [
     {
       "row": 7,
@@ -108,6 +113,10 @@ disagrees is reported rather than believed.
       "row": 4,
       "business_name": "Synthetic Review Business",
       "compliance_status": "needs_review",
+      "eligible_channels": [],
+      "needs_review_channels": ["email", "sms", "whatsapp"],
+      "blocked_channels": [],
+      "invalid_channels": [],
       "reason_codes": ["human_review_required:email"],
       "explanation": "Needs review: email requires a human decision before outreach."
     }
@@ -135,7 +144,16 @@ disagrees is reported rather than believed.
 - `eligible`, `needs_review`, `blocked`, and `invalid` are calculated from the saved
   compliance snapshots after automatic evaluation. `blocked` and `invalid` also include
   suppressed/validation rows refused before a lead was saved.
-- `review_rows` explains every saved non-eligible lead by CSV row.
+- `automated_eligible` counts saved leads with at least one channel eligible through an
+  approved policy.
+- `requiring_review` counts saved leads with at least one channel in `needs_review`; this can
+  overlap with `eligible` when only some channels have automated approval.
+- `suppressed_contacts` counts refused suppressed rows plus saved leads with a terminal
+  channel suppression.
+- `incomplete_data` counts saved leads whose data-quality status is `incomplete`.
+- `review_rows` explains every saved lead with a non-eligible channel, including leads that
+  are partially eligible. Channel arrays show exactly which channels qualified, need review,
+  are blocked, or are technically invalid.
 - `row` is the **physical line in the file**, with the header as line 1 — the number the
   person sees in Excel beside the row they have to fix.
 - `warnings` never reduce `accepted`: a value we could not classify is kept as written and
@@ -230,9 +248,10 @@ are the headline, and `rejected_rows` is the list a person works through.
 The original importer shipped before these were settled. The current status is recorded here
 without erasing that history:
 
-1. **Resolved 2026-10-21 — basis and `source_url`.** Imports capture traceable source fields
-   when supplied. They never infer consent or eligibility; every channel starts in
-   `needs_review` until a human records the applicable basis and evidence.
+1. **Superseded 2026-11-09 — universal manual approval.** Imports still never infer consent or
+   manufacture evidence. A channel may now become eligible through an approved central policy
+   whose documented source, purpose, contact type, method and evidence requirements all match;
+   otherwise it remains in `needs_review`.
 2. **`reviews_count` and `social_presence`.** Derivable from `Website status` — for example
    `3,713 reviews - no website listed` — but there is no column for either.
 3. **`Opening message`.** A finished, ready-to-send draft on every row, and the quality bar for

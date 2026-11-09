@@ -1,6 +1,6 @@
 # Wadi — full project guide
 
-**Updated:** 2026-11-02 · **Current branch:** `sprint/4-offers-templates`
+**Updated:** 2026-11-09 · **Planning posture:** Sprints 1–4 closed; Sprint 5 in contract review
 
 This is the complete, skimmable view of Wadi: why it exists, what works today, how the pieces
 fit, what stops the flow, and what comes next. Start with the
@@ -11,7 +11,7 @@ architecture, history or roadmap context.
 |---|---|
 | understand the whole product quickly | this page, sections 1–4 |
 | understand one lead's exact path | [workflow description](workflow-description.md) |
-| see what is being tested now | [Sprint 4 contract](delivery/sprint-4-offers-templates.md) |
+| see what is being reviewed now | [Sprint 5 campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) |
 | check legal and outreach rules | [compliance foundation](compliance/README.md) |
 
 ## 1. What Wadi is
@@ -62,7 +62,7 @@ campaign generation does not.
 ```mermaid
 flowchart LR
     A[Lead intake] --> B[Evidence + compliance]
-    B --> C[Human review]
+    B --> C[Approved policy + exception review]
     C --> D[Readiness gate]
     D --> E[Offer + template catalogue]
     E -. Sprint 5 .-> F[Campaign + draft]
@@ -77,8 +77,9 @@ flowchart LR
     class F,G,H future;
 ```
 
-**Current boundary:** Wadi can collect a lead, preserve evidence, evaluate compliance, record
-a human channel decision, test outreach readiness, and maintain offers/templates.
+**Current boundary:** Wadi can collect a lead, preserve evidence, apply a central approved
+policy, route genuine exceptions for human review, test outreach readiness, and maintain
+offers/templates.
 
 **Not built:** campaigns, rendered drafts, approval queue, sending, FikaTu dispatch, delivery
 status, retries, replies and outcomes.
@@ -94,8 +95,8 @@ There is deliberately no send path. A readiness result does not approve a messag
 | CSV import with row-level refusals | Built |
 | Provenance, duplicate and terminal suppression handling | Built |
 | Durable compliance evaluations and stale-input detection | Built |
-| Independent channel review and outreach-readiness check | Built |
-| Offers, prices, email/SMS templates and variable validation | Sprint 4, awaiting manual acceptance |
+| Central policy, exception review and outreach-readiness check | Built; approved SMS policy enabled for Yellow Pages Kenya generic business contacts |
+| Offers, prices, email/SMS templates and variable validation | Sprint 4 closed with accepted deviations |
 | Campaigns, segments and rendered drafts | Sprint 5 |
 | Approval queue and FikaTu delivery | Sprint 6 |
 | Replies, qualification and human handoff | Sprint 7 |
@@ -128,14 +129,14 @@ customer portal or separate sales-manager role yet.
 flowchart TB
     subgraph PEOPLE[People]
         P1[Approve source use]
-        P2[Choose lawful basis]
+        P2[Approve policy + lawful basis]
         P3[Approve message + claims]
         P4[Own the relationship]
     end
 
     subgraph WADI[Wadi]
         W1[Lead + provenance]
-        W2[Eligibility evidence]
+        W2[Policy + exception decisions]
         W3[Campaign + draft]
         W4[Fresh safety gate]
     end
@@ -180,6 +181,9 @@ Current runtime facts:
 
 - PostgreSQL stores leads, activity, imports, provenance, compliance, suppression, users,
   offers and templates.
+- The versioned policy file is `backend/app/config/compliance_policy.json`; policy
+  `2026-11-09.1` enables SMS for Yellow Pages Kenya generic business contacts under
+  `legitimate_interests`.
 - Alembic owns reversible migrations `0001`–`0005`.
 - JWT authentication protects every business endpoint; `admin` writes and `sales` reads are
   enforced by the API.
@@ -197,15 +201,18 @@ flowchart TD
     BATCH --> PROV[Provenance]
     PROV --> LEAD
     LEAD --> EVAL[Compliance snapshot]
-    EVAL --> REVIEW[Channel reviews]
-    REVIEW --> GATE[Outreach-readiness gate]
+    POLICY[Approved policy] --> EVAL
+    EVAL --> REVIEW[Human exceptions + holds]
+    POLICY --> GATE[Outreach-readiness gate]
+    REVIEW --> GATE
     GATE -->|pass| READY[Ready for future campaign]
     GATE -->|fail| REASON[Explainable block]
     SUPPRESS[Terminal suppression] --> GATE
 ```
 
-The system preserves the reason, reviewer and assessed input state. When contact, provenance,
-purpose or review data changes, the previous decision can become stale.
+The system preserves the reason, decision type, policy or reviewer reference and assessed input
+state. When contact, provenance, purpose, policy version or review data changes, the previous
+decision can become stale.
 
 Detailed stage rules and stop conditions are in
 [workflow-description.md](workflow-description.md).
@@ -236,7 +243,10 @@ offers, email/SMS templates with variants, allowlisted variables, mandatory `{{o
 Admin management, Sales read-only access, responsive catalogue cards, accessible add/edit
 dialogs, migration `0005` and an idempotent catalogue seed.
 
-**Status:** implemented with green automated checks; awaiting manual acceptance and merge.
+**Status:** closed. Catalogue PR #29 and final sprint PR #30 are merged. Closeout fixes reject
+raw contact details, hide templates under inactive offers from Sales, and expand UI coverage.
+Accepted deviations include the partial copy pack, open non-Starter pricing, and the responsive
+card-grid layout.
 
 ## 10. What is ready to sell
 
@@ -256,8 +266,8 @@ campaign or permission to send.
 
 These are real and must not be mistaken for completed work:
 
-1. The lawful-basis decision, DPIA/registration, retention policy, processor terms and
-   final opt-out wording remain human inputs.
+1. The central policy content, lawful-basis decision, DPIA/registration, retention policy,
+   processor terms and final opt-out wording remain human inputs.
 2. Imported provenance can still be weak when source URL or intended-purpose detail is absent.
 3. Campaigns, rendered drafts, approval and delivery do not exist yet.
 4. FikaTu has no `sales.outreach.send` event type yet.
@@ -267,7 +277,10 @@ These are real and must not be mistaken for completed work:
 8. All four local bootstrap users are Admins; final Admin/Sales allocation is a team decision.
 9. The 13-screen product inventory is not formally signed off.
 10. Business, Custom and FikaTu offer prices remain open.
-11. Sprint 4 requires manual browser acceptance before merge.
+11. Sprint 4 is closed; its limitation register and accepted carry-forward work are in the
+    [exit review](homework/sprint-4/status.md).
+12. Central automatic eligibility is enabled for the approved SMS rule only. Every new source,
+    purpose, contact type or channel requires its own approved policy.
 
 ## 12. Roadmap
 
@@ -284,6 +297,9 @@ flowchart LR
 
 Segments and explicit lead selections, campaign intent, one offer/template per campaign,
 rendered draft snapshots, and a visible skip reason for every ineligible lead.
+
+The [Sprint 5 technical review](delivery/sprint-5-campaigns-drafts.md) lists the campaign,
+segment, role, copy and idempotency decisions still required.
 
 ### Sprint 6 — approval and delivery
 
@@ -335,7 +351,8 @@ and review homework, not duplicated here.
 | Product scope and long-term intent | [Scope spec](superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) |
 | Sprint order, ownership and estimates | [Sprint plan](delivery/sprint-plan.md) |
 | Detailed backlog | [Sprint detail](delivery/sprint-detail.md) |
-| Current offers/templates contract | [Sprint 4 contract](delivery/sprint-4-offers-templates.md) |
+| Closed offers/templates contract | [Sprint 4 contract](delivery/sprint-4-offers-templates.md) · [exit review](homework/sprint-4/status.md) |
+| Sprint 5 review and open decisions | [Campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) |
 | Compliance rules and SOP | [Compliance](compliance/README.md) · [Outreach SOP](compliance/outreach-sop.md) |
 | FikaTu capabilities and gaps | [FikaTu research](research/2026-10-08-fikatu-integration-notes.md) |
 | Team working agreement | [How we work](team/how-we-work.md) |

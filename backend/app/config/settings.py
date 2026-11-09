@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     # accounts in local development. Never read at request time.
     bootstrap_admin_password: str | None = None
 
+    # Optional path to the approved central eligibility policy. The checked-in
+    # file is the safe default; deployments can mount and point at a managed file.
+    compliance_policy_path: str | None = None
+
 
 @lru_cache
 def get_settings() -> Settings:

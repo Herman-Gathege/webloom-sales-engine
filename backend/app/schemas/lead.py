@@ -55,6 +55,15 @@ class ChannelComplianceResultRead(BaseModel):
     status: Literal["eligible", "needs_review", "blocked", "invalid"]
     technical_available: bool
     decision_current: bool
+    decision_type: Literal["automated_policy", "human_review", "none"] = "none"
+    policy_id: str | None = None
+    policy_version: str | None = None
+    policy_fingerprint: str | None = None
+    policy_approved_by: str | None = None
+    policy_approval_reference: str | None = None
+    decision_at: UtcDatetime | None = None
+    evidence_references: list[str] = Field(default_factory=list)
+    input_fingerprint: str | None = None
     reason_codes: list[str]
     explanation: str
 

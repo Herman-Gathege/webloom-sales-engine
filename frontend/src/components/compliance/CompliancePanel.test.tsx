@@ -84,6 +84,11 @@ describe("CompliancePanel", () => {
     expect(screen.getByText("Automatic eligibility result")).toBeTruthy();
     expect(screen.getByText("Automatic channel gate")).toBeTruthy();
     expect(screen.getByText(lead.compliance.explanation)).toBeTruthy();
-    expect(screen.getByText("Current human decision")).toBeTruthy();
+    expect(screen.getByText("Automated policy")).toBeTruthy();
+    expect(screen.getByText(/synthetic-email-policy · v1/)).toBeTruthy();
+    expect(
+      screen.getByText(/only when a current approved policy supports the decision/i),
+    ).toBeTruthy();
+    expect(screen.queryByText(/A public contact is never approved automatically/i)).toBeNull();
   });
 });

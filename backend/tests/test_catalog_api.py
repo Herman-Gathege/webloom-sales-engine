@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.auth import get_current_user
 from app.database import get_session
 from app.main import app
-from app.models import Offer, User, UserRole
+from app.models import MessageTemplate, Offer, TemplateChannel, User, UserRole
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def test_catalog_endpoints_require_authentication(anonymous_client: TestClient) 
 
 
 def test_sales_can_read_but_not_write(
-    session: Session, sales_client: TestClient
+    client: TestClient, session: Session, sales_client: TestClient
 ) -> None:
     offer = Offer(name="Starter Website", slug="starter-website")
     session.add(offer)
@@ -85,6 +85,28 @@ def test_sales_can_read_but_not_write(
         },
     )
     assert forbidden_template.status_code == 403
+    template = MessageTemplate(
+        offer=offer,
+        channel=TemplateChannel.SMS,
+        name="Review template",
+        variant="A",
+        body="Hi {{business_name}} {{opt_out}}",
+        variables=["business_name", "opt_out"],
+    )
+    session.add(template)
+    session.commit()
+    assert (
+        sales_client.patch(
+            f"/api/v1/templates/{template.id}", json={"is_active": False}
+        ).status_code
+        == 403
+    )
+    assert (
+        sales_client.patch(
+            f"/api/v1/offers/{offer.id}", json={"is_active": False}
+        ).status_code
+        == 403
+    )
 
 
 def test_sales_only_sees_active_records(
@@ -101,6 +123,27 @@ def test_sales_only_sees_active_records(
     sales_offers = sales_client.get("/api/v1/offers").json()
 
     assert {row["slug"] for row in sales_offers} == {"active-offer"}
+
+
+def test_sales_do_not_see_templates_for_inactive_offers(
+    session: Session, sales_client: TestClient
+) -> None:
+    offer = Offer(name="Inactive offer", slug="inactive-offer", is_active=False)
+    session.add(offer)
+    session.flush()
+    session.add(
+        MessageTemplate(
+            offer=offer,
+            channel=TemplateChannel.SMS,
+            name="Active orphan",
+            variant="A",
+            body="Hi {{business_name}} {{opt_out}}",
+            variables=["business_name", "opt_out"],
+        )
+    )
+    session.commit()
+
+    assert sales_client.get("/api/v1/templates").json() == []
 
 
 def test_admin_can_list_inactive_records(client: TestClient) -> None:
@@ -178,6 +221,35 @@ def test_template_requires_known_variables_and_opt_out(client: TestClient) -> No
     assert "opt_out" in missing_opt_out.json()["detail"]
 
 
+@pytest.mark.parametrize(
+    "raw_contact",
+    [
+        "Call 0712 345678.",
+        "Email owner@example.test.",
+        "Reach us on +254 712 345678.",
+    ],
+)
+def test_template_rejects_raw_contact_details(
+    client: TestClient, raw_contact: str
+) -> None:
+    offer = create_offer(client).json()
+
+    response = client.post(
+        "/api/v1/templates",
+        json={
+            "offer_id": offer["id"],
+            "channel": "sms",
+            "name": "Unsafe contact",
+            "variant": "A",
+            "body": f"Hi {{{{business_name}}}}. {raw_contact} {{{{opt_out}}}}",
+            "variables": ["business_name", "opt_out"],
+        },
+    )
+
+    assert response.status_code == 422
+    assert "contact details" in response.json()["detail"].lower()
+
+
 def test_template_filtering_and_unknown_offer(client: TestClient) -> None:
     offer = create_offer(client).json()
     assert (
@@ -203,3 +275,33 @@ def test_template_filtering_and_unknown_offer(client: TestClient) -> None:
 
     unknown = client.get(f"/api/v1/templates?offer_id={uuid.uuid4()}")
     assert unknown.status_code == 404
+
+
+def test_admin_can_update_and_deactivate_template(client: TestClient) -> None:
+    offer = create_offer(client).json()
+    template = client.post(
+        "/api/v1/templates",
+        json={
+            "offer_id": offer["id"],
+            "channel": "email",
+            "name": "Email A",
+            "variant": "A",
+            "body": "Hello {{business_name}}. {{opt_out}}",
+            "variables": ["business_name", "opt_out"],
+        },
+    ).json()
+
+    updated = client.patch(
+        f"/api/v1/templates/{template['id']}",
+        json={
+            "name": "Email A revised",
+            "body": "Hello {{business_name}} from {{area}}. {{opt_out}}",
+            "variables": ["area", "business_name", "opt_out"],
+            "is_active": False,
+        },
+    )
+
+    assert updated.status_code == 200
+    assert updated.json()["name"] == "Email A revised"
+    assert updated.json()["variables"] == ["area", "business_name", "opt_out"]
+    assert updated.json()["is_active"] is False

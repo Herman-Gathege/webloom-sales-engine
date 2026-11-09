@@ -9,7 +9,7 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Sprints 1–3 are closed; Sprint 4 is implemented and ready for manual acceptance.**
+Pre-MVP. **Sprints 1–4 are closed; Sprint 5 is in contract review.**
 Start with the [visual workflow](docs/workflow.html) and
 [full Wadi guide](docs/full-wadi-documentation.md) for the current system, boundaries and
 roadmap.
@@ -17,10 +17,13 @@ roadmap.
 - [`frontend/`](frontend/) — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui.
 - [`backend/`](backend/README.md) — FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL 17, with
   reversible migrations, an idempotent seed, lead review endpoints, the CSV importer, and
-  JWT authentication with `admin`/`sales` roles.
+  JWT authentication with `admin`/`sales` roles. A versioned central policy can approve
+  channel eligibility automatically when documented conditions match. The approved
+  `2026-11-09.1` policy currently enables SMS for generic business contacts from the
+  Yellow Pages Kenya research source.
 - [`docker-compose.yml`](docker-compose.yml) — one command starts all three.
 
-There is no sending yet. Sprint 4 owns the current offer/template slice.
+There is no sending yet. Sprint 5 now owns campaigns and draft generation.
 
 ## Run it
 
@@ -68,8 +71,8 @@ The traps we hit, and the decisions to agree before the next sprint, are in the
 
 ## If you are one of the four of us
 
-Read the [Sprint 4 contract](docs/delivery/sprint-4-offers-templates.md) and your
-[homework card](docs/homework/README.md). The whole plan remains the
+Read the [Sprint 5 review](docs/delivery/sprint-5-campaigns-drafts.md) and the shared
+[homework guide](docs/homework/README.md). The whole plan remains the
 [sprint plan](docs/delivery/sprint-plan.md).
 
 There are four administrator accounts and no public sign-up. Create them locally once:
@@ -116,6 +119,8 @@ implement it; a human reviews the result.** The short version is in
 | [Sprint plan](docs/delivery/sprint-plan.md) | The nine sprints, what each delivers, and who leads it. Read this one |
 | [Sprint 3 scope](docs/delivery/sprint-3-auth.md) | Login, roles, bootstrap, and what this sprint does not do |
 | [Sprint 3 solidification](docs/delivery/sprint-3-solidification.md) | CSV import outcomes, automatic eligibility, Lead Desk filters, and the current outreach boundary |
+| [Sprint 4 exit review](docs/homework/sprint-4/status.md) | Catalogue evidence, fixed closeout gaps and accepted carry-forward limitations |
+| [Sprint 5 review](docs/delivery/sprint-5-campaigns-drafts.md) | Proposed campaign/draft slice and decisions required before implementation |
 | [Sprint 3 exit review](docs/homework/sprint-3/status.md) | Tests, accepted deviations and the closeout decision |
 | [Sprint 2 exit](docs/homework/sprint-2/status.md) · [Sprint 1 record](docs/homework/sprint-1/status.md) | How the first two sprints closed, with evidence |
 | [Lead API contract](docs/delivery/sprint-1-lead-contract.md) | The exact Lead and Activity shapes the API and UI agree on |
@@ -134,6 +139,6 @@ matches FikaTu so the two systems share one set of conventions.
 
 ## Not built yet
 
-Campaigns, drafts, approval, sending, replies, and reporting — Sprints 4 to 9 in the
+Campaigns, drafts, approval, sending, replies, and reporting — Sprints 5 to 9 in the
 [sprint plan](docs/delivery/sprint-plan.md). The CI workflow is present, and `main` requires
 its Backend/Frontend checks.

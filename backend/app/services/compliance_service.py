@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from app.models import Activity, Lead, LeadChannelEligibility, Suppression
 from app.repositories import LeadRepository
 from app.services.compliance_evaluator import ComplianceEvaluator
+from app.services.compliance_policy import CompliancePolicyRegistry
 from app.services.contact_identity import contact_fingerprint
 from app.services.lead_service import LeadNotFoundError
 
@@ -37,9 +38,17 @@ class ComplianceTargetError(Exception):
 
 
 class ComplianceService:
-    def __init__(self, repository: LeadRepository) -> None:
+    def __init__(
+        self,
+        repository: LeadRepository,
+        *,
+        policy_registry: CompliancePolicyRegistry | None = None,
+    ) -> None:
         self.repository = repository
-        self.evaluator = ComplianceEvaluator(repository)
+        self.evaluator = ComplianceEvaluator(
+            repository,
+            policy_registry=policy_registry,
+        )
 
     def review_eligibility(
         self,

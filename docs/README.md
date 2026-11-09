@@ -16,9 +16,10 @@ Then open the document that matches what you are about to do.
 | where Wadi has been, where it is and where it is going | [full Wadi guide](full-wadi-documentation.md) |
 | one lead's journey, with human and automation boundaries | [workflow description](workflow-description.md) |
 | the whole plan: nine sprints, and who leads each | [sprint plan](delivery/sprint-plan.md) |
-| the current sprint's scope, roles and manual acceptance criteria | [Sprint 4 offers and templates](delivery/sprint-4-offers-templates.md) |
+| the current sprint review and open implementation decisions | [Sprint 5 campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) |
+| the closed Sprint 4 catalogue and its accepted deviations | [Sprint 4 offers and templates](delivery/sprint-4-offers-templates.md) · [exit review](homework/sprint-4/status.md) |
 | the CSV-to-outreach compliance flow, statuses, filters, and current boundary | [Sprint 3 solidification](delivery/sprint-3-solidification.md) |
-| how the last three sprints went | [Sprint 3](homework/sprint-3/status.md) · [Sprint 2](homework/sprint-2/status.md) · [Sprint 1](homework/sprint-1/status.md) |
+| how the last four sprints went | [Sprint 4](homework/sprint-4/status.md) · [Sprint 3](homework/sprint-3/status.md) · [Sprint 2](homework/sprint-2/status.md) · [Sprint 1](homework/sprint-1/status.md) |
 | deep detail on every piece of work | [sprint detail](delivery/sprint-detail.md) — reference only |
 | how we branch, review, and merge | [how we work](team/how-we-work.md) |
 | what we verified about FikaTu | [FikaTu integration notes](research/2026-10-08-fikatu-integration-notes.md) |
@@ -42,6 +43,7 @@ docs/
 ├── homework/sprint-1/   the finished first sprint: its cards, and its record
 ├── homework/sprint-2/   the second sprint: its cards, and its exit review
 ├── homework/sprint-3/   the completed authentication/compliance sprint
+├── homework/sprint-4/   the completed commercial-catalogue sprint and exit review
 ├── team/                how we work
 ├── research/            verified findings: FikaTu, the lead list
 ├── compliance/          legal boundaries, operating rules, implementation status

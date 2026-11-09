@@ -13,7 +13,7 @@ status, architecture, gaps and roadmap.
 flowchart LR
     A[CSV intake] --> B[Evidence + quality]
     B --> C[Compliance evaluation]
-    C --> D[Human channel review]
+    C --> D[Approved policy + exception review]
     D --> E[Outreach-readiness gate]
     E --> F[Offer + approved template]
     F --> G[Campaign + rendered draft]
@@ -40,8 +40,8 @@ outreach-readiness gate.
 | **0. Access** | Built | Authenticates the user, loads `admin` or `sales`, requires a changed temporary password | Who receives an account and which role they hold | Session and role are valid | `401` or `403` |
 | **1. Intake** | Built | Reads the CSV, validates rows, normalises contacts and reports row-level reasons | Whether the research source is appropriate to use | Rows are valid and accepted | The file or row is malformed, duplicate or suppressed |
 | **2. Evidence** | Built | Preserves provenance, contact availability and data-quality state | Whether the evidence is credible and complete enough | The lead can be reviewed | Required provenance or contact evidence is missing |
-| **3. Compliance** | Built | Applies the current rule version, records reason codes and fingerprints the assessed inputs | Nothing yet: an automatic result is not approval | Evaluation is current and explainable | Suppression blocks it or evidence is incomplete |
-| **4. Review** | Built | Records channel decisions, reviewer identity, evidence and terminal suppression | The lawful basis and contact permission for each channel | A current human decision supports that channel | Public contact details alone are treated as permission, or a review is stale |
+| **3. Compliance** | Built | Applies the central approved policy, records reason codes and fingerprints the assessed inputs and policy version | Whether the central policy is valid for this source, purpose and channel | A current policy or human decision supports the channel | Suppression blocks it, evidence is incomplete, or no policy matches |
+| **4. Exceptions** | Built | Records human decisions, holds, reviewer identity and terminal suppression | Genuine exceptions and any manual override | A current human review or approved policy supports that channel | Public contact details alone are treated as permission, or a decision is stale |
 | **5. Readiness gate** | Built | Re-evaluates the lead and checks the selected channel immediately | Whether to prepare a future campaign | The channel is currently eligible | Any evidence, contact, purpose or suppression check fails |
 | **6. Catalogue** | Sprint 4 | Stores offers, prices, pitch angles, email/SMS templates and validated variables | What is sold, how it is described and whether copy is active | Offer and template are active and valid | Copy has unknown variables, raw contact data or no `{{opt_out}}` |
 | **7. Campaign + draft** | Sprint 5 | Builds a segment, snapshots the offer/template and renders one draft per eligible lead | Audience and campaign intent | Each draft has complete variables and a recorded skip reason where needed | A lead fails the fresh gate |
@@ -59,8 +59,11 @@ flowchart TD
     REFRESH --> SUPPRESSED{Suppressed?}
     SUPPRESSED -->|yes| BLOCKED[Blocked: terminal suppression]
     SUPPRESSED -->|no| REVIEW{Current human review?}
-    REVIEW -->|no| HOLD[Needs review]
-    REVIEW -->|yes| EVIDENCE{Provenance and purpose complete?}
+    REVIEW -->|hold| HOLD[Needs review]
+    REVIEW -->|eligible| EVIDENCE{Provenance and purpose complete?}
+    REVIEW -->|none| POLICY{Matching approved policy?}
+    POLICY -->|no| HOLD
+    POLICY -->|yes| EVIDENCE
     EVIDENCE -->|no| HOLD
     EVIDENCE -->|yes| CONTACT{Usable contact for this channel?}
     CONTACT -->|no| UNAVAILABLE[Blocked: channel unavailable]
@@ -84,14 +87,15 @@ flowchart LR
     subgraph Wadi
         INGEST[Lead + provenance]
         RULES[Compliance rules]
-        REVIEW[Review evidence]
+        POLICY[Approved policy]
+        REVIEW[Review exceptions]
         CATALOGUE[Offers + templates]
         DRAFT[Future campaign drafts]
     end
 
     subgraph People
         SOURCE[Approve source use]
-        BASIS[Set lawful basis]
+        BASIS[Approve policy + lawful basis]
         COPY[Approve claims + copy]
         SEND[Approve each send]
         HANDOFF[Own the human conversation]
@@ -106,7 +110,8 @@ flowchart LR
     INGEST --> SOURCE
     SOURCE --> BASIS
     RULES --> BASIS
-    BASIS --> REVIEW
+    BASIS --> POLICY
+    POLICY --> REVIEW
     REVIEW --> CATALOGUE
     CATALOGUE --> COPY
     COPY --> DRAFT
@@ -123,7 +128,7 @@ acceptance, legal basis, message approval and the relationship.
 | Layer | Built now | Not built |
 |---|---|---|
 | Sales data | Lead Desk, activity history, CSV import, provenance, search, filters, pagination | Lead editing, ownership, lifecycle automation |
-| Compliance | Independent channel reviews, stale-input detection, suppression, outreach checks, audit events | Final legal decisions, automatic opt-out capture, send-time enforcement |
+| Compliance | Central versioned policy, independent channel results, exception reviews, stale-input detection, suppression, outreach checks and audit events | Final legal policy content, automatic opt-out capture, send-time enforcement |
 | Commercial data | Offers, multi-currency prices, email/SMS templates, variants and variable validation | Campaign selection, rendered drafts, template version history |
 | Outreach | Readiness evidence only | Approval queue, sending, FikaTu events, delivery status, retries |
 | Learning | None yet | Replies, qualification, deals, reporting and targeting feedback |
@@ -132,7 +137,8 @@ acceptance, legal basis, message approval and the relationship.
 
 1. **A human approves every send.** Automation may prepare; it may not approve.
 2. **Suppression is terminal.** It overrides a saved review at every future gate.
-3. **Public contact data is not permission.** Lawful basis is a human decision.
+3. **Public contact data is not permission.** Lawful basis must be approved centrally or
+   recorded in a human review.
 4. **Missing evidence stays visible.** Wadi does not fill gaps by assumption.
 5. **The API is authoritative.** Hidden controls are not access control.
 6. **Wadi owns sales decisions; FikaTu owns delivery.**
@@ -141,8 +147,8 @@ acceptance, legal basis, message approval and the relationship.
 ## Where the current workflow ends
 
 ```text
-CSV → lead + provenance → compliance review → outreach-readiness gate
-                                             └── stops here
+CSV → lead + provenance → approved policy / exception review → outreach-readiness gate
+                                                            └── stops here
 
 Sprint 4 catalogue:
 offer + template → available for Sprint 5
@@ -157,4 +163,5 @@ research and current FikaTu gaps remain in
 
 - [Visual workflow](workflow.html) — the compact public orientation page.
 - [Full Wadi documentation](full-wadi-documentation.md) — project status, architecture and roadmap.
-- [Sprint 4 contract](delivery/sprint-4-offers-templates.md) — the current implemented slice.
+- [Sprint 4 contract](delivery/sprint-4-offers-templates.md) — the closed catalogue slice.
+- [Sprint 5 review](delivery/sprint-5-campaigns-drafts.md) — the next slice under review.

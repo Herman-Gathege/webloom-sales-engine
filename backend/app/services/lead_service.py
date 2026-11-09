@@ -47,6 +47,7 @@ class LeadService:
         data_quality_status: str | None = None,
         provenance: Literal["available", "missing", "incomplete"] | None = None,
         outreach_ready: bool | None = None,
+        exception_review: bool | None = None,
         has_suppression: bool | None = None,
         batch_id: uuid.UUID | None = None,
         sort: Literal[
@@ -67,6 +68,7 @@ class LeadService:
             data_quality_status=data_quality_status,
             provenance=provenance,
             outreach_ready=outreach_ready,
+            exception_review=exception_review,
             has_suppression=has_suppression,
             batch_id=batch_id,
             sort=sort,

@@ -66,13 +66,14 @@ data-quality, provenance, outreach-readiness, suppression, source, import-batch,
 controls. It displays the automatic outcome and concise reason per row, and URL state retains
 the filters.
 
-The import result reports created, matched, duplicate, refused, eligible, needs-review,
-blocked, invalid, and provenance-incomplete counts, with batch-filtered next-action links and
-row-level reasons.
+The import result reports created, matched, duplicate, refused, automatically eligible,
+exception-review, suppressed-contact, invalid, incomplete-data, and provenance-incomplete
+counts, with batch-filtered next-action links and row-level reasons.
 
-Lead Detail shows the durable automatic result, its rule version and timestamp, data quality,
-outreach readiness, per-channel gate results, provenance, separate email/SMS/WhatsApp human
-eligibility, terminal suppression history, and forms for recording reviews or opt-outs.
+Lead Detail shows the durable automatic result, its rule and policy versions, data quality,
+outreach readiness, per-channel policy/human decision source, provenance, separate
+email/SMS/WhatsApp human-review records, terminal suppression history, and forms for recording
+exceptions or opt-outs.
 Mutation controls are deliberately disabled while sample fixtures are shown so a local demo
 cannot look like a persisted decision.
 

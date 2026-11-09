@@ -102,6 +102,7 @@ def list_leads(
     ),
     provenance: Literal["available", "missing", "incomplete"] | None = Query(None),
     outreach_ready: bool | None = Query(None),
+    exception_review: bool | None = Query(None),
     has_suppression: bool | None = Query(None),
     batch_id: UUID | None = Query(None),
     sort: Literal[
@@ -122,6 +123,7 @@ def list_leads(
         data_quality_status=data_quality_status,
         provenance=provenance,
         outreach_ready=outreach_ready,
+        exception_review=exception_review,
         has_suppression=has_suppression,
         batch_id=batch_id,
         sort=sort,
@@ -204,6 +206,9 @@ def import_leads(
         invalid=result.invalid,
         provenance_incomplete=result.provenance_incomplete,
         requiring_review=result.requiring_review,
+        automated_eligible=result.automated_eligible,
+        suppressed_contacts=result.suppressed_contacts,
+        incomplete_data=result.incomplete_data,
         rejected_rows=[RefusedRowRead.model_validate(row) for row in result.refused],
         review_rows=[
             ImportReviewRowRead.model_validate(row) for row in result.review_rows

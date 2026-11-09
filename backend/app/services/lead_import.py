@@ -29,6 +29,7 @@ from app.models import (
 )
 from app.repositories import LeadRepository
 from app.services.compliance_evaluator import ComplianceEvaluator
+from app.services.compliance_policy import CompliancePolicyRegistry
 from app.services.contact_identity import contact_fingerprint, normalize_email, valid_email
 
 # Bigger than this is refused rather than read into memory. The real list is
@@ -183,6 +184,9 @@ class ImportResult:
     invalid: int
     provenance_incomplete: int
     requiring_review: int
+    automated_eligible: int
+    suppressed_contacts: int
+    incomplete_data: int
     refused: list[RefusedRow]
     review_rows: list["ImportReviewRow"]
     warnings: list[RowWarning]
@@ -195,6 +199,10 @@ class ImportReviewRow:
     row: int
     business_name: str
     compliance_status: str
+    eligible_channels: list[str]
+    needs_review_channels: list[str]
+    blocked_channels: list[str]
+    invalid_channels: list[str]
     reason_codes: list[str]
     explanation: str
 
@@ -456,8 +464,14 @@ def refused_rows_csv(result: ImportResult) -> str:
 class LeadImportService:
     """Turns an uploaded research CSV into leads, and explains every refusal."""
 
-    def __init__(self, repository: LeadRepository) -> None:
+    def __init__(
+        self,
+        repository: LeadRepository,
+        *,
+        policy_registry: CompliancePolicyRegistry | None = None,
+    ) -> None:
         self.repository = repository
+        self.policy_registry = policy_registry
 
     def import_file(
         self, raw: bytes, filename: str, *, imported_by: str = "system"
@@ -518,7 +532,10 @@ class LeadImportService:
         saved = self._save(accepted, imported_at, batch.id)
         self.repository.flush()
 
-        evaluator = ComplianceEvaluator(self.repository)
+        evaluator = ComplianceEvaluator(
+            self.repository,
+            policy_registry=self.policy_registry,
+        )
         for lead in saved:
             evaluator.evaluate(lead, record_activity=False)
 
@@ -543,27 +560,85 @@ class LeadImportService:
             or "incomplete_provenance" in item.reason_codes
             for item in evaluations
         )
+        automated_eligible = sum(
+            any(
+                result.get("decision_type") == "automated_policy"
+                and result.get("status") == "eligible"
+                for result in item.channel_results
+            )
+            for item in evaluations
+        )
+        incomplete_data = sum(
+            item.data_quality_status == "incomplete" for item in evaluations
+        )
+        requiring_review = sum(
+            any(result.get("status") == "needs_review" for result in item.channel_results)
+            for item in evaluations
+        )
+        suppressed_contacts = blocked_refusals + sum(
+            bool(item.suppressed_channels) for item in evaluations
+        )
 
         batch.eligible = eligible
         batch.needs_review = needs_review
         batch.blocked = blocked_evaluations + blocked_refusals
         batch.invalid = invalid_evaluations + invalid_refusals
         batch.provenance_incomplete = provenance_incomplete
-        batch.review_required = needs_review
+        batch.review_required = requiring_review
 
         review_rows: list[ImportReviewRow] = []
         for lead in saved:
-            if lead.compliance is None or lead.compliance.status == "eligible":
+            if lead.compliance is None:
                 continue
             if lead.provenance is None or lead.provenance.row_number is None:
                 continue
+            channel_results = lead.compliance.channel_results
+            eligible_channels = [
+                str(result["channel"])
+                for result in channel_results
+                if result.get("status") == "eligible"
+            ]
+            needs_review_channels = [
+                str(result["channel"])
+                for result in channel_results
+                if result.get("status") == "needs_review"
+            ]
+            blocked_channels = [
+                str(result["channel"])
+                for result in channel_results
+                if result.get("status") == "blocked"
+            ]
+            invalid_channels = [
+                str(result["channel"])
+                for result in channel_results
+                if result.get("status") == "invalid"
+            ]
+            if not (needs_review_channels or blocked_channels or invalid_channels):
+                continue
+            reasons = {
+                str(reason)
+                for result in channel_results
+                if result.get("status") != "eligible"
+                for reason in result.get("reason_codes", [])
+            }
+            explanation = lead.compliance.explanation
+            if needs_review_channels:
+                explanation += (
+                    " Still needs review for "
+                    + ", ".join(channel.upper() for channel in needs_review_channels)
+                    + "."
+                )
             review_rows.append(
                 ImportReviewRow(
                     row=lead.provenance.row_number,
                     business_name=lead.business_name,
                     compliance_status=lead.compliance.status,
-                    reason_codes=list(lead.compliance.reason_codes),
-                    explanation=lead.compliance.explanation,
+                    eligible_channels=eligible_channels,
+                    needs_review_channels=needs_review_channels,
+                    blocked_channels=blocked_channels,
+                    invalid_channels=invalid_channels,
+                    reason_codes=sorted(reasons),
+                    explanation=explanation,
                 )
             )
         self.repository.commit()
@@ -583,7 +658,10 @@ class LeadImportService:
             blocked=batch.blocked,
             invalid=batch.invalid,
             provenance_incomplete=provenance_incomplete,
-            requiring_review=batch.review_required,
+            requiring_review=requiring_review,
+            automated_eligible=automated_eligible,
+            suppressed_contacts=suppressed_contacts,
+            incomplete_data=incomplete_data,
             refused=refused,
             review_rows=review_rows,
             warnings=warnings,

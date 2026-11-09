@@ -180,22 +180,36 @@ export function LeadImport() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 text-sm lg:grid-cols-5">
                 <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
-                  <p className="text-xs font-medium text-emerald-800">Eligible</p>
-                  <p className="text-xl font-semibold text-emerald-900">{summary.eligible}</p>
+                  <p className="text-xs font-medium text-emerald-800">
+                    Automatically eligible
+                  </p>
+                  <p className="text-xl font-semibold text-emerald-900">
+                    {summary.automated_eligible}
+                  </p>
                 </div>
                 <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
-                  <p className="text-xs font-medium text-amber-800">Needs review</p>
-                  <p className="text-xl font-semibold text-amber-900">{summary.needs_review}</p>
+                  <p className="text-xs font-medium text-amber-800">Exception review</p>
+                  <p className="text-xl font-semibold text-amber-900">
+                    {summary.requiring_review}
+                  </p>
                 </div>
                 <div className="rounded-md border border-red-200 bg-red-50 p-3">
-                  <p className="text-xs font-medium text-red-800">Blocked / suppressed</p>
-                  <p className="text-xl font-semibold text-red-900">{summary.blocked}</p>
+                  <p className="text-xs font-medium text-red-800">Suppressed contacts</p>
+                  <p className="text-xl font-semibold text-red-900">
+                    {summary.suppressed_contacts}
+                  </p>
                 </div>
                 <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="text-xs font-medium text-slate-700">Invalid / incomplete</p>
+                  <p className="text-xs font-medium text-slate-700">Invalid</p>
                   <p className="text-xl font-semibold text-slate-900">{summary.invalid}</p>
+                </div>
+                <div className="rounded-md border bg-slate-50 p-3">
+                  <p className="text-xs font-medium text-slate-700">Incomplete data</p>
+                  <p className="text-xl font-semibold text-slate-900">
+                    {summary.incomplete_data}
+                  </p>
                 </div>
               </div>
 
@@ -206,7 +220,7 @@ export function LeadImport() {
                   </Link>
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <Link to={`/leads?batch_id=${summary.batch_id}&compliance_status=needs_review`}>
+                  <Link to={`/leads?batch_id=${summary.batch_id}&exception_review=true`}>
                     Review exceptions
                   </Link>
                 </Button>
@@ -257,6 +271,14 @@ export function LeadImport() {
                           <ComplianceStatusBadge status={row.compliance_status} />
                         </div>
                         <p className="mt-3 text-sm leading-relaxed">{row.explanation}</p>
+                        {row.needs_review_channels.length > 0 && (
+                          <p className="mt-2 text-sm font-medium text-amber-800">
+                            {row.needs_review_channels
+                              .map((channel) => channel.toUpperCase())
+                              .join(", ")}{" "}
+                            still need review.
+                          </p>
+                        )}
                         <p className="mt-2 break-words font-mono text-[11px] text-muted-foreground">
                           {row.reason_codes.join(", ")}
                         </p>
@@ -283,6 +305,14 @@ export function LeadImport() {
                             </TableCell>
                             <TableCell className="text-sm">
                               {row.explanation}
+                              {row.needs_review_channels.length > 0 && (
+                                <span className="mt-1 block text-sm font-medium text-amber-800">
+                                  {row.needs_review_channels
+                                    .map((channel) => channel.toUpperCase())
+                                    .join(", ")}{" "}
+                                  still need review.
+                                </span>
+                              )}
                               <span className="mt-1 block font-mono text-[11px] text-muted-foreground">
                                 {row.reason_codes.join(", ")}
                               </span>

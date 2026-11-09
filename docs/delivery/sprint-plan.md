@@ -1,6 +1,6 @@
 # Webloom Sales Engine — Sprint Plan
 
-**Updated:** 2026-11-02 · **Owner:** Herman Gathege · **Reviewed by:** Mark Mwenesi
+**Updated:** 2026-11-09 · **Owner:** Herman Gathege · **Reviewed by:** Mark Mwenesi
 **Scope:** [scope spec](../superpowers/specs/2026-10-08-webloom-sales-engine-scope.md) ·
 **Detail:** [sprint detail](sprint-detail.md) · **Rules:** [how we work](../team/how-we-work.md)
 
@@ -30,9 +30,14 @@ in [`sprint-3-auth.md`](sprint-3-auth.md); the closeout evidence is in
 [`docs/homework/sprint-3/status.md`](../homework/sprint-3/status.md). The review homework is in
 [`docs/homework/sprint-3/`](../homework/sprint-3/README.md).
 
-**Sprint 4 is in contract review.** Offers and templates are proposed in
-[`sprint-4-offers-templates.md`](sprint-4-offers-templates.md). No implementation starts
-until the five review decisions are accepted or corrected and the homework cards exist.
+**Sprint 4 is closed with accepted deviations.** Offers and templates shipped through PRs #29
+and #30; the contract is [`sprint-4-offers-templates.md`](sprint-4-offers-templates.md) and
+the evidence and limitation register are in
+[`docs/homework/sprint-4/status.md`](../homework/sprint-4/status.md).
+
+**Sprint 5 is in contract review.** The technical scope is reviewed in
+[`sprint-5-campaigns-drafts.md`](sprint-5-campaigns-drafts.md). Implementation starts only
+after the team accepts the open campaign, segment, role, copy and idempotency decisions.
 
 One thing we carry forward: Sprint 1 cost more in setup friction than in product. **From now
 on, the first task of a sprint is "a new person can run it", not the last.**
@@ -72,13 +77,14 @@ FikaTu is not involved yet, and nothing here depends on another repository.
 Each is one small piece. **1 point ≈ half a focused day**, and the sizes compare sprints to
 each other — they are not a schedule.
 
-**Sprint 4 — What we sell, in the system.** Offers (website packages first, other services
-later) and message templates with variants — all editable without a code change.
-[Implemented and awaiting manual acceptance](sprint-4-offers-templates.md). *Owner: Sharon ·
-Reviewer: Mark · ~11 pts.*
+**Sprint 4 — What we sell, in the system. ✅ closed.** Offers (website packages first, other
+services later) and message templates with variants — all editable without a code change.
+[Closed with accepted deviations](sprint-4-offers-templates.md). *Owner: Sharon · Reviewer:
+Mark · ~11 pts.*
 
-**Sprint 5 — Campaigns and drafts.** A campaign is a batch of leads, one offer, one template.
-It produces one personalised draft per eligible lead and skips the ones it cannot fill.
+**Sprint 5 — Campaigns and drafts. ← contract review.** A campaign is a batch of leads, one
+offer and one template. It produces one personalised draft per currently eligible lead and
+skips the ones it cannot fill. [Read the Sprint 5 review](sprint-5-campaigns-drafts.md).
 *Owner: Herman · Reviewer: Mark · ~16 pts.*
 
 **Sprint 6 — Approve, then send.** A human review queue, then delivery through FikaTu.
@@ -112,9 +118,9 @@ rather than absorbs the work he would otherwise be expected to carry.
 
 ## Order, and what blocks what
 
-- **Sprints 1–3 are closed.** They established the working slice, the real Lead Desk and CI,
-  authentication, and the compliance gate. Everything below assumes them.
-- **Sprints 4 → 5 → 6 are a chain.** Offers and templates, then campaigns and drafts, then
+- **Sprints 1–4 are closed.** They established the working slice, Lead Desk, CI,
+  authentication, compliance, and the commercial catalogue. Everything below assumes them.
+- **Sprints 5 → 6 are a chain.** Campaigns and drafts, then
   approval and sending. They do not parallelise.
 - **Sprint 6 needs one change outside this repository.** FikaTu's event registry is
   hardcoded, so a `sales.outreach.send` event type has to be added to
@@ -141,8 +147,8 @@ before anyone builds it.
 
 Flagged, not invented. Settle each before the sprint it affects.
 
-1. Where does the 13-screen inventory land now? Both Sprint 2 and Sprint 3 closed without it.
-   It should be settled before Sprint 5 builds campaigns against the Lead Desk.
+1. Where does the 13-screen inventory land now? Sprint 2, Sprint 3 and Sprint 4 closed without
+   it. It must be settled in the Sprint 5 contract before campaign screens are implemented.
 2. Is outcome capture the end of Sprint 7 or the start of Sprint 8? It produces the data
    Sprint 8 reports on.
 3. Does Sprint 9 split into "run the pilot" and "harden and deploy"?

@@ -55,6 +55,12 @@ function sampleList(params: LeadListParams): LeadListResponse {
     if (params.outreach_ready !== undefined && lead.compliance.outreach_ready !== params.outreach_ready) {
       return false;
     }
+    if (params.exception_review !== undefined) {
+      const hasException = lead.compliance.channel_results.some(
+        (result) => result.status === "needs_review",
+      );
+      if (hasException !== params.exception_review) return false;
+    }
     if (params.has_suppression !== undefined) {
       const hasSuppression = lead.compliance.suppressed_channels.length > 0;
       if (hasSuppression !== params.has_suppression) return false;
