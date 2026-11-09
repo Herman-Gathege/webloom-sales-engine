@@ -37,7 +37,7 @@ function makeLeads(count: number): Lead[] {
       channel_results: [],
       outreach_ready: false,
       evaluated_at: "2026-10-19T09:00:00Z",
-      rule_version: "2026-10-27.1",
+      rule_version: "2026-11-09.1",
     },
   }));
 }

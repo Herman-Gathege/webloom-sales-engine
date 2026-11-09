@@ -20,18 +20,22 @@ We use **one shared branch per sprint**. No personal branches. Think of a car li
 person adds a piece, checks it, pushes, and passes it on. This replaced separate branches
 because nobody could tell which branch was safe to pull.
 
-**Next sprint branch:** `sprint/4-offers-templates`
+**Sprint 4 branch:** `sprint/4-offers-templates` — merged and closed.
+
+**Next sprint branch:** none yet. Sprint 5 remains in contract review until the decisions in
+[`sprint-5-campaigns-drafts.md`](../delivery/sprint-5-campaigns-drafts.md) are accepted.
 
 ### Your turn
 
-1. `git switch sprint/4-offers-templates && git pull` — review and test the approved Sprint 4
-   implementation.
+1. For the next sprint, switch to the agreed branch once it exists and pull it. Sprint 4 is
+   closed; use its [exit review](sprint-4/status.md) for evidence rather than re-running the
+   acceptance guide.
 2. Run `docker compose up --build`. If the last hand-off is broken, say so before adding
    anything.
 3. Do only what your card says.
 4. Run the checks on your card until they pass.
 5. `git add -A && git commit -m "<type>: <what you did>" && git push`
-6. The first hand-off will open one PR from `sprint/4-offers-templates` to `main`. Every later hand-off
+6. The first hand-off will open one PR from the new sprint branch to `main`. Every later hand-off
    pushes to the same branch and updates that PR. Post in the group:
    **"pushed, green — your turn, <name>."**
 
@@ -72,4 +76,4 @@ Re-run the checks, push, then hand off. Never leave a conflict for the next pers
 - [Sprint 1](sprint-1/README.md) — finished.
 - [Sprint 2](sprint-2/README.md) — finished; exit review in [status.md](sprint-2/status.md).
 - [Sprint 3](sprint-3/status.md) — finished; authentication and compliance boundary.
-- [Sprint 4](sprint-4/README.md) — implementation ready for manual acceptance.
+- [Sprint 4](sprint-4/status.md) — closed with accepted deviations; catalogue shipped.

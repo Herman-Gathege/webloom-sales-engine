@@ -8,9 +8,11 @@ from fastapi import FastAPI
 
 from app.api.v1 import api_router
 from app.config import get_settings, validate_settings
+from app.services.compliance_policy import load_default_policy_registry
 
 settings = get_settings()
 validate_settings(settings)
+load_default_policy_registry()
 
 app = FastAPI(
     title=settings.app_name,

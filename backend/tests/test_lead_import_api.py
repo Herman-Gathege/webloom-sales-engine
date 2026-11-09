@@ -32,6 +32,9 @@ REPORT_FIELDS = {
     "invalid",
     "provenance_incomplete",
     "requiring_review",
+    "automated_eligible",
+    "suppressed_contacts",
+    "incomplete_data",
     "rejected_rows",
     "review_rows",
     "warnings",
@@ -58,14 +61,18 @@ def test_the_report_has_exactly_the_documented_shape(client: TestClient) -> None
     assert body["created"] == 3
     assert body["matched"] == 0
     assert body["duplicates"] == 0
-    assert body["requiring_review"] == 3
+    assert body["requiring_review"] == 2
     assert body["needs_review"] == 3
     assert body["eligible"] == body["blocked"] == body["invalid"] == 0
     assert body["provenance_incomplete"] == 0
+    assert body["automated_eligible"] == 0
+    assert body["suppressed_contacts"] == 0
+    assert body["incomplete_data"] == 0
     assert body["batch_id"]
     assert body["rejected_rows"] == []
     assert len(body["review_rows"]) == 3
     assert all(row["compliance_status"] == "needs_review" for row in body["review_rows"])
+    assert sum(bool(row["needs_review_channels"]) for row in body["review_rows"]) == 2
     assert body["warnings"] == []
     assert client.get("/api/v1/leads").json()["total"] == 3
 
@@ -74,7 +81,7 @@ def test_the_refused_rows_are_shaped_for_a_screen(client: TestClient) -> None:
     body = upload(client, "import_mixed.csv").json()
 
     assert body["duplicates"] == 1
-    assert body["requiring_review"] == 3
+    assert body["requiring_review"] == 2
     assert set(body["rejected_rows"][0]) == {"row", "business_name", "code", "reason"}
     assert set(body["warnings"][0]) == {"row", "field", "value", "code", "message"}
     assert body["rejected_rows"][0]["business_name"] == ""

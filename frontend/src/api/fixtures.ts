@@ -28,7 +28,7 @@ function sampleCompliance(n: number): LeadCompliance {
   const suppressedChannels = n === 1 ? (["sms"] as const) : n === 4 ? (["email", "sms", "whatsapp"] as const) : [];
   const reasonCodes =
     status === "eligible"
-      ? ["eligible:email", "suppressed:sms"]
+      ? ["automated_policy_eligible:email", "suppressed:sms"]
       : status === "blocked"
         ? ["all_marketing_suppressed"]
         : status === "invalid"
@@ -63,9 +63,29 @@ function sampleCompliance(n: number): LeadCompliance {
         status: channelStatus,
         technical_available: status !== "invalid",
         decision_current: channelStatus === "eligible",
+        decision_type: channelStatus === "eligible" ? "automated_policy" : "none",
+        policy_id: channelStatus === "eligible" ? "synthetic-email-policy" : null,
+        policy_version: channelStatus === "eligible" ? "1" : null,
+        policy_fingerprint:
+          channelStatus === "eligible"
+            ? "0000000000000000000000000000000000000000000000000000000000000001"
+            : null,
+        policy_approved_by:
+          channelStatus === "eligible" ? "compliance@example.test" : null,
+        policy_approval_reference:
+          channelStatus === "eligible" ? "SYNTHETIC-ONLY" : null,
+        decision_at: channelStatus === "eligible" ? EVALUATED : null,
+        evidence_references:
+          channelStatus === "eligible"
+            ? ["collection_date", "collection_method", "intended_purpose", "source"]
+            : [],
+        input_fingerprint:
+          channelStatus === "eligible"
+            ? "0000000000000000000000000000000000000000000000000000000000000002"
+            : null,
         reason_codes:
           channelStatus === "eligible"
-            ? [`eligible:${channel}`]
+            ? [`automated_policy_eligible:${channel}`]
             : channelStatus === "blocked"
               ? [`suppressed:${channel}`]
               : [`human_review_required:${channel}`],
@@ -79,7 +99,7 @@ function sampleCompliance(n: number): LeadCompliance {
     }),
     outreach_ready: status === "eligible",
     evaluated_at: EVALUATED,
-    rule_version: "2026-10-27.1",
+    rule_version: "2026-11-09.1",
   };
 }
 

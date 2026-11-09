@@ -38,6 +38,16 @@ function label(value: string): string {
   return value.replaceAll("_", " ");
 }
 
+function decisionSourceLabel(
+  result: LeadDetail["compliance"]["channel_results"][number],
+): string {
+  if (result.decision_type === "automated_policy") return "Automated policy";
+  if (result.decision_type === "human_review") {
+    return result.decision_current ? "Human review" : "Human review (stale)";
+  }
+  return "No current decision";
+}
+
 function ChannelReviewForm({
   leadId,
   record,
@@ -407,8 +417,9 @@ export function CompliancePanel({
       <CardHeader>
         <CardTitle className="text-base">Compliance review</CardTitle>
         <CardDescription>
-          Provenance and decisions are separate. A public contact is never approved
-          automatically.
+          Public contact details alone never authorize outreach. A channel becomes
+          eligible only when a current approved policy supports the decision or a person
+          records a complete review.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -470,9 +481,15 @@ export function CompliancePanel({
                   <ComplianceStatusBadge status={result.status} />
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">{result.explanation}</p>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  {result.decision_current ? "Current human decision" : "Human decision not current"}
+                <p className="mt-2 text-xs font-medium text-foreground">
+                  {decisionSourceLabel(result)}
                 </p>
+                {result.decision_type === "automated_policy" && result.policy_id && (
+                  <p className="mt-1 break-words font-mono text-[11px] text-muted-foreground">
+                    {result.policy_id}
+                    {result.policy_version ? ` · v${result.policy_version}` : ""}
+                  </p>
+                )}
               </div>
             ))}
           </div>

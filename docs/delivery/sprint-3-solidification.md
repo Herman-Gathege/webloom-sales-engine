@@ -3,6 +3,10 @@
 **Status:** complete on `feature/sprint-3-solidification`; backend and frontend checks pass.
 This extends the Sprint 3 authentication work without replacing it.
 
+> **Updated 2026-11-09:** the original human-decision-only gate below is superseded by the
+> central approved-policy evaluator. The durable snapshot, fingerprints, suppression and
+> outreach boundaries remain. Human review now handles genuine exceptions and explicit holds.
+
 This slice turns an imported CSV into a reviewed, filterable pipeline. It deliberately stops
 at the outreach eligibility boundary because queueing, campaign approval, dispatch, FikaTu,
 and inbound reply processing do not exist yet.
@@ -16,7 +20,7 @@ CSV upload
   → phone de-duplication and provenance
   → automatic lead compliance snapshot
   → Lead Desk filters and row-level explanation
-  → human channel review and/or manual suppression
+  → approved-policy eligibility / genuine exception review / manual suppression
   → automatic re-evaluation
   → individual or bulk outreach-readiness gate
   → [Sprint 5–6: queue, approval, dispatch, delivery, replies]
@@ -29,7 +33,7 @@ Per-channel human decisions remain in `lead_channel_eligibility`.
 
 | Outcome | Meaning | Can enter outreach? |
 |---|---|---|
-| `eligible` | At least one technically available channel has a complete human decision with a current legal basis, evidence, purpose, contact context, and rationale. Suppression and provenance checks also pass. | Yes, for the listed eligible channel only |
+| `eligible` | At least one technically available channel has a current approved-policy decision or a complete human decision with a legal basis, evidence, purpose, context, and rationale. Suppression and provenance checks also pass. | Yes, for the listed eligible channel only |
 | `needs_review` | Source, evidence, human decision, technical availability, or another material fact is missing, stale, or ambiguous. | No |
 | `blocked` | The lead is opted out, all marketing is suppressed, or every technically available channel is suppressed. | No |
 | `invalid` | Required identity or usable contact data is missing or invalid. | No |
@@ -45,7 +49,8 @@ The evaluator in `backend/app/services/compliance_evaluator.py` applies rule ver
 - applies terminal suppression and `opted_out` lead status before approval;
 - checks that the selected channel has a technically usable contact;
 - requires source/provenance information before eligibility;
-- accepts only a complete, current human channel decision;
+- accepts a matching, current approved policy or a complete, current human channel decision;
+- treats a current human `needs_review` as an explicit hold against policy approval;
 - preserves a stale decision for audit but refuses to use it;
 - records reason codes, a readable explanation, channel results, eligible/suppressed
   channels, eligibility timestamp, rule version, and an input fingerprint; and
@@ -55,7 +60,7 @@ Relevant changes to contacts, provenance, source, lead status, suppression, or r
 change the fingerprint. Import, human review, suppression recording, and an outreach check
 trigger re-evaluation.
 
-## Human checks
+## Human exception checks
 
 An `eligible` channel review requires a lawful-basis category, evidence summary and source,
 intended purpose, contact context, rationale, reviewer, and timestamp. The API takes the
@@ -82,6 +87,7 @@ website, status, search, limit, and offset parameters remain. The extension adds
 - `data_quality_status`
 - `provenance=available|missing|incomplete`
 - `outreach_ready`
+- `exception_review=true|false`
 - `has_suppression`
 - `batch_id`
 - `source`
@@ -99,8 +105,10 @@ The existing import fields remain. The response also distinguishes:
 - duplicate rows inside the upload;
 - rejected validation rows;
 - saved `eligible`, `needs_review`, `blocked`, and `invalid` outcomes;
-- `provenance_incomplete`; and
-- `review_rows` with row number, business name, outcome, reason codes, and explanation.
+- `automated_eligible`, `suppressed_contacts`, `incomplete_data`, and
+  `provenance_incomplete`; and
+- `review_rows` with row number, business name, outcome, per-channel states, reason codes,
+  and explanation.
 
 The import response links directly to batch-filtered Lead Desk views. The exact request and
 response contract remains in the [CSV import contract](sprint-2-import-contract.md).

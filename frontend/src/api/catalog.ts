@@ -36,9 +36,15 @@ export type TemplateInput = Omit<
 >;
 
 const VARIABLE_TOKEN = /\{\{\s*([a-z][a-z0-9_]*)\s*\}\}/g;
+const RAW_EMAIL = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+const RAW_PHONE = /(?<!\d)(?:\+?254|0)(?:[\s().-]*\d){9,12}(?!\d)/;
 
 export function variablesInBody(body: string): string[] {
   return [...new Set([...body.matchAll(VARIABLE_TOKEN)].map((match) => match[1]))].sort();
+}
+
+export function containsRawContact(body: string): boolean {
+  return RAW_EMAIL.test(body) || RAW_PHONE.test(body);
 }
 
 export function formatPriceRange(

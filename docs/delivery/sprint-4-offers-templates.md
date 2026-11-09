@@ -1,7 +1,12 @@
 # Sprint 4 — offers and templates
 
-**Status:** implemented; ready for manual acceptance · **Owner:** Sharon · **Reviewer:** Mark
-**Branch:** `sprint/4-offers-templates` · **Updated:** 2026-11-02
+**Status:** closed with accepted deviations · **Owner:** Sharon · **Reviewer:** Mark
+**Branch:** `sprint/4-offers-templates` · **Updated:** 2026-11-09
+
+The exit review is [Sprint 4 status](../homework/sprint-4/status.md). PR
+[#29](https://github.com/Herman-Gathege/webloom-sales-engine/pull/29) shipped the catalogue and
+PR [#30](https://github.com/Herman-Gathege/webloom-sales-engine/pull/30) merged the completed
+sprint branch.
 
 ## Goal
 
@@ -134,8 +139,8 @@ All endpoints require authentication.
 
 ### Templates
 
-- `GET /api/v1/templates?offer_id=&channel=&active=` — active templates; admins may request
-  inactive rows.
+- `GET /api/v1/templates?offer_id=&channel=&include_inactive=` — active templates whose parent
+  offer is active; admins may request inactive rows.
 - `POST /api/v1/templates` — admin only.
 - `PATCH /api/v1/templates/{id}` — admin only; supports edits and deactivation.
 
@@ -155,7 +160,7 @@ Expected failures:
 
 Add a **Catalog** section to the authenticated navigation:
 
-- **Offers** — responsive cards on mobile and a compact table on desktop.
+- **Offers** — responsive cards on mobile and desktop.
 - **Templates** — filterable offer/channel list with responsive cards.
 
 Admins get create/edit/deactivate controls. Sales users see active catalogue data without write
@@ -190,10 +195,12 @@ Each variant stays under the channel limit and includes `{{opt_out}}`.
 ## Seed data
 
 Provide an idempotent catalogue seed command separate from demo lead seeding. It installs the
-four offers, Starter Website at KES 40,000, and safe starter SMS/email templates only when
-their keys do not already exist. It never rewrites an edited record.
+four offers, Starter Website at KES 40,000, and the implemented safe starter SMS/email
+templates only when their keys do not already exist. It never rewrites an edited record.
 
-Exact pricing and copy are required team inputs before the seed is considered complete.
+The shipped seed contains one SMS A and one email A template. The full A/B, social-only, price
+phrasing, channel-length and final opt-out copy pack remains an accepted carry-forward into
+Sprint 5 before a real campaign.
 
 ## Work split
 
@@ -219,6 +226,16 @@ Mark remains reviewer rather than owner of the entire backend.
 - A record edited through the UI is never overwritten by rerunning the catalogue seed.
 - Mobile lists use cards with no horizontal page overflow.
 - Existing lead, import, compliance and authentication behaviour remains unchanged.
+
+## Closeout reconciliation
+
+- The original desktop-table expectation is superseded by responsive cards on all screen sizes.
+- Template query filtering now uses the implemented `include_inactive` parameter.
+- Raw phone numbers and email addresses are rejected in template bodies.
+- Sales template results exclude active templates whose parent offer is inactive.
+- Automated UI coverage now exercises Admin create/deactivate and Sales read-only workflows.
+- The complete limitation register and future ownership are in the
+  [Sprint 4 exit review](../homework/sprint-4/status.md).
 
 ## Demo
 

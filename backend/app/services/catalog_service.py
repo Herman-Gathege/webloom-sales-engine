@@ -10,6 +10,10 @@ from app.models import MessageTemplate, Offer, TemplateChannel
 from app.repositories.catalog_repository import CatalogRepository
 
 VARIABLE_TOKEN = re.compile(r"\{\{\s*([a-z][a-z0-9_]*)\s*\}\}")
+RAW_EMAIL = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE)
+RAW_PHONE = re.compile(
+    r"(?<!\d)(?:\+?254|0)(?:[\s().-]*\d){9,12}(?!\d)"
+)
 ALLOWED_VARIABLES = {
     "business_name",
     "sector",
@@ -134,6 +138,10 @@ class CatalogService:
     @staticmethod
     def _validate_template(values: dict[str, Any]) -> None:
         body = values["body"].strip()
+        if RAW_EMAIL.search(body) or RAW_PHONE.search(body):
+            raise CatalogValidationError(
+                "Templates cannot contain raw contact details; use lead variables instead."
+            )
         detected = variables_in_body(body)
         declared = sorted(set(values.get("variables") or []))
         if detected != declared:

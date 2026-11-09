@@ -157,13 +157,15 @@ stays honest:
 
 ---
 
-## Sprint 4 — what we sell, in the system ← contract in review
+## Sprint 4 — what we sell, in the system ✅ closed
 
 **Owner:** Sharon · **Reviewer:** Mark. Offers and message templates become data, not code.
 
-The proposed scope, API contract, permissions and acceptance criteria are in
-[`sprint-4-offers-templates.md`](sprint-4-offers-templates.md). That document governs once
-the team accepts its five review decisions; the story detail below is the original backlog.
+The closed scope, API contract, permissions and acceptance criteria are in
+[`sprint-4-offers-templates.md`](sprint-4-offers-templates.md). That document governed the
+implemented slice; the story detail below is the original backlog.
+The actual exit decision, fixed gaps and accepted carry-forward items are in the
+[Sprint 4 exit review](../homework/sprint-4/status.md).
 
 ### Offer catalogue with seeded website packages
 *Owner: Sharon · Reviewer: Mark · ~3 pts*
@@ -202,9 +204,12 @@ Tasks: copy variants (Anne, 8h) · review against brand voice (Herman, 4h). **To
 
 ---
 
-## Sprint 5 — campaigns and drafts
+## Sprint 5 — campaigns and drafts ← contract review
 
 **Owner:** Herman · **Reviewer:** Mark. A campaign produces one personalised draft per eligible lead.
+
+The [Sprint 5 review](sprint-5-campaigns-drafts.md) is the current contract draft. It defines
+the smaller first slice and the decisions that must be accepted before implementation.
 
 ### Campaign creation
 *Owner: Mark · Reviewer: Sharon · ~5 pts*
@@ -212,6 +217,8 @@ As Anne, I want to create a campaign from an offer, a segment, a template, and a
 
 - [ ] A campaign requires an offer, a channel, a template, an owner, and a goal
 - [ ] Leads are attached by segment or by explicit selection, with a preview count before saving
+- [ ] Inactive offers and inactive templates, including templates under inactive offers, cannot
+      be selected
 - [ ] A campaign cannot include leads that have opted out
 - [ ] Campaign preview shows effective channel eligibility, purpose, and technical-contact skips
 - [ ] Campaign status moves through `draft`, `active`, `paused`, `completed`
@@ -238,8 +245,11 @@ As Anne, I want a personalised draft per lead generated from the template, so I 
 - [ ] Rendered text matches the seed message for the seed leads, byte for byte
 - [ ] Leads missing a required variable are skipped and listed with the reason
 - [ ] Opted-out and call-only leads are excluded according to channel rules
-- [ ] Only a human `eligible` decision for the selected channel can produce a sendable draft
+- [ ] Only a current approved policy or a complete current human `eligible` decision for the
+      selected channel can produce a sendable draft
 - [ ] Generation is idempotent: running it twice does not duplicate drafts
+- [ ] Each draft snapshots the rendered body, offer/template content and eligibility basis so
+      later catalogue edits cannot change history
 
 Tasks: rendering service with tests (Sharon, 12h) · eligibility rules (Sharon, 6h) · generation job and
 endpoint (Sharon, 8h) · generation UI with progress and skip report (Herman, 6h). **Total 32h.**

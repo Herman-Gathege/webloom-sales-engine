@@ -74,6 +74,9 @@ describe("rejectedRowsCsv", () => {
       invalid: 2,
       provenance_incomplete: 0,
       requiring_review: 0,
+      automated_eligible: 0,
+      suppressed_contacts: 0,
+      incomplete_data: 0,
       rejected_rows: [
         {
           row: 7,

@@ -6,6 +6,7 @@ from datetime import datetime
 
 from app.repositories import LeadRepository
 from app.services.compliance_evaluator import ComplianceEvaluator
+from app.services.compliance_policy import CompliancePolicyRegistry
 from app.services.lead_service import LeadNotFoundError
 
 
@@ -23,9 +24,17 @@ class OutreachGateResult:
 class OutreachGateService:
     """Re-evaluate immediately and allow only a current channel approval."""
 
-    def __init__(self, repository: LeadRepository) -> None:
+    def __init__(
+        self,
+        repository: LeadRepository,
+        *,
+        policy_registry: CompliancePolicyRegistry | None = None,
+    ) -> None:
         self.repository = repository
-        self.evaluator = ComplianceEvaluator(repository)
+        self.evaluator = ComplianceEvaluator(
+            repository,
+            policy_registry=policy_registry,
+        )
 
     def check(self, lead_id: str, channel: str, *, actor: str) -> OutreachGateResult:
         parsed_id = self._parse_id(lead_id)

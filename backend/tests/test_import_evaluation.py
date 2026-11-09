@@ -2,6 +2,7 @@
 
 import csv
 import io
+from datetime import date
 from pathlib import Path
 
 from sqlalchemy import func, select
@@ -9,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Lead, LeadComplianceEvaluation, Suppression
 from app.repositories import LeadRepository
+from app.services.compliance_policy import CompliancePolicy, CompliancePolicyRegistry
 from app.services.contact_identity import contact_fingerprint
 from app.services.lead_import import LeadImportService
 
@@ -35,7 +37,7 @@ def test_clean_import_is_saved_as_needs_review_with_actual_summary_counts(
         result.blocked,
         result.invalid,
     ) == (3, 3, 3, 0, 0, 0, 0, 3, 0, 0)
-    assert result.requiring_review == 3
+    assert result.requiring_review == 2
     assert len(result.review_rows) == 3
     assert {row.compliance_status for row in result.review_rows} == {"needs_review"}
     assert session.scalar(select(func.count()).select_from(LeadComplianceEvaluation)) == 3
@@ -151,6 +153,71 @@ def test_import_normalises_whitespace_before_evaluation(session: Session) -> Non
     assert lead.area == "Westlands Nairobi"
     assert lead.provenance is not None
     assert lead.provenance.source_name == "Google Maps listing"
+
+
+def test_policy_import_reports_partial_automatic_eligibility_and_exceptions(
+    session: Session,
+) -> None:
+    policies = CompliancePolicyRegistry(
+        version="synthetic-import-policy-1",
+        policies=(
+            CompliancePolicy(
+                id="synthetic-email",
+                version="1",
+                channel="email",
+                source="google_maps",
+                intended_purpose="Business outreach",
+                contact_types=frozenset({"generic_business"}),
+                collection_methods=frozenset({"Manual listing review"}),
+                required_provenance_fields=frozenset(
+                    {
+                        "source",
+                        "source_name",
+                        "source_url",
+                        "collection_date",
+                        "collection_method",
+                        "intended_purpose",
+                        "contact_type",
+                    }
+                ),
+                lawful_basis="legitimate_interests",
+                rationale="Synthetic test policy only.",
+                approved_by="compliance@example.test",
+                approved_at=date(2026, 11, 9),
+                approval_reference="SYNTHETIC-ONLY",
+            ),
+        ),
+    )
+    content = _csv(
+        {
+            "Business": "Synthetic Policy Business",
+            "Sector": "Professional services",
+            "Area": "Nairobi",
+            "Phone": "0700 000903",
+            "WhatsApp capable": "Yes",
+            "Website status": "No website listed",
+            "Source": "Google Maps listing",
+            "Email": "owner@example.test",
+            "Contact type": "generic business",
+            "Source URL": "https://example.test/business/903",
+            "Collection date": "2026-11-01",
+            "Collection method": "Manual listing review",
+            "Intended purpose": "Business outreach",
+        }
+    )
+
+    result = LeadImportService(
+        LeadRepository(session),
+        policy_registry=policies,
+    ).import_file(content, "policy.csv")
+
+    assert result.created == 1
+    assert result.eligible == 1
+    assert result.automated_eligible == 1
+    assert result.requiring_review == 1
+    assert len(result.review_rows) == 1
+    assert result.review_rows[0].needs_review_channels == ["sms", "whatsapp"]
+    assert result.incomplete_data == 0
 
 
 def _csv(row: dict[str, str]) -> bytes:

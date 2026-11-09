@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  containsRawContact,
   createOffer,
   createTemplate,
   formatPriceRange,
@@ -85,5 +86,11 @@ describe("catalog API", () => {
   it("formats price ranges in the selected currency", () => {
     expect(formatPriceRange("40000.00", "40000.00", "KES")).toContain("40,000");
     expect(formatPriceRange(null, null, "USD")).toBe("Price guidance pending");
+  });
+
+  it("recognises raw phone and email values", () => {
+    expect(containsRawContact("Call 0712 345678.")).toBe(true);
+    expect(containsRawContact("Email owner@example.test.")).toBe(true);
+    expect(containsRawContact("Hi {{business_name}} from {{area}}.")).toBe(false);
   });
 });

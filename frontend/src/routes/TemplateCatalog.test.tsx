@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TemplateCatalog } from "./TemplateCatalog";
@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   role: "admin",
   listOffers: vi.fn(),
   listTemplates: vi.fn(),
+  createTemplate: vi.fn(),
 }));
 
 vi.mock("@/auth/context", () => ({
@@ -19,6 +20,7 @@ vi.mock("@/api/catalog", async (importOriginal) => {
     ...original,
     listOffers: mocks.listOffers,
     listTemplates: mocks.listTemplates,
+    createTemplate: mocks.createTemplate,
   };
 });
 
@@ -54,8 +56,10 @@ describe("TemplateCatalog", () => {
     mocks.role = "admin";
     mocks.listOffers.mockReset();
     mocks.listTemplates.mockReset();
+    mocks.createTemplate.mockReset();
     mocks.listOffers.mockResolvedValue([offer]);
     mocks.listTemplates.mockResolvedValue([template]);
+    mocks.createTemplate.mockResolvedValue(template);
   });
 
   it("shows templates and admin create controls", async () => {
@@ -74,5 +78,39 @@ describe("TemplateCatalog", () => {
 
     await screen.findByText("Website starter A");
     expect(screen.queryByRole("button", { name: "New template" })).toBeNull();
+  });
+
+  it("creates a valid template and rejects an unknown variable before saving", async () => {
+    render(<TemplateCatalog />);
+
+    await screen.findByText("Website starter A");
+    fireEvent.click(screen.getByRole("button", { name: "New template" }));
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Review template" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Create template" }));
+
+    await waitFor(() =>
+      expect(mocks.createTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          offer_id: offer.id,
+          name: "Review template",
+          channel: "sms",
+          variables: ["business_name", "opt_out"],
+        }),
+      ),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "New template" }));
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Invalid template" },
+    });
+    fireEvent.change(screen.getByLabelText("Template body"), {
+      target: { value: "Hi {{secret_field}} {{opt_out}}" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Create template" }));
+
+    expect(await screen.findByText(/unknown variables: secret_field/i)).toBeTruthy();
+    expect(mocks.createTemplate).toHaveBeenCalledTimes(1);
   });
 });

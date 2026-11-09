@@ -139,3 +139,29 @@ still not a queue or send path. Sprint 5–6 must call it from every dispatch an
 
 Inbound replies and automatic opt-out ingestion remain absent. A signed-in person records an
 opt-out or objection through the existing suppression endpoint.
+
+## 2026-11-09 policy-based eligibility
+
+Rule `2026-11-09.1` adds a central eligibility policy without changing the database schema.
+The approved policy enables SMS for generic business contacts from
+`yellow_pages_kenya_listing`, collected through `Public business directory review`, under
+`legitimate_interests`. Email, WhatsApp and every unmatched context remain fail-closed.
+
+The evaluator applies this precedence independently per channel:
+
+1. terminal suppression and lead opt-out;
+2. technical contact availability;
+3. source and provenance availability;
+4. a current human review, including an explicit human hold;
+5. a matching approved policy;
+6. otherwise `needs_review`.
+
+Automated decisions remain in `lead_compliance_evaluation.channel_results`; they are never
+written into `lead_channel_eligibility` as a fake human review. Channel results now carry the
+decision type, policy ID/version/fingerprint, approval reference, decision timestamp, evidence
+references, reason codes and channel input fingerprint. The latest snapshot remains durable,
+while material decision changes are appended to `activities`.
+
+`COMPLIANCE_POLICY_PATH` may point at a centrally managed mounted file. The default approved
+file is copied into the API container. Changing either file requires restarting the API so the
+validated policy registry is reloaded.

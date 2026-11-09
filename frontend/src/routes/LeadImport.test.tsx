@@ -21,12 +21,15 @@ const summary: ImportSummary = {
   rejected: 2,
   matched: 1,
   duplicates: 1,
-  eligible: 0,
+  eligible: 32,
   needs_review: 50,
   blocked: 0,
   invalid: 2,
   provenance_incomplete: 4,
-  requiring_review: 50,
+  requiring_review: 18,
+  automated_eligible: 32,
+  suppressed_contacts: 1,
+  incomplete_data: 6,
   rejected_rows: [
     {
       row: 7,
@@ -46,6 +49,10 @@ const summary: ImportSummary = {
       row: 12,
       business_name: "Synthetic Needs Review",
       compliance_status: "needs_review",
+      eligible_channels: ["email"],
+      needs_review_channels: ["sms", "whatsapp"],
+      blocked_channels: [],
+      invalid_channels: [],
       reason_codes: ["human_review_required:email"],
       explanation: "Needs review: a human decision and evidence are required.",
     },
@@ -113,7 +120,14 @@ describe("LeadImport", () => {
     expect(counts).toContain("1 duplicate");
     expect(screen.getAllByText("Needs review").length).toBeGreaterThan(0);
     expect(screen.getByText(/4 saved leads have incomplete source/i)).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Review exceptions" })).toBeTruthy();
+    expect(screen.getByText("Automatically eligible")).toBeTruthy();
+    expect(screen.getByText("Exception review")).toBeTruthy();
+    expect(screen.getByText("Suppressed contacts")).toBeTruthy();
+    expect(screen.getByText("Incomplete data")).toBeTruthy();
+    expect(screen.getByText(/SMS, WHATSAPP still need review/i)).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Review exceptions" }).getAttribute("href"),
+    ).toContain("exception_review=true");
 
     expect(screen.getByText("Mwangaza Hardware")).toBeTruthy();
     expect(screen.getByText("This phone number is already on row 3 of the file.")).toBeTruthy();

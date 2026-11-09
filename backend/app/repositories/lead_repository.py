@@ -36,6 +36,7 @@ class LeadRepository:
         data_quality_status: str | None = None,
         provenance: str | None = None,
         outreach_ready: bool | None = None,
+        exception_review: bool | None = None,
         has_suppression: bool | None = None,
         batch_id: uuid.UUID | None = None,
         sort: str = "newest",
@@ -105,6 +106,11 @@ class LeadRepository:
             )
         if outreach_ready is not None:
             conditions.append(LeadComplianceEvaluation.outreach_ready.is_(outreach_ready))
+        if exception_review is not None:
+            has_exception = LeadComplianceEvaluation.channel_results.contains(
+                [{"status": "needs_review"}]
+            )
+            conditions.append(has_exception if exception_review else ~has_exception)
         if has_suppression is not None:
             has_rows = (
                 func.coalesce(

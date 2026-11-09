@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "version": "2026-11-09.1",
+  "policies": [
+    {
+      "id": "yellow-pages-generic-business-sms-v1",
+      "version": "1",
+      "channel": "sms",
+      "source": "yellow_pages_kenya_listing",
+      "intended_purpose": "Business outreach",
+      "contact_types": [
+        "generic_business"
+      ],
+      "collection_methods": [
+        "Public business directory review"
+      ],
+      "required_provenance_fields": [
+        "source",
+        "source_name",
+        "source_url",
+        "collection_date",
+        "collection_method",
+        "intended_purpose",
+        "contact_type"
+      ],
+      "lawful_basis": "legitimate_interests",
+      "rationale": "Publicly published business contact details are processed for narrowly targeted B2B website outreach, with provenance, human oversight, opt-out and terminal suppression safeguards.",
+      "approved_by": "Herman Gathege, authorised policy approver",
+      "approved_at": "2026-11-09",
+      "approval_reference": "this Codex conversation dated 2026-11-09",
+      "enabled": true
+    }
+  ]
+}

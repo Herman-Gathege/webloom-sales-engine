@@ -2,6 +2,7 @@ import { Pencil, Plus, Power } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
+  containsRawContact,
   createTemplate,
   listOffers,
   listTemplates,
@@ -134,6 +135,10 @@ export function TemplateCatalog() {
     }
     if (form.is_active && !variables.includes("opt_out")) {
       setError("Active templates must include {{opt_out}}.");
+      return;
+    }
+    if (containsRawContact(form.body)) {
+      setError("Templates cannot contain raw contact details; use lead variables instead.");
       return;
     }
     if (!form.offer_id) {

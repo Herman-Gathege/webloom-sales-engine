@@ -43,6 +43,9 @@ services:
       SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA:-false}
       # Only read by `python -m app.bootstrap`; empty is fine.
       BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      # The checked-in policy is fail-closed. Mount and point at a managed file
+      # when the compliance lead has approved real rules.
+      COMPLIANCE_POLICY_PATH: ${COMPLIANCE_POLICY_PATH:-/app/app/config/compliance_policy.json}
     ports:
       - "${API_PORT:-8001}:8000"
     depends_on:
@@ -86,6 +89,7 @@ services:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/webloom_sales_engine
       TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/webloom_sales_engine_test
       ENVIRONMENT: development
+      COMPLIANCE_POLICY_PATH: ${COMPLIANCE_POLICY_PATH:-/app/app/config/compliance_policy.json}
     depends_on:
       db:
         condition: service_healthy

@@ -18,9 +18,13 @@ from app.models import (
     LeadComplianceEvaluation,
 )
 from app.repositories import LeadRepository
+from app.services.compliance_policy import (
+    CompliancePolicyRegistry,
+    load_default_policy_registry,
+)
 from app.services.contact_identity import contact_fingerprint, valid_email
 
-RULE_VERSION = "2026-10-27.1"
+RULE_VERSION = "2026-11-09.1"
 CHANNELS = ("email", "sms", "whatsapp")
 
 _REASON_TEXT = {
@@ -33,14 +37,25 @@ _REASON_TEXT = {
     "all_marketing_suppressed": "all marketing is suppressed",
     "lead_opted_out": "the lead is marked opted out",
     "all_available_channels_suppressed": "every available channel is suppressed",
+    "policy_context_not_met": "no approved policy matches the recorded context",
+    "policy_evidence_insufficient": "the approved policy requires evidence that is missing",
+    "no_approved_policy": "no approved policy matches this channel",
+    "human_review_hold": "a current human review holds this channel",
+    "automated_policy_eligible": "an approved policy qualifies this channel",
 }
 
 
 class ComplianceEvaluator:
     """Evaluate and persist the current compliance snapshot for a lead."""
 
-    def __init__(self, repository: LeadRepository | None = None) -> None:
+    def __init__(
+        self,
+        repository: LeadRepository | None = None,
+        *,
+        policy_registry: CompliancePolicyRegistry | None = None,
+    ) -> None:
         self.repository = repository
+        self.policy_registry = policy_registry or load_default_policy_registry()
 
     def evaluate(
         self,
@@ -62,9 +77,13 @@ class ComplianceEvaluator:
         ):
             return current
 
-        result = self._build(lead, fingerprint)
+        evaluated_at = datetime.now(UTC)
+        result = self._build(lead, fingerprint, evaluated_at)
         previous_status = current.status if current is not None else None
         previous_reasons = current.reason_codes if current is not None else []
+        previous_channel_decisions = (
+            self._decision_summary(current.channel_results) if current is not None else []
+        )
 
         evaluation = current or LeadComplianceEvaluation(lead=lead)
         evaluation.status = result["status"]
@@ -75,7 +94,7 @@ class ComplianceEvaluator:
         evaluation.suppressed_channels = result["suppressed_channels"]
         evaluation.channel_results = result["channel_results"]
         evaluation.outreach_ready = result["outreach_ready"]
-        evaluation.evaluated_at = datetime.now(UTC)
+        evaluation.evaluated_at = evaluated_at
         evaluation.rule_version = RULE_VERSION
         evaluation.input_fingerprint = fingerprint
         lead.compliance = evaluation
@@ -86,6 +105,12 @@ class ComplianceEvaluator:
         changed = (
             previous_status != evaluation.status
             or previous_reasons != evaluation.reason_codes
+            or (
+                current is not None
+                and current.input_fingerprint != evaluation.input_fingerprint
+            )
+            or previous_channel_decisions
+            != self._decision_summary(evaluation.channel_results)
         )
         if record_activity and (current is None or changed):
             activity = Activity(
@@ -103,6 +128,12 @@ class ComplianceEvaluator:
                     "reason_codes": evaluation.reason_codes,
                     "eligible_channels": evaluation.eligible_channels,
                     "rule_version": evaluation.rule_version,
+                    "policy_version": self.policy_registry.version,
+                    "policy_fingerprint": self.policy_registry.fingerprint,
+                    "previous_channel_decisions": previous_channel_decisions,
+                    "channel_decisions": self._decision_summary(
+                        evaluation.channel_results
+                    ),
                 },
             )
             if self.repository is None:
@@ -142,6 +173,7 @@ class ComplianceEvaluator:
             "provenance": self._provenance_payload(lead),
             "channels": channels,
             "suppressions": self._suppression_payload(lead),
+            "policy_fingerprint": self.policy_registry.fingerprint,
         }
         return self._hash(payload)
 
@@ -217,7 +249,24 @@ class ComplianceEvaluator:
             )
         )
 
-    def _build(self, lead: Lead, fingerprint: str) -> dict[str, object]:
+    @staticmethod
+    def human_review_current(
+        record: LeadChannelEligibility, channel_fingerprint: str
+    ) -> bool:
+        """Whether a person explicitly reviewed this channel for its current inputs."""
+        return bool(
+            record.reviewer
+            and record.reviewed_at
+            and record.rationale
+            and record.reviewed_input_fingerprint == channel_fingerprint
+        )
+
+    def _build(
+        self,
+        lead: Lead,
+        fingerprint: str,
+        evaluated_at: datetime,
+    ) -> dict[str, object]:
         provenance_ok = self.provenance_sufficient(lead)
         business_ok = bool(lead.business_name and lead.business_name.strip())
         phone_ok = self._valid_phone(lead.phone)
@@ -257,6 +306,7 @@ class ComplianceEvaluator:
 
         for channel in CHANNELS:
             record = review_by_channel.get(channel)
+            channel_fingerprint = self.channel_input_fingerprint(lead, channel)
             technical = self._technical_available(lead, channel)
             if technical:
                 available_channels.append(channel)
@@ -268,12 +318,23 @@ class ComplianceEvaluator:
                 record is not None
                 and self.review_complete(record)
                 and record.reviewed_input_fingerprint
-                == self.channel_input_fingerprint(lead, channel)
+                == channel_fingerprint
             )
+            human_hold = (
+                record is not None
+                and record.state == "needs_review"
+                and self.human_review_current(record, channel_fingerprint)
+            )
+            policy_decision = self.policy_registry.evaluate(lead, channel)
             channel_reasons: list[str] = []
+            decision_type = "none"
+            applied_policy = None
             if suppressed:
                 channel_status = "blocked"
                 channel_reasons.append(f"suppressed:{channel}")
+            elif lead_opted_out:
+                channel_status = "blocked"
+                channel_reasons.append("lead_opted_out")
             elif not technical:
                 channel_status = "invalid"
                 channel_reasons.append(f"contact_unavailable:{channel}")
@@ -284,30 +345,73 @@ class ComplianceEvaluator:
                     if lead.provenance is None
                     else ["incomplete_provenance"]
                 )
-            elif record is None or record.state != "eligible":
-                channel_status = "needs_review"
-                channel_reasons.append(f"human_review_required:{channel}")
-            elif not self.review_complete(record):
-                channel_status = "needs_review"
-                channel_reasons.append(f"incomplete_review:{channel}")
-            elif record.reviewed_input_fingerprint != self.channel_input_fingerprint(
-                lead, channel
-            ):
-                channel_status = "needs_review"
-                channel_reasons.append(f"review_stale:{channel}")
-            else:
+            elif current_review:
                 channel_status = "eligible"
+                decision_type = "human_review"
                 channel_reasons.append(f"eligible:{channel}")
+            elif human_hold:
+                channel_status = "needs_review"
+                decision_type = "human_review"
+                channel_reasons.append(f"human_review_hold:{channel}")
+            elif record is not None and record.state == "eligible":
+                decision_type = "human_review"
+                channel_reasons.append(
+                    f"incomplete_review:{channel}"
+                    if not self.review_complete(record)
+                    else f"review_stale:{channel}"
+                )
+                channel_reasons.extend(policy_decision.reason_codes)
+                if policy_decision.status == "eligible":
+                    channel_status = "eligible"
+                    decision_type = "automated_policy"
+                    applied_policy = policy_decision.policy
+                else:
+                    channel_status = "needs_review"
+            elif policy_decision.status == "eligible":
+                channel_status = "eligible"
+                decision_type = "automated_policy"
+                applied_policy = policy_decision.policy
+                channel_reasons.extend(policy_decision.reason_codes)
+            else:
+                channel_status = "needs_review"
+                channel_reasons.extend(policy_decision.reason_codes)
+                channel_reasons.append(f"human_review_required:{channel}")
 
             if channel_status == "eligible":
                 eligible_channels.append(channel)
             all_reasons.extend(channel_reasons)
+            policy = applied_policy
+            if (
+                policy is None
+                and decision_type == "none"
+                and channel_status == "needs_review"
+            ):
+                policy = policy_decision.policy
             channel_results.append(
                 {
                     "channel": channel,
                     "status": channel_status,
                     "technical_available": technical,
-                    "decision_current": current_review,
+                    "decision_current": (
+                        channel_status == "eligible"
+                        and decision_type in {"human_review", "automated_policy"}
+                    )
+                    or (channel_status == "needs_review" and human_hold),
+                    "decision_type": decision_type,
+                    "policy_id": policy.id if policy is not None else None,
+                    "policy_version": policy.version if policy is not None else None,
+                    "policy_fingerprint": (
+                        self.policy_registry.fingerprint if policy is not None else None
+                    ),
+                    "policy_approved_by": (
+                        policy.approved_by if policy is not None else None
+                    ),
+                    "policy_approval_reference": (
+                        policy.approval_reference if policy is not None else None
+                    ),
+                    "decision_at": evaluated_at.isoformat(),
+                    "evidence_references": list(policy_decision.evidence_references),
+                    "input_fingerprint": channel_fingerprint,
                     "reason_codes": sorted(set(channel_reasons)),
                     "explanation": self._channel_explanation(
                         channel, channel_status, channel_reasons
@@ -325,7 +429,15 @@ class ComplianceEvaluator:
             reason_codes = quality_reasons or ["no_usable_contact"]
         elif eligible_channels:
             status = "eligible"
-            reason_codes = [f"eligible:{channel}" for channel in eligible_channels]
+            reason_codes = []
+            for result in channel_results:
+                channel = result["channel"]
+                if channel not in eligible_channels:
+                    continue
+                if result.get("decision_type") == "automated_policy":
+                    reason_codes.append(f"automated_policy_eligible:{channel}")
+                else:
+                    reason_codes.append(f"eligible:{channel}")
             reason_codes.extend(
                 f"suppressed:{channel}" for channel in suppressed_channels
             )
@@ -460,6 +572,10 @@ class ComplianceEvaluator:
         channel: str, status: str, reasons: list[str]
     ) -> str:
         if status == "eligible":
+            if any(
+                reason.startswith("automated_policy_eligible") for reason in reasons
+            ):
+                return f"{channel.upper()} is eligible under a current approved policy."
             return f"{channel.upper()} has a current recorded basis for outreach."
         if status == "blocked":
             return f"{channel.upper()} is blocked by a terminal restriction."
@@ -471,6 +587,25 @@ class ComplianceEvaluator:
             return f"{channel.upper()} review evidence is incomplete."
         if "missing_provenance" in reasons or "incomplete_provenance" in reasons:
             return f"{channel.upper()} needs source or provenance review."
+        if any(reason.startswith("human_review_hold") for reason in reasons):
+            return f"{channel.upper()} is being held by a current human review."
+        if any(
+            reason.startswith("policy_evidence_insufficient") for reason in reasons
+        ):
+            return (
+                f"{channel.upper()} matches an approved policy, but required "
+                "provenance evidence is missing."
+            )
+        if any(reason.startswith("policy_context_not_met") for reason in reasons):
+            return (
+                f"{channel.upper()} does not match the documented context of an "
+                "approved policy."
+            )
+        if any(reason.startswith("no_approved_policy") for reason in reasons):
+            return (
+                f"{channel.upper()} has no matching approved policy and needs a "
+                "human decision."
+            )
         return f"{channel.upper()} needs a human decision before outreach."
 
     @staticmethod
@@ -504,3 +639,22 @@ class ComplianceEvaluator:
         if data_quality == "incomplete":
             text += " Data quality is incomplete."
         return text
+
+    @staticmethod
+    def _decision_summary(
+        channel_results: list[dict[str, object]],
+    ) -> list[dict[str, object]]:
+        """The material decision facts an audit event must not overwrite."""
+        return [
+            {
+                "channel": item.get("channel"),
+                "status": item.get("status"),
+                "decision_type": item.get("decision_type", "none"),
+                "policy_id": item.get("policy_id"),
+                "policy_version": item.get("policy_version"),
+                "policy_fingerprint": item.get("policy_fingerprint"),
+                "decision_current": item.get("decision_current", False),
+                "reason_codes": item.get("reason_codes", []),
+            }
+            for item in channel_results
+        ]

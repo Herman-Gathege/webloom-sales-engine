@@ -25,21 +25,28 @@ Check the import result for:
 - accepted rows;
 - refused rows and actionable reasons;
 - duplicate rows;
-- accepted rows requiring compliance review;
+- automatically eligible channels and leads that still require an exception review;
+- suppressed contacts and incomplete data;
 - warnings for malformed optional provenance values.
 
 Never invent a source URL, collection date, evidence, or review decision to clear a warning.
 
-## 3. Review provenance and channel eligibility
+## 3. Apply policy, then review exceptions
 
-After import, the Lead Desk shows the automatic lead outcome and concise reasons. Filter
-`compliance_status=needs_review` (optionally with the import batch) to work only the exceptions
-that need a person. `blocked` is for audit and must not be treated as an outreach queue.
+After import, Wadi evaluates every technically available channel against the central approved
+policy. A matching policy may make a channel eligible only when its source, purpose, contact
+type, method and required provenance all match. No match, missing evidence or a current human
+hold leaves that channel as an exception.
 
-Open each imported lead and confirm provenance before making a channel decision. Email, SMS,
-and WhatsApp are reviewed separately.
+Filter `compliance_status=needs_review` or use the batch's exception count to find genuine
+exceptions. A lead may be automatically eligible on email while SMS or WhatsApp remains in
+review; open the compliance panel to see the outcome for each channel. `blocked` is for audit
+and must not be treated as an outreach queue.
 
-For an `eligible` decision, record:
+Email, SMS, and WhatsApp are decided separately. Public contact details alone are never
+permission, and reviewing every imported lead is no longer the default workflow.
+
+For a human `eligible` decision, record:
 
 - the applicable lawful-basis category;
 - the permission evidence and its source;
@@ -53,11 +60,13 @@ The stored categories are `consent`, `contract`, `legal_obligation`, `vital_inte
 human assessment; the system records it and does not decide whether it is legally sufficient.
 
 If the evidence is absent or ambiguous, leave the channel `needs_review`. Do not infer consent
-from a public listing or from the fact that a business owns a contact channel.
+from a public listing or from the fact that a business owns a contact channel. An explicit
+current human `needs_review` decision holds the channel against automatic policy approval.
 
-The automatic evaluator reruns after review, suppression, or material contact/provenance
-changes. If a lead later changes, an older human approval remains visible as history but is
-stale and cannot pass the current outreach gate.
+The automatic evaluator reruns after a policy-version change, review, suppression, or material
+contact/provenance change. If a lead later changes, an older decision remains visible as
+history but is stale and cannot pass the current outreach gate. The compliance panel names
+whether the current decision came from an approved policy or a human review.
 
 ## 4. Prepare the campaign
 
