@@ -20,5 +20,6 @@ The first four sprints are complete; their records are
 | [Sprint 3 solidification](sprint-3-solidification.md) | CSV import, compliance evaluation, responsive Lead Desk and the outreach boundary. |
 | [Sprint 4 offers and templates](sprint-4-offers-templates.md) | Catalogue, template, permission, variable and manual acceptance contract. |
 | [Sprint 4 exit review](../homework/sprint-4/status.md) | What shipped, fixed closeout gaps, accepted deviations and carry-forward work. |
-| [Sprint 5 campaigns and drafts](sprint-5-campaigns-drafts.md) | Proposed first campaign/draft slice and decisions required before implementation. |
+| [Sprint 5 campaigns and drafts](sprint-5-campaigns-drafts.md) | Active campaign/draft contract with locked decisions and ownership. |
+| [Sprint 5 homework](../homework/sprint-5/README.md) | Herman implementation card and review-only cards for the other three. |
 | [Sprint detail](sprint-detail.md) | Deep detail on every piece of work, sprint by sprint. Reference. |

@@ -204,9 +204,14 @@ Tasks: copy variants (Anne, 8h) · review against brand voice (Herman, 4h). **To
 
 ---
 
-## Sprint 5 — campaigns and drafts ← contract review
+## Sprint 5 — campaigns and drafts ← active
 
-**Owner:** Herman · **Reviewer:** Mark. A campaign produces one personalised draft per eligible lead.
+**Implementation:** Herman only. **Reviewers:** Mark (architecture), Sharon (backend/tests),
+Anne (seller workflow/copy). A campaign produces one personalised draft per eligible lead.
+
+**Staffing override (2026-11-09):** every Sprint 5 implementation story below belongs to Herman.
+The individual names in the original task lists are retained as historical backlog planning, not
+parallel assignments. Mark, Sharon and Anne do not open implementation branches this sprint.
 
 The [Sprint 5 review](sprint-5-campaigns-drafts.md) is the current contract draft. It defines
 the smaller first slice and the decisions that must be accepted before implementation.

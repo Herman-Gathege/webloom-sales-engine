@@ -48,6 +48,11 @@ every prompt** — split the work so no single agent (or person) carries the who
 the four of us move as one. Skip delegation only when a prompt genuinely has nothing to
 split: a single file, or a single decision on its own.
 
+**Sprint 5 staffing override:** Herman is the sole implementation owner for Sprint 5. AI
+subagents must not create or push parallel implementation branches during this sprint. They may
+perform read-only review or research when Herman explicitly requests it; Mark, Sharon and Anne
+provide human review.
+
 Rules for doing it safely:
 
 - **One writer per file.** Before delegating, name the files each agent owns. Two agents
@@ -75,7 +80,8 @@ for its subject — edit the document, not a copy of it.
 | The detail behind each sprint: the pieces of work and their acceptance criteria | `docs/delivery/sprint-detail.md` |
 | Sprint 4's implemented offer/template contract and manual test path | `docs/delivery/sprint-4-offers-templates.md` |
 | Sprint 4's closure evidence and limitation register | `docs/homework/sprint-4/status.md` |
-| Sprint 5's current technical review and open decisions | `docs/delivery/sprint-5-campaigns-drafts.md` |
+| Sprint 5's active contract, locked decisions and ownership | `docs/delivery/sprint-5-campaigns-drafts.md` |
+| Sprint 5 implementation and review assignments | `docs/homework/sprint-5/README.md` |
 | Sprint 3's scope, roles, and acceptance criteria | `docs/delivery/sprint-3-auth.md` |
 | How a hand-off works: the branch, the steps, the checks | `docs/homework/README.md` |
 | How the first four sprints closed | `docs/homework/sprint-1/status.md`, `docs/homework/sprint-2/status.md`, `docs/homework/sprint-3/status.md`, `docs/homework/sprint-4/status.md` |
@@ -110,11 +116,11 @@ human can review and convert.
 
 ## Current state
 
-**Sprints 1–4 are closed; Sprint 5 is in contract review.** The exit reviews are
+**Sprints 1–4 are closed; Sprint 5 is active with Herman as sole implementation owner.** The exit reviews are
 `docs/homework/sprint-1/status.md`, `docs/homework/sprint-2/status.md`,
 `docs/homework/sprint-3/status.md` and `docs/homework/sprint-4/status.md`; the plan is
-`docs/delivery/sprint-plan.md`; Sprint 5's review is
-`docs/delivery/sprint-5-campaigns-drafts.md`.
+`docs/delivery/sprint-plan.md`; Sprint 5's contract and homework are
+`docs/delivery/sprint-5-campaigns-drafts.md` and `docs/homework/sprint-5/README.md`.
 
 Sprint 2 shipped the CSV importer (PRs #16 and #17), Anne's seller review (PR #19), the filters
 and import screen (#20–#23), the Wadi identity, and the compliance hardening below. Two

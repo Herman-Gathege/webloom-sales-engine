@@ -6,7 +6,8 @@
 The exit review is [Sprint 4 status](../homework/sprint-4/status.md). PR
 [#29](https://github.com/Herman-Gathege/webloom-sales-engine/pull/29) shipped the catalogue and
 PR [#30](https://github.com/Herman-Gathege/webloom-sales-engine/pull/30) merged the completed
-sprint branch.
+sprint branch. [PR #31](https://github.com/Herman-Gathege/webloom-sales-engine/pull/31) merged
+the closeout fixes and approved-policy follow-up.
 
 ## Goal
 
