@@ -35,9 +35,10 @@ and #30; the contract is [`sprint-4-offers-templates.md`](sprint-4-offers-templa
 the evidence and limitation register are in
 [`docs/homework/sprint-4/status.md`](../homework/sprint-4/status.md).
 
-**Sprint 5 is in contract review.** The technical scope is reviewed in
-[`sprint-5-campaigns-drafts.md`](sprint-5-campaigns-drafts.md). Implementation starts only
-after the team accepts the open campaign, segment, role, copy and idempotency decisions.
+**Sprint 5 is active.** The contract is
+[`sprint-5-campaigns-drafts.md`](sprint-5-campaigns-drafts.md), the branch is
+`sprint/5-campaigns-drafts`, and Herman is the sole implementation owner. Mark, Sharon and Anne
+provide review-only homework.
 
 One thing we carry forward: Sprint 1 cost more in setup friction than in product. **From now
 on, the first task of a sprint is "a new person can run it", not the last.**
@@ -82,10 +83,10 @@ services later) and message templates with variants — all editable without a c
 [Closed with accepted deviations](sprint-4-offers-templates.md). *Owner: Sharon · Reviewer:
 Mark · ~11 pts.*
 
-**Sprint 5 — Campaigns and drafts. ← contract review.** A campaign is a batch of leads, one
+**Sprint 5 — Campaigns and drafts. ← active.** A campaign is a batch of leads, one
 offer and one template. It produces one personalised draft per currently eligible lead and
 skips the ones it cannot fill. [Read the Sprint 5 review](sprint-5-campaigns-drafts.md).
-*Owner: Herman · Reviewer: Mark · ~16 pts.*
+*Implementation: Herman only · Reviews: Mark, Sharon and Anne · ~16 pts.*
 
 **Sprint 6 — Approve, then send.** A human review queue, then delivery through FikaTu.
 Nothing sends without approval. Channels for now: **SMS through Africa's Talking (sandbox)**
@@ -110,7 +111,7 @@ and hand-off, not for writing every line. Sprint 1 was shared by all four.
 |---|---|---|
 | **Mark** | Sprint 6 (approve + send), Sprint 9 (pilot + harden); closed Sprint 3 | Architecture, schema, the FikaTu seam, security review |
 | **Sharon** | Sprint 4 (offers + templates); closed Sprint 2 | Backend features end-to-end, migrations, tests |
-| **Herman** | Sprint 5 (campaigns + drafts), Sprint 8 (funnel + reports) | Product, backlog, frontend, documentation |
+| **Herman** | Sprint 5 (campaigns + drafts, sole implementation), Sprint 8 (funnel + reports) | Product, backlog, frontend, documentation |
 | **Anne** | Sprint 7 (replies + handoff) | Sales workflow, copy, compliance wording, the pilot |
 
 This spreads ownership deliberately: nobody leads two sprints in a row, and Mark reviews

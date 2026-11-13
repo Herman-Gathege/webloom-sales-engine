@@ -1,6 +1,7 @@
 # Wadi — full project guide
 
-**Updated:** 2026-11-09 · **Planning posture:** Sprints 1–4 closed; Sprint 5 in contract review
+**Updated:** 2026-11-09 · **Planning posture:** Sprints 1–4 closed; Sprint 5 active with Herman
+as sole implementation owner
 
 This is the complete, skimmable view of Wadi: why it exists, what works today, how the pieces
 fit, what stops the flow, and what comes next. Start with the
@@ -11,7 +12,7 @@ architecture, history or roadmap context.
 |---|---|
 | understand the whole product quickly | this page, sections 1–4 |
 | understand one lead's exact path | [workflow description](workflow-description.md) |
-| see what is being reviewed now | [Sprint 5 campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) |
+| see what is active now | [Sprint 5 campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) · [homework](homework/sprint-5/README.md) |
 | check legal and outreach rules | [compliance foundation](compliance/README.md) |
 
 ## 1. What Wadi is
@@ -97,7 +98,7 @@ There is deliberately no send path. A readiness result does not approve a messag
 | Durable compliance evaluations and stale-input detection | Built |
 | Central policy, exception review and outreach-readiness check | Built; approved SMS policy enabled for Yellow Pages Kenya generic business contacts |
 | Offers, prices, email/SMS templates and variable validation | Sprint 4 closed with accepted deviations |
-| Campaigns, segments and rendered drafts | Sprint 5 |
+| Campaigns, segments and rendered drafts | Sprint 5 active — Herman implementation, three reviewers |
 | Approval queue and FikaTu delivery | Sprint 6 |
 | Replies, qualification and human handoff | Sprint 7 |
 | Outcomes, reporting and learning | Sprint 8 |
@@ -298,8 +299,9 @@ flowchart LR
 Segments and explicit lead selections, campaign intent, one offer/template per campaign,
 rendered draft snapshots, and a visible skip reason for every ineligible lead.
 
-The [Sprint 5 technical review](delivery/sprint-5-campaigns-drafts.md) lists the campaign,
-segment, role, copy and idempotency decisions still required.
+The [Sprint 5 contract](delivery/sprint-5-campaigns-drafts.md) locks the implementation
+decisions. Herman implements alone; Mark, Sharon and Anne use
+[review homework](homework/sprint-5/README.md).
 
 ### Sprint 6 — approval and delivery
 
@@ -352,7 +354,7 @@ and review homework, not duplicated here.
 | Sprint order, ownership and estimates | [Sprint plan](delivery/sprint-plan.md) |
 | Detailed backlog | [Sprint detail](delivery/sprint-detail.md) |
 | Closed offers/templates contract | [Sprint 4 contract](delivery/sprint-4-offers-templates.md) · [exit review](homework/sprint-4/status.md) |
-| Sprint 5 review and open decisions | [Campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) |
+| Sprint 5 contract and homework | [Campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) · [homework](homework/sprint-5/README.md) |
 | Compliance rules and SOP | [Compliance](compliance/README.md) · [Outreach SOP](compliance/outreach-sop.md) |
 | FikaTu capabilities and gaps | [FikaTu research](research/2026-10-08-fikatu-integration-notes.md) |
 | Team working agreement | [How we work](team/how-we-work.md) |

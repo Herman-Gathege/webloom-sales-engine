@@ -9,7 +9,8 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Sprints 1–4 are closed; Sprint 5 is in contract review.**
+Pre-MVP. **Sprints 1–4 are closed; Sprint 5 is active with Herman as the sole implementation
+owner.**
 Start with the [visual workflow](docs/workflow.html) and
 [full Wadi guide](docs/full-wadi-documentation.md) for the current system, boundaries and
 roadmap.
@@ -71,8 +72,8 @@ The traps we hit, and the decisions to agree before the next sprint, are in the
 
 ## If you are one of the four of us
 
-Read the [Sprint 5 review](docs/delivery/sprint-5-campaigns-drafts.md) and the shared
-[homework guide](docs/homework/README.md). The whole plan remains the
+Read the [Sprint 5 contract](docs/delivery/sprint-5-campaigns-drafts.md) and the
+[Sprint 5 homework](docs/homework/sprint-5/README.md). The whole plan remains the
 [sprint plan](docs/delivery/sprint-plan.md).
 
 There are four administrator accounts and no public sign-up. Create them locally once:
@@ -120,7 +121,8 @@ implement it; a human reviews the result.** The short version is in
 | [Sprint 3 scope](docs/delivery/sprint-3-auth.md) | Login, roles, bootstrap, and what this sprint does not do |
 | [Sprint 3 solidification](docs/delivery/sprint-3-solidification.md) | CSV import outcomes, automatic eligibility, Lead Desk filters, and the current outreach boundary |
 | [Sprint 4 exit review](docs/homework/sprint-4/status.md) | Catalogue evidence, fixed closeout gaps and accepted carry-forward limitations |
-| [Sprint 5 review](docs/delivery/sprint-5-campaigns-drafts.md) | Proposed campaign/draft slice and decisions required before implementation |
+| [Sprint 5 contract](docs/delivery/sprint-5-campaigns-drafts.md) | Active campaign/draft slice, locked decisions and ownership |
+| [Sprint 5 homework](docs/homework/sprint-5/README.md) | Herman implementation card plus review-only cards for Mark, Sharon and Anne |
 | [Sprint 3 exit review](docs/homework/sprint-3/status.md) | Tests, accepted deviations and the closeout decision |
 | [Sprint 2 exit](docs/homework/sprint-2/status.md) · [Sprint 1 record](docs/homework/sprint-1/status.md) | How the first two sprints closed, with evidence |
 | [Lead API contract](docs/delivery/sprint-1-lead-contract.md) | The exact Lead and Activity shapes the API and UI agree on |

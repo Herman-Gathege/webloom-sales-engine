@@ -164,4 +164,6 @@ research and current FikaTu gaps remain in
 - [Visual workflow](workflow.html) — the compact public orientation page.
 - [Full Wadi documentation](full-wadi-documentation.md) — project status, architecture and roadmap.
 - [Sprint 4 contract](delivery/sprint-4-offers-templates.md) — the closed catalogue slice.
-- [Sprint 5 review](delivery/sprint-5-campaigns-drafts.md) — the next slice under review.
+- [Sprint 5 contract](delivery/sprint-5-campaigns-drafts.md) — the active slice.
+- [Sprint 5 homework](homework/sprint-5/README.md) — Herman implements; Mark, Sharon and Anne
+  review.
