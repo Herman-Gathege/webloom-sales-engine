@@ -44,3 +44,14 @@
 - **Sharon:** migration, repository queries, idempotency, renderer and failure-path tests.
 - **Anne:** seller wording, preview clarity, draft readability, Import tutorial and responsive
   Campaign walkthrough.
+
+## Team completion tracking
+
+Record your own status. Do not mark others complete.
+
+| Person | Walkthrough completed | Admin tested | Sales tested | Campaign tested | Findings submitted | Blockers resolved/accepted |
+|---|---|---|---|---|---|---|
+| Herman | | | | | | |
+| Mark | | | | | | |
+| Sharon | | | | | | |
+| Anne | | | | | | |
