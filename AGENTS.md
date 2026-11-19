@@ -80,7 +80,7 @@ for its subject — edit the document, not a copy of it.
 | The detail behind each sprint: the pieces of work and their acceptance criteria | `docs/delivery/sprint-detail.md` |
 | Sprint 4's implemented offer/template contract and manual test path | `docs/delivery/sprint-4-offers-templates.md` |
 | Sprint 4's closure evidence and limitation register | `docs/homework/sprint-4/status.md` |
-| Sprint 5's active contract, locked decisions and ownership | `docs/delivery/sprint-5-campaigns-drafts.md` |
+| Sprint 5's implemented contract, locked decisions and ownership | `docs/delivery/sprint-5-campaigns-drafts.md` |
 | Sprint 5 implementation and review assignments | `docs/homework/sprint-5/README.md` |
 | Sprint 3's scope, roles, and acceptance criteria | `docs/delivery/sprint-3-auth.md` |
 | How a hand-off works: the branch, the steps, the checks | `docs/homework/README.md` |
@@ -116,7 +116,8 @@ human can review and convert.
 
 ## Current state
 
-**Sprints 1–4 are closed; Sprint 5 is active with Herman as sole implementation owner.** The exit reviews are
+**Sprints 1–4 are closed; Sprint 5 implementation is complete and awaiting team review.** Herman remains the sole
+implementation owner for this sprint. The exit reviews are
 `docs/homework/sprint-1/status.md`, `docs/homework/sprint-2/status.md`,
 `docs/homework/sprint-3/status.md` and `docs/homework/sprint-4/status.md`; the plan is
 `docs/delivery/sprint-plan.md`; Sprint 5's contract and homework are
@@ -146,19 +147,20 @@ the compliance snapshot; `lead_channel_eligibility` remains the human-review rec
 Suppression and opt-out still override every policy.
 
 - **Built:** `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, routed
-  Lead Desk, compliance workflow and responsive offer/template catalogues. See
+  Lead Desk, compliance workflow, responsive offer/template catalogues and Sprint 5 campaign
+  preview/draft/archive screens. See
   `frontend/README.md`.
 - **Built:** `backend/` — the Lead and Activity model, the compliance models, reversible
-  migrations `0001`–`0005`, an opt-in synthetic seed, the read/import/compliance
+  migrations `0001`–`0006`, an opt-in synthetic seed, the read/import/compliance
   endpoints, authentication with `admin`/`sales` roles, offer/template APIs and seed, the
-  bootstrap command, and a pytest suite. See `backend/README.md`,
+  bootstrap command, campaign/draft preparation APIs, and a pytest suite. See `backend/README.md`,
   `docs/delivery/sprint-2-import-contract.md`,
   `docs/delivery/sprint-3-auth.md` and `docs/delivery/sprint-4-offers-templates.md`.
 - **Built:** the containers — `docker compose up --build` starts the database, the API and
   the UI together from a clean clone. Ports and traps are in `docker/README.md`.
-- **Verified:** 228/228 backend tests green against PostgreSQL 17 and Python 3.12; the
-  frontend builds in the Node 22 container and passes its 50 tests plus lint locally.
-- **Not built yet:** sending, campaigns, and the remaining screens.
+- **Verified:** 263/263 backend tests green against PostgreSQL 17 and Python 3.12; the
+  frontend builds in the Node 22 container and passes its 76 tests plus lint locally.
+- **Not built yet:** approval, sending, reply capture, scheduling and the remaining screens.
   `docs/delivery/sprint-plan.md` says which sprint brings each.
 - The shapes the two halves must agree on are frozen in
   `docs/delivery/sprint-1-lead-contract.md`. Change that document and

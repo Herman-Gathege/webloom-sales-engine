@@ -14,6 +14,7 @@ from app.models import (
     LeadChannelEligibility,
     LeadProvenance,
     LeadStatus,
+    classify_website_presence,
 )
 from app.repositories import LeadRepository
 from app.schemas.lead import LeadCreate
@@ -76,7 +77,7 @@ class LeadService:
         sector: str | None = None,
         area: str | None = None,
         source: str | None = None,
-        website: Literal["yes", "no"] | None = None,
+        website: Literal["yes", "no", "unknown"] | None = None,
         status: str | None = None,
         compliance_status: str | None = None,
         data_quality_status: str | None = None,
@@ -183,6 +184,9 @@ class LeadService:
         )
         parsed_has_website, _ = parse_website_status(website_status or "")
         has_website = values.has_website or parsed_has_website
+        website_presence = classify_website_presence(
+            website_status, has_website
+        ).value
         whatsapp_capable = bool(
             phone and values.whatsapp_capable and not is_landline(phone)
         )
@@ -197,6 +201,7 @@ class LeadService:
             whatsapp_capable=whatsapp_capable,
             website_status=website_status,
             has_website=has_website,
+            website_presence=website_presence,
             source=source,
             status=LeadStatus.NEW,
             created_at=created_at,

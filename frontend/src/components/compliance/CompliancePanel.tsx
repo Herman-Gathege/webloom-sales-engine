@@ -38,6 +38,17 @@ function label(value: string): string {
   return value.replaceAll("_", " ");
 }
 
+function sourceReviewLink(lead: LeadDetail): { href: string; verified: boolean } {
+  if (lead.provenance?.source_url) {
+    return { href: lead.provenance.source_url, verified: true };
+  }
+  const query = [lead.business_name, lead.area].filter(Boolean).join(" ");
+  return {
+    href: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+    verified: false,
+  };
+}
+
 function decisionSourceLabel(
   result: LeadDetail["compliance"]["channel_results"][number],
 ): string {
@@ -522,7 +533,21 @@ export function CompliancePanel({
               <div>
                 <dt className={labelClass()}>Source URL</dt>
                 <dd className="break-all">
-                  {lead.provenance.source_url ?? "Not recorded"}
+                  {(() => {
+                    const reviewLink = sourceReviewLink(lead);
+                    return (
+                      <a
+                        href={reviewLink.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium text-primary underline underline-offset-2"
+                      >
+                        {reviewLink.verified
+                          ? "Open recorded source"
+                          : "Search the web (unverified)"}
+                      </a>
+                    );
+                  })()}
                 </dd>
               </div>
               <div>
@@ -541,9 +566,17 @@ export function CompliancePanel({
               </div>
             </dl>
           ) : (
-            <p className="text-sm text-amber-800">
-              No provenance record yet. Keep this lead in review.
-            </p>
+            <div className="space-y-2 text-sm text-amber-800">
+              <p>No provenance record yet. Keep this lead in review.</p>
+              <a
+                href={sourceReviewLink(lead).href}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-primary underline underline-offset-2"
+              >
+                Search the web (unverified)
+              </a>
+            </div>
           )}
         </div>
 

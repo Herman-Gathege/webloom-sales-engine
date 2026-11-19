@@ -120,6 +120,10 @@ def admin_user() -> User:
 @pytest.fixture
 def client(session: Session, admin_user: User) -> Iterator[TestClient]:
     """The real app, using the test's session, signed in as an administrator."""
+    # Campaign ownership is enforced with a real FK. Keep the test principal
+    # durable without changing authentication behaviour for older tests.
+    session.add(admin_user)
+    session.flush()
     app.dependency_overrides[get_session] = lambda: session
     app.dependency_overrides[get_current_user] = lambda: admin_user
     try:

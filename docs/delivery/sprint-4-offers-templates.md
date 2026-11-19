@@ -30,7 +30,7 @@ The result is:
 Offer catalogue
   → reusable channel templates
   → validated personalisation variables
-  → [Sprint 5: segments, campaigns, drafts]
+  → [Sprint 5: explicit lead selection, campaigns, immutable drafts]
 ```
 
 ## Roles
@@ -69,7 +69,7 @@ Initial catalogue:
 3. Custom Website
 4. FikaTu Notification Platform
 
-Starter Website is seeded at **KES 40,000**. Business Website and Custom Website remain
+Starter Website is seeded **From KES 40,000**. Business Website and Custom Website remain
 unpriced until the team supplies their guidance. The model permits blank price guidance for
 discovery-first offers; no other pricing is invented in the seed.
 
@@ -196,7 +196,7 @@ Each variant stays under the channel limit and includes `{{opt_out}}`.
 ## Seed data
 
 Provide an idempotent catalogue seed command separate from demo lead seeding. It installs the
-four offers, Starter Website at KES 40,000, and the implemented safe starter SMS/email
+four offers, Starter Website from KES 40,000, and the implemented safe starter SMS/email
 templates only when their keys do not already exist. It never rewrites an edited record.
 
 The shipped seed contains one SMS A and one email A template. The full A/B, social-only, price
@@ -270,7 +270,8 @@ outreach.
 
 1. **Permissions:** `admin` manages the catalogue; `sales` has read-only access to active
    offers and templates.
-2. **Prices:** Starter Website is KES 40,000. Business and Custom website guidance remains
+2. **Prices:** Starter Website is “From KES 40,000” following the 2026-11-19 business decision.
+   Business and Custom website guidance remains
    open.
 3. **Discovery-first offers:** both price fields may be blank when the approved copy avoids
    making a price claim.

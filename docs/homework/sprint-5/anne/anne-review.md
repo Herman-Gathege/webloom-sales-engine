@@ -3,6 +3,11 @@
 **Verdict:** Revise. The campaign flow could not be tested because there is no way to get
 leads into the system.
 
+> **2026-11-19 follow-up:** this review is preserved as historical evidence. Manual lead
+> creation, the downloadable importer template and a synthetic campaign fixture are now in
+> `main`. The remaining campaign requirements are implemented against the approved decisions
+> in [Sprint 5 readiness](../../../delivery/sprint-5-readiness.md) and await Anne's re-review.
+
 ## What I found
 
 - **No leads in the system.** Campaign List, Preview and Drafts cannot be tested without them.

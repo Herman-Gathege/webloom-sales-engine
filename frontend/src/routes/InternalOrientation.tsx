@@ -30,11 +30,12 @@ export function InternalOrientation() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <Badge className="bg-secondary text-secondary-foreground">
-              Sprint 5 active
+              Sprint 5 ready for review
             </Badge>
             <p className="text-muted-foreground">
-              Herman implements campaigns, lead selection, preview and draft generation. Mark,
-              Sharon and Anne review; approval and sending remain outside the sprint.
+              Campaign selection, eligibility preview, immutable draft generation and reversible
+              archive are implemented. Mark, Sharon and Anne review; approval and sending remain
+              outside the sprint.
             </p>
             <Link to="/leads" className="inline-flex items-center gap-1 font-medium text-primary">
               Open the Lead Desk

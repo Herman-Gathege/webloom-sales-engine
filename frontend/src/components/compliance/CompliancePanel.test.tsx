@@ -86,9 +86,22 @@ describe("CompliancePanel", () => {
     expect(screen.getByText(lead.compliance.explanation)).toBeTruthy();
     expect(screen.getByText("Automated policy")).toBeTruthy();
     expect(screen.getByText(/synthetic-email-policy · v1/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Open recorded source" })).toBeTruthy();
     expect(
       screen.getByText(/only when a current approved policy supports the decision/i),
     ).toBeTruthy();
     expect(screen.queryByText(/A public contact is never approved automatically/i)).toBeNull();
+  });
+
+  it("offers a clearly labelled search fallback when provenance URL is absent", () => {
+    const withoutUrl = {
+      ...lead,
+      provenance: lead.provenance
+        ? { ...lead.provenance, source_url: null }
+        : null,
+    };
+    render(<CompliancePanel lead={withoutUrl} sampleMode onUpdated={vi.fn()} />);
+
+    expect(screen.getByRole("link", { name: "Search the web (unverified)" })).toBeTruthy();
   });
 });

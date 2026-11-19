@@ -285,6 +285,7 @@ describe("the Lead contract", () => {
         "whatsapp_capable",
         "website_status",
         "has_website",
+        "website_presence",
         "source",
         "status",
         "created_at",

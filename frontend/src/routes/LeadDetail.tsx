@@ -26,15 +26,47 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function activityDetails(details: Record<string, unknown> | null) {
+const SELLER_ACTIVITY_FIELDS = new Set([
+  "channel",
+  "previous_state",
+  "new_state",
+  "status",
+  "eligible_channels",
+  "suppressed_channels",
+  "scope",
+  "reason",
+]);
+
+function primitiveDetails(details: Record<string, unknown> | null) {
   return Object.entries(details ?? {}).filter(([, value]) => {
     return (
       typeof value === "string" ||
       typeof value === "number" ||
       typeof value === "boolean" ||
-      value === null
+      value === null ||
+      (Array.isArray(value) &&
+        value.every(
+          (item) =>
+            typeof item === "string" ||
+            typeof item === "number" ||
+            typeof item === "boolean",
+        ))
     );
   });
+}
+
+function activityValue(value: unknown): string {
+  if (value === null) return "—";
+  if (Array.isArray(value)) return value.join(", ");
+  return String(value);
+}
+
+function activityDetails(details: Record<string, unknown> | null) {
+  const entries = primitiveDetails(details);
+  return {
+    seller: entries.filter(([key]) => SELLER_ACTIVITY_FIELDS.has(key)),
+    technical: entries.filter(([key]) => !SELLER_ACTIVITY_FIELDS.has(key)),
+  };
 }
 
 export function LeadDetail() {
@@ -123,7 +155,13 @@ export function LeadDetail() {
                   <span className="font-mono text-xs">{lead.email ?? "—"}</span>
                 </Field>
                 <Field label="WhatsApp">{lead.whatsapp_capable ? "Yes" : "No / call only"}</Field>
-                <Field label="Website">{lead.has_website ? "Yes" : "None found"}</Field>
+                <Field label="Website">
+                  {lead.website_presence === "has_website"
+                    ? "Has a website"
+                    : lead.website_presence === "no_website"
+                      ? "No website"
+                      : "Not checked / unknown"}
+                </Field>
                 <Field label="Research note">{lead.website_status ?? "—"}</Field>
                 <Field label="Source">{lead.source}</Field>
                 <Field label="Added">{new Date(lead.created_at).toLocaleDateString()}</Field>
@@ -161,18 +199,38 @@ export function LeadDetail() {
                       <p className="font-mono text-xs text-muted-foreground">
                         {entry.type} · {entry.actor}
                       </p>
-                      {activityDetails(entry.details).length > 0 && (
+                      {activityDetails(entry.details).seller.length > 0 && (
                         <dl
                           aria-label="Activity details"
                           className="grid gap-x-4 gap-y-1 text-xs sm:grid-cols-2"
                         >
-                          {activityDetails(entry.details).map(([key, value]) => (
+                          {activityDetails(entry.details).seller.map(([key, value]) => (
                             <div key={key} className="flex gap-1">
                               <dt className="text-muted-foreground">{key}:</dt>
-                              <dd>{value === null ? "—" : String(value)}</dd>
+                              <dd>{activityValue(value)}</dd>
                             </div>
                           ))}
                         </dl>
+                      )}
+                      {activityDetails(entry.details).technical.length > 0 && (
+                        <details
+                          aria-label="Activity details"
+                          className="rounded-md border border-border bg-muted/20 px-3 py-2 text-xs"
+                        >
+                          <summary className="cursor-pointer text-muted-foreground">
+                            Technical details
+                          </summary>
+                          <dl className="mt-2 space-y-2">
+                            {activityDetails(entry.details).technical.map(([key, value]) => (
+                              <div key={key}>
+                                <dt className="text-muted-foreground">{key}:</dt>
+                                <dd className="break-all whitespace-pre-wrap font-mono">
+                                  {activityValue(value)}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </details>
                       )}
                       {index < lead.activity.length - 1 && <Separator className="mt-2" />}
                     </li>

@@ -1,7 +1,7 @@
 # Wadi — full project guide
 
-**Updated:** 2026-11-09 · **Planning posture:** Sprints 1–4 closed; Sprint 5 active with Herman
-as sole implementation owner
+**Updated:** 2026-11-19 · **Planning posture:** Sprints 1–4 closed; Sprint 5 implementation
+complete pending final team acceptance
 
 This is the complete, skimmable view of Wadi: why it exists, what works today, how the pieces
 fit, what stops the flow, and what comes next. Start with the
@@ -12,7 +12,7 @@ architecture, history or roadmap context.
 |---|---|
 | understand the whole product quickly | this page, sections 1–4 |
 | understand one lead's exact path | [workflow description](workflow-description.md) |
-| see what is active now | [Sprint 5 campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) · [homework](homework/sprint-5/README.md) |
+| see the implemented current sprint | [Sprint 5 campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) · [homework](homework/sprint-5/README.md) |
 | check legal and outreach rules | [compliance foundation](compliance/README.md) |
 
 ## 1. What Wadi is
@@ -55,8 +55,8 @@ flowchart LR
 ```
 
 “Built” here means Wadi can handle the corresponding sales data or decision. It does not
-mean every future automation exists. For example, intake and personalisation data exist, but
-campaign generation does not.
+mean every future automation exists. For example, campaign preparation creates immutable
+drafts, but approval and sending do not exist.
 
 ## 3. You are here
 
@@ -66,24 +66,24 @@ flowchart LR
     B --> C[Approved policy + exception review]
     C --> D[Readiness gate]
     D --> E[Offer + template catalogue]
-    E -. Sprint 5 .-> F[Campaign + draft]
+    E --> F[Sprint 5 campaign + draft]
     F -. Sprint 6 .-> G[Human approval]
     G -. Sprint 6 .-> H[FikaTu delivery]
 
     classDef built fill:#eff5e0,stroke:#084734,color:#0b1f18;
     classDef current fill:#b4d665,stroke:#084734,color:#0b1f18;
     classDef future fill:#ffffff,stroke:#9aa9a0,color:#3d5148,stroke-dasharray:5 4;
-    class A,B,C,D built;
-    class E current;
-    class F,G,H future;
+    class A,B,C,D,E,F built;
+    class G,H future;
 ```
 
 **Current boundary:** Wadi can collect a lead, preserve evidence, apply a central approved
 policy, route genuine exceptions for human review, test outreach readiness, and maintain
-offers/templates.
+offers/templates. Sprint 5 can prepare explicit SMS campaigns and immutable **Not sent**
+drafts with complete eligibility and catalogue snapshots.
 
-**Not built:** campaigns, rendered drafts, approval queue, sending, FikaTu dispatch, delivery
-status, retries, replies and outcomes.
+**Not built:** approval queue, sending, FikaTu dispatch, delivery status, retries, replies,
+scheduling and outcomes. Saved segments and structured social targeting are also deferred.
 
 There is deliberately no send path. A readiness result does not approve a message.
 
@@ -98,7 +98,7 @@ There is deliberately no send path. A readiness result does not approve a messag
 | Durable compliance evaluations and stale-input detection | Built |
 | Central policy, exception review and outreach-readiness check | Built; approved SMS policy enabled for Yellow Pages Kenya generic business contacts |
 | Offers, prices, email/SMS templates and variable validation | Sprint 4 closed with accepted deviations |
-| Campaigns, segments and rendered drafts | Sprint 5 active — Herman implementation, three reviewers |
+| Explicit SMS campaigns, eligibility preview, immutable drafts and archive | Sprint 5 built; saved segments deferred |
 | Approval queue and FikaTu delivery | Sprint 6 |
 | Replies, qualification and human handoff | Sprint 7 |
 | Outcomes, reporting and learning | Sprint 8 |
@@ -110,16 +110,16 @@ There is deliberately no send path. A readiness result does not approve a messag
 flowchart LR
     USER[Team member] --> LOGIN[Sign in]
     LOGIN --> ROLE{Role}
-    ROLE -->|admin| ADMIN[Lead desk + compliance + catalogue writes + user list]
-    ROLE -->|sales| SALES[Lead desk + compliance + active catalogue]
+    ROLE -->|admin| ADMIN[Lead desk + compliance + campaigns + catalogue writes + user list]
+    ROLE -->|sales| SALES[Lead desk + compliance + campaigns + active catalogue]
     ADMIN --> API[API authorization]
     SALES --> API
 ```
 
 | Role | Current access |
 |---|---|
-| `admin` | Lead Desk, manual lead entry, import, compliance review, user list, offer/template writes |
-| `sales` | Lead Desk, manual lead entry, import, compliance review, active offer/template reads |
+| `admin` | Lead Desk, manual lead entry, import, compliance review, campaigns, user list, offer/template writes |
+| `sales` | Lead Desk, manual lead entry, import, compliance review, campaigns, active offer/template reads |
 
 Both roles can see contact details because both work the lead desk. There is no public user,
 customer portal or separate sales-manager role yet.
@@ -181,11 +181,11 @@ flowchart TB
 Current runtime facts:
 
 - PostgreSQL stores leads, activity, imports, provenance, compliance, suppression, users,
-  offers and templates.
+  offers, templates, campaigns, skips and immutable draft snapshots.
 - The versioned policy file is `backend/app/config/compliance_policy.json`; policy
   `2026-11-09.1` enables SMS for Yellow Pages Kenya generic business contacts under
   `legitimate_interests`.
-- Alembic owns reversible migrations `0001`–`0005`.
+- Alembic owns reversible migrations `0001`–`0006`.
 - JWT authentication protects every business endpoint; `admin` writes and `sales` reads are
   enforced by the API.
 - Nginx serves the React app and proxies `/api` to FastAPI.
@@ -239,7 +239,7 @@ compliance filters, responsive card lists, and the explicit outreach boundary.
 
 ### Sprint 4 — offers and templates
 
-Multi-currency offers, Starter Website at KES 40,000, open commercial pricing for discovery
+Multi-currency offers, Starter Website from KES 40,000, open commercial pricing for discovery
 offers, email/SMS templates with variants, allowlisted variables, mandatory `{{opt_out}}`,
 Admin management, Sales read-only access, responsive catalogue cards, accessible add/edit
 dialogs, migration `0005` and an idempotent catalogue seed.
@@ -255,7 +255,7 @@ The catalogue seed currently describes:
 
 | Offer | Current price guidance |
 |---|---|
-| Starter Website | **KES 40,000** |
+| Starter Website | **From KES 40,000** |
 | Business Website | Open; no price invented |
 | Custom Website | Open; no price invented |
 | FikaTu Notification Platform | Open; no price invented |
@@ -270,7 +270,7 @@ These are real and must not be mistaken for completed work:
 1. The central policy content, lawful-basis decision, DPIA/registration, retention policy,
    processor terms and final opt-out wording remain human inputs.
 2. Imported provenance can still be weak when source URL or intended-purpose detail is absent.
-3. Campaigns, rendered drafts, approval and delivery do not exist yet.
+3. Approval and delivery do not exist yet. Sprint 5 campaign preparation and immutable drafts do.
 4. FikaTu has no `sales.outreach.send` event type yet.
 5. WhatsApp eligibility can be recorded, but FikaTu has no WhatsApp provider.
 6. Inbound replies and automatic opt-out capture are absent.
@@ -278,11 +278,11 @@ These are real and must not be mistaken for completed work:
 8. All four local bootstrap users are Admins; final Admin/Sales allocation is a team decision.
 9. The 13-screen product inventory is not formally signed off.
 10. Business, Custom and FikaTu offer prices remain open.
-11. Starter Website wording still needs confirmation as “from KES 40,000” or exactly
-    KES 40,000 before outreach copy can promise it.
-11. Sprint 4 is closed; its limitation register and accepted carry-forward work are in the
+11. Structured social presence, sender identity and reply/opt-out ownership remain deferred
+    dependencies for later targeting and sending.
+12. Sprint 4 is closed; its limitation register and accepted carry-forward work are in the
     [exit review](homework/sprint-4/status.md).
-12. Central automatic eligibility is enabled for the approved SMS rule only. Every new source,
+13. Central automatic eligibility is enabled for the approved SMS rule only. Every new source,
     purpose, contact type or channel requires its own approved policy.
 
 ## 12. Roadmap
@@ -298,8 +298,9 @@ flowchart LR
 
 ### Sprint 5 — campaigns and drafts
 
-Segments and explicit lead selections, campaign intent, one offer/template per campaign,
-rendered draft snapshots, and a visible skip reason for every ineligible lead.
+Explicit selection of 1–200 leads, one active SMS offer/template per campaign, eligibility
+preview, one-shot immutable draft generation, visible skip reasons and reversible archive.
+Saved segments, approval and sending are outside this slice.
 
 The [Sprint 5 contract](delivery/sprint-5-campaigns-drafts.md) locks the implementation
 decisions. Herman implements alone; Mark, Sharon and Anne use

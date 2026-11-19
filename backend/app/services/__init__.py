@@ -1,3 +1,10 @@
+from app.services.campaign_service import (
+    CampaignConflictError,
+    CampaignNotFoundError,
+    CampaignPermissionError,
+    CampaignService,
+    CampaignValidationError,
+)
 from app.services.catalog_service import (
     CatalogConflictError,
     CatalogNotFoundError,
@@ -10,6 +17,7 @@ from app.services.compliance_service import (
     EligibilityDecision,
     SuppressionDecision,
 )
+from app.services.draft_renderer import OPT_OUT_TEXT, render_draft, sms_metrics
 from app.services.lead_import import (
     MAX_UPLOAD_BYTES,
     ImportFileError,
@@ -33,6 +41,11 @@ __all__ = [
     "CatalogNotFoundError",
     "CatalogService",
     "CatalogValidationError",
+    "CampaignConflictError",
+    "CampaignNotFoundError",
+    "CampaignPermissionError",
+    "CampaignService",
+    "CampaignValidationError",
     "ComplianceService",
     "ComplianceTargetError",
     "EligibilityDecision",
@@ -46,7 +59,10 @@ __all__ = [
     "LeadValidationError",
     "OutreachGateResult",
     "OutreachGateService",
+    "OPT_OUT_TEXT",
     "SuppressionDecision",
     "import_template_csv",
+    "render_draft",
     "refused_rows_csv",
+    "sms_metrics",
 ]

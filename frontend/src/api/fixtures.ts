@@ -121,6 +121,7 @@ function lead(
     whatsapp_capable,
     website_status,
     has_website: false,
+    website_presence: "no_website",
     source: "google_maps",
     status: "new",
     created_at: CREATED,
@@ -192,7 +193,11 @@ export const sampleActivity: Activity[] = sampleLeads.flatMap((entry, i) => [
     type: "lead.researched",
     actor: "system",
     summary: `Website research recorded: ${entry.website_status}`,
-    details: { source: "google_maps" },
+    details: {
+      source: "google_maps",
+      policy_fingerprint:
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    },
     created_at: "2026-09-23T09:05:00Z",
   },
 ]);

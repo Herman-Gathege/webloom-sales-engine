@@ -1,4 +1,16 @@
 from app.schemas.activity import ActivityRead
+from app.schemas.campaign import (
+    CampaignDetailRead,
+    CampaignDraftRead,
+    CampaignEventRead,
+    CampaignInput,
+    CampaignListRead,
+    CampaignPreviewRead,
+    CampaignSelectionContext,
+    CampaignSkipRead,
+    CampaignSummaryRead,
+    CampaignUpdate,
+)
 from app.schemas.catalog import (
     OfferCreate,
     OfferRead,
@@ -34,6 +46,16 @@ from app.schemas.lead_import import (
 
 __all__ = [
     "ActivityRead",
+    "CampaignDetailRead",
+    "CampaignDraftRead",
+    "CampaignEventRead",
+    "CampaignInput",
+    "CampaignListRead",
+    "CampaignPreviewRead",
+    "CampaignSelectionContext",
+    "CampaignSkipRead",
+    "CampaignSummaryRead",
+    "CampaignUpdate",
     "OfferCreate",
     "OfferRead",
     "OfferUpdate",

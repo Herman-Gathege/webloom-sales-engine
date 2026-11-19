@@ -27,6 +27,7 @@ const createdLead: Lead = {
   whatsapp_capable: true,
   website_status: "No website listed",
   has_website: false,
+  website_presence: "no_website",
   source: "manual_entry",
   status: "new",
   created_at: "2026-11-09T09:00:00Z",

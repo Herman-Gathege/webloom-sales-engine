@@ -38,8 +38,24 @@ function sampleList(params: LeadListParams): LeadListResponse {
     if (params.sector && lead.sector !== params.sector) return false;
     if (params.area && lead.area !== params.area) return false;
     if (params.source && lead.source !== params.source) return false;
-    if (params.website === "yes" && !lead.has_website) return false;
-    if (params.website === "no" && lead.has_website) return false;
+    if (
+      params.website === "yes" &&
+      lead.website_presence !== "has_website"
+    ) {
+      return false;
+    }
+    if (
+      params.website === "no" &&
+      lead.website_presence !== "no_website"
+    ) {
+      return false;
+    }
+    if (
+      params.website === "unknown" &&
+      lead.website_presence !== "unknown"
+    ) {
+      return false;
+    }
     if (params.status && lead.status !== params.status) return false;
     if (
       params.compliance_status &&

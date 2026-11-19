@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -100,8 +100,77 @@ describe("LeadImport", () => {
   it("starts with nothing to import", () => {
     renderScreen();
 
-    expect(screen.getByRole("button", { name: "Import" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "Import leads" })).toHaveProperty(
+      "disabled",
+      true,
+    );
     expect(screen.queryByText(/rows read/i)).toBeNull();
+  });
+
+  it("lets an experienced user skip the guide trail", () => {
+    renderScreen();
+
+    expect(
+      screen.getByRole("list", { name: "Wadi lead trail" }),
+    ).toBeTruthy();
+    expect(screen.getByText("Take the map")).toBeTruthy();
+    expect(screen.getByText("Mark the trail")).toBeTruthy();
+    expect(screen.getByText("Send the scout")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "I already have my CSV" }));
+
+    expect(screen.getByText("Using your own CSV")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "I already have my CSV" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    expect(screen.getByRole("group", { name: "CSV drop area" })).toHaveFocus();
+  });
+
+  it("marks the first checkpoint after the CSV template downloads", async () => {
+    mocks.downloadImportTemplate.mockResolvedValue(
+      new Blob(["Business,Phone,Source\n"], { type: "text/csv" }),
+    );
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+    vi.stubGlobal("URL", {
+      createObjectURL: vi.fn(() => "blob:template"),
+      revokeObjectURL: vi.fn(),
+    });
+
+    renderScreen();
+    fireEvent.click(screen.getByRole("button", { name: "Download CSV template" }));
+
+    expect((await screen.findAllByText(/Map secured/)).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Download again" })).toBeTruthy();
+  });
+
+  it("marks the second checkpoint and lets the user replace a wrong file", () => {
+    renderScreen();
+    chooseFile();
+
+    expect(screen.getAllByText(/Trail marked/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/webloom-lead-list.csv/)).toBeTruthy();
+    expect(screen.getByText("Using your own CSV")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Wrong file?" }));
+
+    expect(screen.queryByText(/webloom-lead-list.csv/)).toBeNull();
+    expect(screen.getByRole("button", { name: "Import leads" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+  });
+
+  it("accepts a CSV dropped onto the trail marker", () => {
+    renderScreen();
+    const file = new File(["Business\n"], "dropped-leads.csv", { type: "text/csv" });
+
+    fireEvent.drop(screen.getByRole("group", { name: "CSV drop area" }), {
+      dataTransfer: { files: [file] },
+    });
+
+    expect(screen.getAllByText(/Trail marked/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/dropped-leads.csv/)).toBeTruthy();
   });
 
   it("explains the CSV columns and downloads the importer-compatible template", async () => {
@@ -117,8 +186,11 @@ describe("LeadImport", () => {
 
     renderScreen();
 
-    expect(screen.getByRole("heading", { name: "Prepare your CSV" })).toBeTruthy();
-    expect(screen.getByText(/required columns/i)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Wadi’s Lead Trail" })).toBeTruthy();
+    expect(screen.getByText("First, take the map.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Open trail notes" }));
+    const dialog = screen.getByRole("dialog", { name: "Trail notes" });
+    expect(within(dialog).getByText(/required columns/i)).toBeTruthy();
     for (const column of [
       "Business",
       "Sector",
@@ -128,9 +200,9 @@ describe("LeadImport", () => {
       "Website status",
       "Source",
     ]) {
-      expect(screen.getByText(column, { selector: "code" })).toBeTruthy();
+      expect(within(dialog).getByText(column, { selector: "code" })).toBeTruthy();
     }
-    expect(screen.getByText(/optional columns/i)).toBeTruthy();
+    expect(within(dialog).getByText(/optional columns/i)).toBeTruthy();
     for (const column of [
       "Email",
       "Contact name",
@@ -140,8 +212,9 @@ describe("LeadImport", () => {
       "Collection method",
       "Intended purpose",
     ]) {
-      expect(screen.getByText(column, { selector: "code" })).toBeTruthy();
+      expect(within(dialog).getByText(column, { selector: "code" })).toBeTruthy();
     }
+    fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
     fireEvent.click(screen.getByRole("button", { name: "Download CSV template" }));
 
     await waitFor(() => expect(mocks.downloadImportTemplate).toHaveBeenCalledTimes(1));
@@ -161,7 +234,7 @@ describe("LeadImport", () => {
 
     renderScreen();
     chooseFile();
-    fireEvent.click(screen.getByRole("button", { name: "Import" }));
+    fireEvent.click(screen.getByRole("button", { name: "Import leads" }));
 
     // Wait for the summary; while the upload runs there is a different status.
     await screen.findByText("Refused rows");
@@ -194,6 +267,24 @@ describe("LeadImport", () => {
     ).toBeTruthy();
   });
 
+  it("celebrates a completed trail and starts a fresh import", async () => {
+    mocks.importLeads.mockResolvedValue(summary);
+
+    renderScreen();
+    chooseFile();
+    fireEvent.click(screen.getByRole("button", { name: "Import leads" }));
+
+    expect(await screen.findByText("The scout is back.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Import another trail" }));
+
+    expect(screen.queryByText(/rows read/i)).toBeNull();
+    expect(screen.queryByText("The scout is back.")).toBeNull();
+    expect(screen.getByRole("button", { name: "Import leads" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+  });
+
   it("shows the server's reason when the file is refused", async () => {
     mocks.importLeads.mockRejectedValue(
       new Error("The file is missing these columns: Phone."),
@@ -201,11 +292,46 @@ describe("LeadImport", () => {
 
     renderScreen();
     chooseFile();
-    fireEvent.click(screen.getByRole("button", { name: "Import" }));
+    fireEvent.click(screen.getByRole("button", { name: "Import leads" }));
 
     expect(await screen.findByRole("alert")).toHaveProperty(
       "textContent",
       "The file is missing these columns: Phone.",
     );
+  });
+
+  it("keeps the file and retries after a failed import", async () => {
+    mocks.importLeads
+      .mockRejectedValueOnce(new Error("The file is missing these columns: Phone."))
+      .mockResolvedValueOnce(summary);
+
+    renderScreen();
+    chooseFile();
+    fireEvent.click(screen.getByRole("button", { name: "Import leads" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Wrong turn" });
+    expect(dialog).toHaveProperty(
+      "textContent",
+      expect.stringContaining("The file is missing these columns: Phone."),
+    );
+    expect(dialog.textContent).toContain("webloom-lead-list.csv");
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(await screen.findByText("The scout is back.")).toBeTruthy();
+    expect(mocks.importLeads).toHaveBeenCalledTimes(2);
+  });
+
+  it("offers a retry when the template download fails", async () => {
+    mocks.downloadImportTemplate.mockRejectedValue(
+      new Error("Could not download the CSV template."),
+    );
+
+    renderScreen();
+    fireEvent.click(screen.getByRole("button", { name: "Download CSV template" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Wrong turn" });
+    expect(dialog.textContent).toContain("Could not download the CSV template.");
+    expect(within(dialog).getByRole("button", { name: "Try again" })).toBeTruthy();
   });
 });
