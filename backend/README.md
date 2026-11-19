@@ -160,6 +160,13 @@ SMS/email templates. Rerunning it preserves existing records.
 
 ## The API
 
+Lead preparation:
+
+- `POST /api/v1/leads` creates one manually researched lead. Both `admin` and `sales` may use
+  it. Business name, source, and at least one phone or email are required.
+- `GET /api/v1/leads/import-template` downloads a UTF-8 CSV generated from the importer's exact
+  columns, with fictional examples.
+
 ### `GET /api/v1/leads?limit=50&offset=0`
 
 One page of leads, newest first (`created_at` descending, with the id as a tie-breaker so a

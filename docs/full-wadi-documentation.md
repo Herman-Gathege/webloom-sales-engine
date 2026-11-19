@@ -1,6 +1,7 @@
 # Wadi — full project guide
 
-**Updated:** 2026-11-09 · **Planning posture:** Sprints 1–4 closed; Sprint 5 in contract review
+**Updated:** 2026-11-09 · **Planning posture:** Sprints 1–4 closed; Sprint 5 active with Herman
+as sole implementation owner
 
 This is the complete, skimmable view of Wadi: why it exists, what works today, how the pieces
 fit, what stops the flow, and what comes next. Start with the
@@ -11,7 +12,7 @@ architecture, history or roadmap context.
 |---|---|
 | understand the whole product quickly | this page, sections 1–4 |
 | understand one lead's exact path | [workflow description](workflow-description.md) |
-| see what is being reviewed now | [Sprint 5 campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) |
+| see what is active now | [Sprint 5 campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) · [homework](homework/sprint-5/README.md) |
 | check legal and outreach rules | [compliance foundation](compliance/README.md) |
 
 ## 1. What Wadi is
@@ -91,13 +92,13 @@ There is deliberately no send path. A readiness result does not approve a messag
 | Area | Status now |
 |---|---|
 | Authentication and `admin`/`sales` roles | Built |
-| Lead list, detail, activity and responsive Lead Desk | Built |
-| CSV import with row-level refusals | Built |
+| Lead list, detail, activity, manual single-lead entry and responsive Lead Desk | Built |
+| CSV import with row-level refusals and downloadable canonical template | Built |
 | Provenance, duplicate and terminal suppression handling | Built |
 | Durable compliance evaluations and stale-input detection | Built |
 | Central policy, exception review and outreach-readiness check | Built; approved SMS policy enabled for Yellow Pages Kenya generic business contacts |
 | Offers, prices, email/SMS templates and variable validation | Sprint 4 closed with accepted deviations |
-| Campaigns, segments and rendered drafts | Sprint 5 |
+| Campaigns, segments and rendered drafts | Sprint 5 active — Herman implementation, three reviewers |
 | Approval queue and FikaTu delivery | Sprint 6 |
 | Replies, qualification and human handoff | Sprint 7 |
 | Outcomes, reporting and learning | Sprint 8 |
@@ -117,8 +118,8 @@ flowchart LR
 
 | Role | Current access |
 |---|---|
-| `admin` | Lead Desk, import, compliance review, user list, offer/template writes |
-| `sales` | Lead Desk, import, compliance review, active offer/template reads |
+| `admin` | Lead Desk, manual lead entry, import, compliance review, user list, offer/template writes |
+| `sales` | Lead Desk, manual lead entry, import, compliance review, active offer/template reads |
 
 Both roles can see contact details because both work the lead desk. There is no public user,
 customer portal or separate sales-manager role yet.
@@ -277,6 +278,8 @@ These are real and must not be mistaken for completed work:
 8. All four local bootstrap users are Admins; final Admin/Sales allocation is a team decision.
 9. The 13-screen product inventory is not formally signed off.
 10. Business, Custom and FikaTu offer prices remain open.
+11. Starter Website wording still needs confirmation as “from KES 40,000” or exactly
+    KES 40,000 before outreach copy can promise it.
 11. Sprint 4 is closed; its limitation register and accepted carry-forward work are in the
     [exit review](homework/sprint-4/status.md).
 12. Central automatic eligibility is enabled for the approved SMS rule only. Every new source,
@@ -298,8 +301,9 @@ flowchart LR
 Segments and explicit lead selections, campaign intent, one offer/template per campaign,
 rendered draft snapshots, and a visible skip reason for every ineligible lead.
 
-The [Sprint 5 technical review](delivery/sprint-5-campaigns-drafts.md) lists the campaign,
-segment, role, copy and idempotency decisions still required.
+The [Sprint 5 contract](delivery/sprint-5-campaigns-drafts.md) locks the implementation
+decisions. Herman implements alone; Mark, Sharon and Anne use
+[review homework](homework/sprint-5/README.md).
 
 ### Sprint 6 — approval and delivery
 
@@ -336,8 +340,10 @@ npm run lint && npm test && npm run build
 
 Useful local URLs:
 
-- App before login: <http://localhost:5174/>
-- Direct public workflow: <http://localhost:5174/workflow.html>
+- Product landing page: <http://localhost:5174/>
+- Customer workflow: <http://localhost:5174/workflow>
+- Team orientation (requires sign-in): <http://localhost:5174/internal>
+- Legacy workflow URL (redirects): <http://localhost:5174/workflow.html>
 - API documentation: <http://localhost:8001/docs>
 
 The exact current test counts, commit and manual acceptance status belong in the Sprint 4 PR
@@ -352,7 +358,7 @@ and review homework, not duplicated here.
 | Sprint order, ownership and estimates | [Sprint plan](delivery/sprint-plan.md) |
 | Detailed backlog | [Sprint detail](delivery/sprint-detail.md) |
 | Closed offers/templates contract | [Sprint 4 contract](delivery/sprint-4-offers-templates.md) · [exit review](homework/sprint-4/status.md) |
-| Sprint 5 review and open decisions | [Campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) |
+| Sprint 5 contract and homework | [Campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) · [homework](homework/sprint-5/README.md) |
 | Compliance rules and SOP | [Compliance](compliance/README.md) · [Outreach SOP](compliance/outreach-sop.md) |
 | FikaTu capabilities and gaps | [FikaTu research](research/2026-10-08-fikatu-integration-notes.md) |
 | Team working agreement | [How we work](team/how-we-work.md) |

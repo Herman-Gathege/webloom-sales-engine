@@ -1,7 +1,8 @@
+import { Download } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import { importLeads, rejectedRowsCsv } from "@/api/leads";
+import { downloadImportTemplate, importLeads, rejectedRowsCsv } from "@/api/leads";
 import type { ImportSummary } from "@/api/types";
 import { Scout } from "@/components/Scout";
 import { ComplianceStatusBadge } from "@/components/compliance/ComplianceStatusBadge";
@@ -28,6 +29,26 @@ import { useMediaQuery } from "@/lib/use-media-query";
 
 type Phase = "idle" | "uploading" | "working" | "done" | "error";
 
+const REQUIRED_COLUMNS = [
+  "Business",
+  "Sector",
+  "Area",
+  "Phone",
+  "WhatsApp capable",
+  "Website status",
+  "Source",
+];
+
+const OPTIONAL_COLUMNS = [
+  "Email",
+  "Contact name",
+  "Contact type",
+  "Source URL",
+  "Collection date",
+  "Collection method",
+  "Intended purpose",
+];
+
 function fileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -40,6 +61,8 @@ export function LeadImport() {
   const [percent, setPercent] = useState(0);
   const [summary, setSummary] = useState<ImportSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [templateError, setTemplateError] = useState<string | null>(null);
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const showResultTables = useMediaQuery("(min-width: 768px)");
 
   const busy = phase === "uploading" || phase === "working";
@@ -91,8 +114,106 @@ export function LeadImport() {
     URL.revokeObjectURL(url);
   }
 
+  async function downloadTemplate() {
+    setTemplateError(null);
+    setDownloadingTemplate(true);
+    try {
+      const blob = await downloadImportTemplate();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "wadi-lead-import-template.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (cause) {
+      setTemplateError(
+        cause instanceof Error ? cause.message : "Could not download the CSV template.",
+      );
+    } finally {
+      setDownloadingTemplate(false);
+    }
+  }
+
   return (
     <div className="space-y-5">
+      <Card>
+        <CardHeader>
+          <CardTitle>Prepare your CSV</CardTitle>
+          <CardDescription>
+            Use the template so the column names match the importer. Replace the fictional
+            examples with authorised business data before uploading.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm font-medium">Required columns</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {REQUIRED_COLUMNS.map((column) => (
+                <code key={column} className="rounded bg-secondary px-2 py-1 text-xs">
+                  {column}
+                </code>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-sm font-medium">Optional columns</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {OPTIONAL_COLUMNS.map((column) => (
+                <code key={column} className="rounded border border-border px-2 py-1 text-xs">
+                  {column}
+                </code>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+            <p>
+              <span className="font-medium text-foreground">Phone:</span> use{" "}
+              <code>0700 000 000</code>, <code>020 000 0000</code>, or{" "}
+              <code>+254700000000</code>.
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Dates:</span> use ISO format, such
+              as <code>2026-11-19</code>.
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Source:</span> describe where the
+              business information came from.
+            </p>
+            <p>
+              <span className="font-medium text-foreground">WhatsApp capable:</span> use{" "}
+              <code>Yes</code> or <code>Call only</code>.
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Contact type:</span> use{" "}
+              <code>unknown</code>, <code>generic_business</code>, or{" "}
+              <code>named_individual</code>.
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Website status:</span> keep the
+              research wording, such as <code>no website listed</code> or{" "}
+              <code>Facebook page only</code>.
+            </p>
+            <p>
+              Save the completed file as UTF-8 CSV before uploading it below.
+            </p>
+          </div>
+          {templateError && (
+            <p role="alert" className="text-sm text-destructive">
+              {templateError}
+            </p>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void downloadTemplate()}
+            disabled={downloadingTemplate}
+          >
+            <Download className="size-4" aria-hidden="true" />
+            {downloadingTemplate ? "Downloading…" : "Download CSV template"}
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card className="relative">
         {/* Wrapped because the scout's own stylesheet sets display, which would
             beat Tailwind's `hidden` on the SVG itself. */}

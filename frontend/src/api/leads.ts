@@ -13,6 +13,7 @@ import type {
   Channel,
   EligibilityReviewInput,
   ImportSummary,
+  LeadCreateInput,
   LeadDetail,
   LeadFilterOptions,
   LeadListParams,
@@ -210,6 +211,31 @@ export function reviewEligibility(
 
 export function recordSuppression(id: string, request: SuppressionInput): Promise<LeadDetail> {
   return mutate<LeadDetail>(`/leads/${encodeURIComponent(id)}/suppressions`, "POST", request);
+}
+
+/** Create one lead. Deliberately no sample fallback: a fake save would be unsafe. */
+export function createLead(input: LeadCreateInput): Promise<LeadDetail> {
+  return mutate<LeadDetail>("/leads", "POST", input);
+}
+
+/** Download the canonical CSV template from the importer that will read it. */
+export async function downloadImportTemplate(): Promise<Blob> {
+  const headers = new Headers({ Accept: "text/csv" });
+  const token = getToken();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const response = await fetch(`${API_BASE_URL}/leads/import-template`, { headers });
+  if (!response.ok) {
+    let detail = `The template download failed (${response.status}).`;
+    try {
+      const body = (await response.json()) as { detail?: unknown };
+      if (typeof body.detail === "string") detail = body.detail;
+    } catch {
+      // Keep the generic message when the body is not JSON.
+    }
+    throw new ApiError(detail, response.status);
+  }
+  return response.blob();
 }
 
 /**

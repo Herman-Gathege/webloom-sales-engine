@@ -91,6 +91,16 @@ the frontend's default base URL is `/api/v1`. Set `VITE_API_BASE_URL` to point e
 has happened yet — never null. `provenance` may be null for an older lead. `eligibility`
 always represents email, SMS, and WhatsApp separately; `suppressions` may be empty.
 
+### `POST /api/v1/leads`
+
+Creates one researched lead from the Lead Desk. `admin` and `sales` may call it. The request
+requires `business_name`, `source`, and at least one of `phone` or `email`; optional fields are
+`sector`, `area`, `whatsapp_capable`, `website_status`, `source_url` and provenance detail.
+The server normalises the phone into E.164, validates the email, refuses an existing phone or
+the same business/email combination, records provenance, creates the three independent
+`needs_review` channel records, writes activity without contact values in the audit payload,
+and runs the existing compliance evaluator. It returns the full Lead Detail with `201`.
+
 ### Compliance review endpoints
 
 `PUT /api/v1/leads/{id}/eligibility/{channel}` records a human decision for one of

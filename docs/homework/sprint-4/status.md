@@ -6,8 +6,9 @@
 
 **Evidence:** [PR #29](https://github.com/Herman-Gathege/webloom-sales-engine/pull/29)
 merged the catalogue in `68141f5`; [PR #30](https://github.com/Herman-Gathege/webloom-sales-engine/pull/30)
-merged the completed sprint branch in `604be37`. Both Backend and Frontend checks passed for the
-merge commit.
+merged the completed sprint branch in `604be37`; closeout and approved-policy work merged in
+[PR #31](https://github.com/Herman-Gathege/webloom-sales-engine/pull/31) as `32bc30c`.
+Backend and Frontend checks passed for all release commits.
 
 This review separates what shipped from what remains. It does not treat later campaign, draft,
 approval, delivery or analytics work as Sprint 4 debt.
@@ -100,9 +101,8 @@ approval, delivery or analytics work as Sprint 4 debt.
 
 ## Repository state at review
 
-The remote Sprint 4 branch and `main` contain the catalogue work. The current local branch also
-contains the approved compliance-policy follow-up and the closeout fixes above; these are
-uncommitted and must be preserved.
+Sprint 4 catalogue, closeout fixes and the approved compliance-policy follow-up are merged into
+`main` at `32bc30c`. Sprint 5 now branches from that merged state.
 
 ## Closure checklist
 

@@ -61,6 +61,60 @@ OPTIONAL_COLUMNS = (
     "Intended purpose",
 )
 
+# The download uses the importer's own header list. The rows deliberately
+# demonstrate mobile and landline numbers, present and absent email, both
+# WhatsApp states, website/no-website research and populated provenance.
+IMPORT_TEMPLATE_ROWS = (
+    {
+        "Business": "Wadi Test Bakery",
+        "Sector": "Food and beverage",
+        "Area": "Kilimani",
+        "Phone": "+254700990101",
+        "WhatsApp capable": "Yes",
+        "Website status": "No website - synthetic research",
+        "Source": "Yellow Pages Kenya listing",
+        "Email": "bakery@example.test",
+        "Contact name": "",
+        "Contact type": "generic_business",
+        "Source URL": "https://example.com/synthetic-directory/bakery",
+        "Collection date": "2026-11-19",
+        "Collection method": "Public business directory review",
+        "Intended purpose": "Business outreach",
+    },
+    {
+        "Business": "Wadi Test Tailors",
+        "Sector": "Tailoring and clothing",
+        "Area": "Westlands",
+        "Phone": "+254700990102",
+        "WhatsApp capable": "Call only",
+        "Website status": "Has a website",
+        "Source": "Yellow Pages Kenya listing",
+        "Email": "",
+        "Contact name": "",
+        "Contact type": "generic_business",
+        "Source URL": "https://example.com/synthetic-directory/tailors",
+        "Collection date": "2026-11-19",
+        "Collection method": "Public business directory review",
+        "Intended purpose": "Business outreach",
+    },
+    {
+        "Business": "Wadi Test Landline Studio",
+        "Sector": "Creative services",
+        "Area": "Nairobi CBD",
+        "Phone": "020 9990103",
+        "WhatsApp capable": "Call only",
+        "Website status": "Facebook page only",
+        "Source": "Yellow Pages Kenya listing",
+        "Email": "studio@example.test",
+        "Contact name": "",
+        "Contact type": "generic_business",
+        "Source URL": "https://example.com/synthetic-directory/studio",
+        "Collection date": "2026-11-19",
+        "Collection method": "Public business directory review",
+        "Intended purpose": "Business outreach",
+    },
+)
+
 # The words a person reads, kept in one place so Anne's rejected-row wording can
 # replace them without touching any logic.
 REFUSAL_REASONS: dict[str, str] = {
@@ -458,6 +512,15 @@ def refused_rows_csv(result: ImportResult) -> str:
     writer.writerow(["row", "business_name", "code", "reason"])
     for refused in result.refused:
         writer.writerow([refused.row, refused.business_name, refused.code, refused.reason])
+    return buffer.getvalue()
+
+
+def import_template_csv() -> str:
+    """A ready-to-edit CSV built from the exact columns the importer accepts."""
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=COLUMNS_READ + OPTIONAL_COLUMNS)
+    writer.writeheader()
+    writer.writerows(IMPORT_TEMPLATE_ROWS)
     return buffer.getvalue()
 
 

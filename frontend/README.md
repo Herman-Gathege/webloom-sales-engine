@@ -1,15 +1,29 @@
 # Frontend
 
-The React shell for Wadi. It has a login screen, a server-filtered Lead List, Lead Detail with
-activity history and a practical compliance review card, the CSV import summary, responsive
-offer/template catalogues, and an administrator-only user list.
+The React shell for Wadi. It has a login screen, a server-filtered Lead List, single-lead manual
+entry, Lead Detail with activity history and a practical compliance review card, CSV import
+guidance and a downloadable template, responsive offer/template catalogues, and an
+administrator-only user list.
 
 ## Signing in
 
-Everything except `/login` needs a session. Tokens are stored in `localStorage` under
-`wadi.token`; a 401 anywhere clears it and returns you to the login page. The four
-development administrators are created by `python -m app.bootstrap` (see the backend README);
-each must set its own password at first login, and the API refuses lead data until it does.
+The public routes are `/` (product landing), `/workflow` (customer-facing workflow),
+`/workflow.html` (a compatibility redirect to `/workflow`) and `/login`. An authenticated
+visitor to `/` is sent to the Lead Desk, or to password setup when their account still has a
+temporary password. `/internal` is a protected team orientation page; `/app` redirects to
+`/leads` for compatibility and still requires a session.
+
+Tokens are stored in `localStorage` under `wadi.token`; a 401 anywhere clears it and returns
+you to the login page. The four development administrators are created by
+`python -m app.bootstrap` (see the backend README); each must set its own password at first
+login, and the API refuses lead data until it does.
+
+## Preparing leads
+
+The Lead Desk's **Add lead** dialog creates one researched business. Business name, source and
+at least one phone or email are required; the API still validates every field and runs the
+normal compliance evaluation. The Import screen explains the canonical CSV columns and
+downloads a template generated from the backend importer itself.
 
 ## Node version — read this first
 

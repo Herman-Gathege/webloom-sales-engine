@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   FileText,
   LogOut,
   Menu,
@@ -31,6 +32,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/leads/import", label: "Import", icon: Upload, end: true },
   { to: "/catalog/offers", label: "Offers", icon: PackageOpen, end: true },
   { to: "/catalog/templates", label: "Templates", icon: FileText, end: true },
+  { to: "/internal", label: "Orientation", icon: BookOpen, end: true },
   { to: "/admin/users", label: "Users", icon: ShieldCheck, end: true, adminOnly: true },
 ];
 

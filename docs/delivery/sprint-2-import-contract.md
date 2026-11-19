@@ -17,6 +17,12 @@ because a row we cannot use must never cost us the rows beside it.
 
 `POST /api/v1/leads/import` — `multipart/form-data`, one part named `file` carrying the CSV.
 
+`GET /api/v1/leads/import-template` returns a UTF-8 CSV built from the same required and
+optional column lists below. It includes fictional example rows for mobile and landline
+numbers, email-present and email-absent leads, both WhatsApp values, website/no-website
+research, social-only research and populated provenance. Sellers replace the examples rather
+than renaming columns.
+
 | The file | |
 |---|---|
 | Encoding | UTF-8. A byte-order mark is tolerated; anything else is a `400`. |

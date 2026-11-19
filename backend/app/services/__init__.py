@@ -15,9 +15,16 @@ from app.services.lead_import import (
     ImportFileError,
     ImportResult,
     LeadImportService,
+    import_template_csv,
     refused_rows_csv,
 )
-from app.services.lead_service import LeadNotFoundError, LeadPage, LeadService
+from app.services.lead_service import (
+    LeadConflictError,
+    LeadNotFoundError,
+    LeadPage,
+    LeadService,
+    LeadValidationError,
+)
 from app.services.outreach_gate import OutreachGateResult, OutreachGateService
 
 __all__ = [
@@ -32,11 +39,14 @@ __all__ = [
     "ImportFileError",
     "ImportResult",
     "LeadImportService",
+    "LeadConflictError",
     "LeadNotFoundError",
     "LeadPage",
     "LeadService",
+    "LeadValidationError",
     "OutreachGateResult",
     "OutreachGateService",
     "SuppressionDecision",
+    "import_template_csv",
     "refused_rows_csv",
 ]

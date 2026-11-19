@@ -1,13 +1,17 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ImportSummary } from "@/api/types";
 import { LeadImport } from "./LeadImport";
 
-const mocks = vi.hoisted(() => ({ importLeads: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  downloadImportTemplate: vi.fn(),
+  importLeads: vi.fn(),
+}));
 
 vi.mock("@/api/leads", () => ({
+  downloadImportTemplate: mocks.downloadImportTemplate,
   importLeads: mocks.importLeads,
   rejectedRowsCsv: () => "row,business_name,code,reason\n",
 }));
@@ -85,7 +89,12 @@ function chooseFile() {
 
 describe("LeadImport", () => {
   beforeEach(() => {
+    mocks.downloadImportTemplate.mockReset();
     mocks.importLeads.mockReset();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("starts with nothing to import", () => {
@@ -93,6 +102,53 @@ describe("LeadImport", () => {
 
     expect(screen.getByRole("button", { name: "Import" })).toHaveProperty("disabled", true);
     expect(screen.queryByText(/rows read/i)).toBeNull();
+  });
+
+  it("explains the CSV columns and downloads the importer-compatible template", async () => {
+    mocks.downloadImportTemplate.mockResolvedValue(
+      new Blob(["Business,Phone,Source\n"], { type: "text/csv" }),
+    );
+    const createObjectUrl = vi.fn(() => "blob:template");
+    const revokeObjectUrl = vi.fn();
+    const anchorClick = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    vi.stubGlobal("URL", { createObjectURL: createObjectUrl, revokeObjectURL: revokeObjectUrl });
+
+    renderScreen();
+
+    expect(screen.getByRole("heading", { name: "Prepare your CSV" })).toBeTruthy();
+    expect(screen.getByText(/required columns/i)).toBeTruthy();
+    for (const column of [
+      "Business",
+      "Sector",
+      "Area",
+      "Phone",
+      "WhatsApp capable",
+      "Website status",
+      "Source",
+    ]) {
+      expect(screen.getByText(column, { selector: "code" })).toBeTruthy();
+    }
+    expect(screen.getByText(/optional columns/i)).toBeTruthy();
+    for (const column of [
+      "Email",
+      "Contact name",
+      "Contact type",
+      "Source URL",
+      "Collection date",
+      "Collection method",
+      "Intended purpose",
+    ]) {
+      expect(screen.getByText(column, { selector: "code" })).toBeTruthy();
+    }
+    fireEvent.click(screen.getByRole("button", { name: "Download CSV template" }));
+
+    await waitFor(() => expect(mocks.downloadImportTemplate).toHaveBeenCalledTimes(1));
+    expect(createObjectUrl).toHaveBeenCalledTimes(1);
+    expect(revokeObjectUrl).toHaveBeenCalledWith("blob:template");
+    anchorClick.mockRestore();
+    vi.unstubAllGlobals();
   });
 
   it("shows what happened to every row, with the reasons", async () => {

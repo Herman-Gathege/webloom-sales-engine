@@ -22,14 +22,13 @@ because nobody could tell which branch was safe to pull.
 
 **Sprint 4 branch:** `sprint/4-offers-templates` — merged and closed.
 
-**Next sprint branch:** none yet. Sprint 5 remains in contract review until the decisions in
-[`sprint-5-campaigns-drafts.md`](../delivery/sprint-5-campaigns-drafts.md) are accepted.
+**Current sprint branch:** `sprint/5-campaigns-drafts`. Herman is the sole implementation owner;
+Mark, Sharon and Anne review without opening parallel implementation branches.
 
 ### Your turn
 
-1. For the next sprint, switch to the agreed branch once it exists and pull it. Sprint 4 is
-   closed; use its [exit review](sprint-4/status.md) for evidence rather than re-running the
-   acceptance guide.
+1. `git switch sprint/5-campaigns-drafts && git pull` for Sprint 5. Sprint 4 is closed; use its
+   [exit review](sprint-4/status.md) for evidence rather than re-running the acceptance guide.
 2. Run `docker compose up --build`. If the last hand-off is broken, say so before adding
    anything.
 3. Do only what your card says.
@@ -77,3 +76,4 @@ Re-run the checks, push, then hand off. Never leave a conflict for the next pers
 - [Sprint 2](sprint-2/README.md) — finished; exit review in [status.md](sprint-2/status.md).
 - [Sprint 3](sprint-3/status.md) — finished; authentication and compliance boundary.
 - [Sprint 4](sprint-4/status.md) — closed with accepted deviations; catalogue shipped.
+- [Sprint 5](sprint-5/README.md) — Herman implements alone; Mark, Sharon and Anne review.

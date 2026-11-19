@@ -1,4 +1,4 @@
-import { SlidersHorizontal } from "lucide-react";
+import { Plus, SlidersHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -11,10 +11,12 @@ import type {
   LeadListResponse,
   LeadStatus,
   Loaded,
+  LeadDetail,
 } from "@/api/types";
 import { DataSourceBanner } from "@/components/DataSourceBanner";
 import { Scout } from "@/components/Scout";
 import { ComplianceStatusBadge } from "@/components/compliance/ComplianceStatusBadge";
+import { AddLeadDialog } from "@/components/leads/AddLeadDialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,6 +81,8 @@ export function LeadList() {
   const [options, setOptions] = useState<LeadFilterOptions | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [addLeadOpen, setAddLeadOpen] = useState(false);
+  const [createdLead, setCreatedLead] = useState<LeadDetail | null>(null);
   const showLeadTable = useMediaQuery("(min-width: 768px)");
 
   const query = cleanParam(searchParams.get("q"));
@@ -205,22 +209,50 @@ export function LeadList() {
     setSearchParams(new URLSearchParams(), { replace: true });
   }
 
+  function handleLeadCreated(lead: LeadDetail) {
+    setCreatedLead(lead);
+    setAddLeadOpen(false);
+    setSearchParams(new URLSearchParams({ q: lead.business_name }), { replace: true });
+  }
+
   return (
     <div className="space-y-5">
       {response && <DataSourceBanner source={response.source} reason={response.reason} />}
 
       <Card>
-        <CardHeader>
-          <CardTitle>Leads</CardTitle>
-          <CardDescription>
-            {!response
-              ? "Loading leads…"
-              : hasFilter
-                ? `${total} match the current filters`
-                : `${total} in the pipeline`}
-          </CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle>Leads</CardTitle>
+            <CardDescription>
+              {!response
+                ? "Loading leads…"
+                : hasFilter
+                  ? `${total} match the current filters`
+                  : `${total} in the pipeline`}
+            </CardDescription>
+          </div>
+          <Button size="sm" onClick={() => setAddLeadOpen(true)}>
+            <Plus className="size-4" aria-hidden="true" />
+            Add lead
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
+          {createdLead && (
+            <div
+              role="status"
+              className="rounded-md border border-[#cfe3d4] bg-[#f1f7f2] px-3 py-2 text-sm text-[#0d4a3a]"
+            >
+              <strong className="font-semibold">{createdLead.business_name}</strong> was added.{" "}
+              <Link to={`/leads/${createdLead.id}`} className="font-medium underline">
+                Open the lead
+              </Link>
+            </div>
+          )}
+          <AddLeadDialog
+            open={addLeadOpen}
+            onOpenChange={setAddLeadOpen}
+            onCreated={handleLeadCreated}
+          />
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Input

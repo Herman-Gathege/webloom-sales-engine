@@ -15,6 +15,69 @@ from app.schemas.activity import ActivityRead
 from app.schemas.types import UtcDatetime
 
 
+class LeadCreate(BaseModel):
+    """One manually entered lead and the research context behind it."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    business_name: str = Field(min_length=1, max_length=255)
+    sector: str | None = Field(default=None, max_length=255)
+    area: str | None = Field(default=None, max_length=255)
+    phone: str | None = Field(default=None, max_length=32)
+    email: str | None = Field(default=None, max_length=255)
+    whatsapp_capable: bool = True
+    website_status: str | None = Field(default=None, max_length=2000)
+    has_website: bool = False
+    source: str = Field(min_length=1, max_length=255)
+    source_name: str | None = Field(default=None, max_length=2000)
+    source_url: str | None = Field(default=None, max_length=2000)
+    collection_date: date | None = None
+    collection_method: str | None = Field(default=None, max_length=255)
+    intended_purpose: str | None = Field(default=None, max_length=2000)
+    contact_type: Literal[
+        "unknown", "generic_business", "named_individual"
+    ] = "generic_business"
+    contact_name: str | None = Field(default=None, max_length=255)
+
+    @field_validator(
+        "sector",
+        "area",
+        "website_status",
+        "source_name",
+        "source_url",
+        "collection_method",
+        "intended_purpose",
+        "contact_name",
+        mode="before",
+    )
+    @classmethod
+    def optional_text_is_clean(cls, value: object) -> str | None:
+        if value is None:
+            return None
+        cleaned = " ".join(str(value).split())
+        return cleaned or None
+
+    @field_validator("phone", mode="before")
+    @classmethod
+    def phone_is_clean(cls, value: object) -> str | None:
+        if value is None or not str(value).strip():
+            return None
+        return str(value).strip()
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def email_is_valid(cls, value: object) -> str | None:
+        if value is None or not str(value).strip():
+            return None
+        return str(value).strip().lower()
+
+    @model_validator(mode="after")
+    def has_a_contact_route(self) -> "LeadCreate":
+        if not self.phone and not self.email:
+            raise ValueError("Add a phone number or email address for this lead.")
+        return self
+
+
 class LeadRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

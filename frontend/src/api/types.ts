@@ -151,6 +151,26 @@ export interface LeadDetail extends Lead {
 
 export type ContactType = "unknown" | "generic_business" | "named_individual";
 
+/** POST /api/v1/leads — one manually researched business. */
+export interface LeadCreateInput {
+  business_name: string;
+  sector: string | null;
+  area: string | null;
+  phone: string | null;
+  email: string | null;
+  whatsapp_capable: boolean;
+  website_status: string | null;
+  has_website: boolean;
+  source: string;
+  source_name?: string | null;
+  source_url?: string | null;
+  collection_date?: string | null;
+  collection_method?: string | null;
+  intended_purpose?: string | null;
+  contact_type?: ContactType;
+  contact_name?: string | null;
+}
+
 export interface LeadProvenance {
   import_batch_id: string | null;
   row_number: number | null;

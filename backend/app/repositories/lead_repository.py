@@ -222,6 +222,31 @@ class LeadRepository:
     def find_by_phone(self, phone: str) -> Lead | None:
         return self.session.scalar(select(Lead).where(Lead.phone == phone))
 
+    def find_by_email(self, email: str) -> Lead | None:
+        return self.session.scalar(select(Lead).where(Lead.email == email))
+
+    def find_manual_duplicate(
+        self,
+        *,
+        business_name: str,
+        phone: str | None,
+        email: str | None,
+    ) -> Lead | None:
+        """Catch a repeated save while allowing branches to share a group inbox."""
+        conditions = []
+        if phone:
+            conditions.append(Lead.phone == phone)
+        if email:
+            conditions.append(
+                (func.lower(Lead.email) == email.lower())
+                & (func.lower(Lead.business_name) == business_name.lower())
+            )
+        if not conditions:
+            return None
+        return self.session.scalar(
+            select(Lead).where(or_(*conditions)).limit(1)
+        )
+
     def existing_phones(self, phones: Iterable[str]) -> set[str]:
         """Which of these numbers we already hold, in one query.
 
