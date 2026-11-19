@@ -5,6 +5,9 @@ import { useAuth } from "@/auth/context";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AccessDenied } from "@/routes/AccessDenied";
 import { AdminUsers } from "@/routes/AdminUsers";
+import { CampaignCreate } from "@/routes/CampaignCreate";
+import { CampaignDetail } from "@/routes/CampaignDetail";
+import { CampaignList } from "@/routes/CampaignList";
 import { ChangePassword } from "@/routes/ChangePassword";
 import { InternalOrientation } from "@/routes/InternalOrientation";
 import { LandingPage } from "@/routes/LandingPage";
@@ -63,6 +66,10 @@ export default function App() {
           <Route path="app" element={<Navigate to="/leads" replace />} />
           <Route path="leads/import" element={<LeadImport />} />
           <Route path="leads/:id" element={<LeadDetail />} />
+          <Route path="campaigns" element={<CampaignList />} />
+          <Route path="campaigns/new" element={<CampaignCreate />} />
+          <Route path="campaigns/:id/edit" element={<CampaignCreate />} />
+          <Route path="campaigns/:id" element={<CampaignDetail />} />
           <Route path="catalog/offers" element={<OfferCatalog />} />
           <Route path="catalog/templates" element={<TemplateCatalog />} />
           <Route path="internal" element={<InternalOrientation />} />

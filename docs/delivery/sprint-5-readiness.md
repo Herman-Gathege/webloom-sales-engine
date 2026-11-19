@@ -1,7 +1,7 @@
 # Sprint 5 — Seller Readiness
 
-**Status:** lead preparation barriers removed; campaign implementation and business decisions
-below still determine the final seller-walkthrough verdict.
+**Status:** Sprint 5 implementation complete and awaiting team review; decisions locked
+2026-11-19.
 
 This page turns [Anne's Sprint 5 review](../homework/sprint-5/anne/anne-review.md) into concrete
 requirements. It does not expand Sprint 5 into approval, sending or FikaTu delivery.
@@ -64,7 +64,8 @@ it where real data matters.
 
 ## Campaign requirements from Anne
 
-These are requirements for the campaign/draft implementation, not claims that they are built.
+These requirements are implemented in the Sprint 5 campaign/draft slice. The locked decisions
+below resolve Anne's earlier open questions; deferred Sprint 6 dependencies remain explicit.
 
 ### A. Generation warning and campaign archiving
 
@@ -73,8 +74,8 @@ These are requirements for the campaign/draft implementation, not claims that th
   Sprint 5.
 - Require explicit confirmation.
 - A mistaken campaign needs a soft-archive action, never hard deletion.
-- Recommendation for team approval: archived campaigns retain drafts, skips and audit history;
-  remain viewable through an archive filter; and can be restored by an authorised user.
+- Approved: archived campaigns retain drafts, skips and audit history; remain viewable through
+  an archive filter; and can be restored by an authorised user.
 
 ### B. Plain-language skip reasons
 
@@ -122,8 +123,9 @@ The goal describes the intended business outcome, not the message body. Guidance
 - Show the lead's `collection_date` beside website research.
 - Mark old or missing research as needing a re-check.
 - Do not present stale or absent research as a verified “no website” fact.
-- A future verification field should record `unchecked`, `verified_present`,
-  `verified_absent` and the verification date. That field does not exist yet.
+- The normalized `website_presence` field now distinguishes `has_website`, `no_website` and
+  `unknown`. A separate website-verification date remains future work; provenance
+  `collection_date` is the current freshness signal.
 
 ### H. Sender identity
 
@@ -149,9 +151,9 @@ No owner is assigned in this readiness change.
 
 ### J. Starter Website pricing
 
-The repository seed contains **KES 40,000** for Starter Website, but Anne's review asks whether
-customer copy should say **from KES 40,000** or **exactly KES 40,000**. That is an open business
-decision. Campaign copy must not make an unconfirmed pricing promise.
+The approved wording is **“From KES 40,000.”** Clean-install seed data uses KES 40,000 as the
+minimum with no maximum. Existing development catalogue records are not overwritten by seed
+reruns; edit those through the Admin catalogue screen.
 
 ### K. Business-name verification
 
@@ -163,19 +165,41 @@ message addresses the correct business. Generated text alone never establishes a
 No messages at night or on Sundays is explicitly a **Sprint 6** requirement. Scheduling and
 delivery remain outside this sprint.
 
-## Open decisions
+## Decisions locked on 2026-11-19
 
-| Decision | Current state | Recommendation |
-|---|---|---|
-| Campaign archive and restore | Open | Soft archive, retain history, allow authorised restore |
-| Starter Website wording | Open | Anne/business owner confirms before live copy |
-| Reply and opt-out owner | Open | Assign one named human and a daily check |
-| Named sender and SMS sender ID | Open | Confirm both before approval/sending |
-| Social-presence representation | Not modelled | Add a structured verified value before social-only targeting |
+| Decision | Approved direction |
+|---|---|
+| Campaign archive and restore | Reversible soft archive; retain drafts, skips, snapshots and events |
+| Campaign lifecycle | Editable before generation; immutable and one-shot after generation |
+| Archive visibility | All Admin/Sales users view; creator or Admin may archive/restore |
+| Sprint 5 targeting | Explicit selection using existing filters; saved segments deferred |
+| Selection snapshot | Store explicit lead IDs and the active filter context with the campaign |
+| Channel | SMS-only UI and acceptance; generic renderer with email backend tests |
+| Website state | Normalized `has_website`, `no_website`, `unknown` |
+| Social presence | Deferred; no social filter or social-only copy in Sprint 5 |
+| Research freshness | Show collection date; warn after 90 days without automatic blocking |
+| Skip reasons | Curated labels and grouped counts with expandable technical detail |
+| Campaign goal | Required free text describing the business outcome |
+| Draft editing | Read-only in Sprint 5; editing starts in Sprint 6 approval |
+| Catalogue drift | Reject generation and require a fresh campaign |
+| Draft snapshot | Full rendered body, catalogue, eligibility, policy and SMS metric snapshot |
+| Opt-out copy | `Reply STOP to opt out.` |
+| Business-name verification | Sprint 6 approval stage |
+| Source review | Clickable stored provenance URL; labelled Google Search fallback if absent, with no scraping |
+| Starter Website wording | “From KES 40,000” |
+| Timing restrictions | Sprint 6 |
+| Activity detail | Seller-friendly allowlist with collapsed, wrapped technical detail |
+| Import help | Compact three-step Wadi tutorial |
+
+Still deferred beyond Sprint 5:
+
+- Structured social presence and all social-only targeting/copy.
+- Named sender, user display identity and registered SMS sender ID.
+- Reply monitoring and opt-out ownership. Assign a named owner before sending.
+- Full copy pack, A/B and social variants.
 
 ## Readiness verdict
 
-**Ready with known limitations.** Sellers can now create individual leads and download a
-compatible CSV template. The campaign workflow can be exercised once its Sprint 5 implementation
-is present, but the open business decisions above must be resolved before any real campaign is
-approved or sent.
+**Implemented and awaiting team review.** Seller lead preparation and all product decisions
+required by the Sprint 5 campaign/draft slice are settled and built. No campaign may be approved
+or sent until the deferred sender and reply-ownership dependencies are resolved.

@@ -23,6 +23,7 @@ function makeLeads(count: number): Lead[] {
     whatsapp_capable: true,
     website_status: "no website listed",
     has_website: false,
+    website_presence: "no_website",
     source: "google_maps",
     status: "new" as const,
     created_at: "2026-10-19T09:00:00Z",

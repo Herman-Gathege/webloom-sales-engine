@@ -2,6 +2,7 @@ import {
   BookOpen,
   FileText,
   LogOut,
+  Megaphone,
   Menu,
   PackageOpen,
   ShieldCheck,
@@ -29,6 +30,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   // `end` keeps "Leads" from staying lit while you are on the import screen.
   { to: "/leads", label: "Leads", icon: UsersIcon, end: true },
+  { to: "/campaigns", label: "Campaigns", icon: Megaphone, end: false },
   { to: "/leads/import", label: "Import", icon: Upload, end: true },
   { to: "/catalog/offers", label: "Offers", icon: PackageOpen, end: true },
   { to: "/catalog/templates", label: "Templates", icon: FileText, end: true },
@@ -37,7 +39,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 /** Screens that exist in the plan but deliberately not in this sprint. */
-const LATER_ITEMS = ["Campaigns", "Replies", "Pipeline"];
+const LATER_ITEMS = ["Replies", "Pipeline"];
 
 function NavItems({ onNavigate }: { onNavigate?: () => void }) {
   const { user } = useAuth();

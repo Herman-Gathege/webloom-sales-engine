@@ -20,12 +20,14 @@ The short version:
 
 - Wadi has leads, compliance, policy-based SMS eligibility, the Lead Desk and a commercial
   catalogue.
-- Sprint 5 adds campaigns, selection, preview, draft generation and saved segments.
+- Sprint 5 adds explicit SMS campaign selection, preview, immutable draft generation and
+  reversible archiving. Saved segments and sending are outside this slice.
 - Sprint 5 does not approve or send messages.
 - Herman writes the implementation. Mark checks architecture, Sharon checks backend correctness,
   and Anne checks the seller experience and copy.
-- Anne's latest review is [Revise](anne/anne-review.md); the lead-entry and CSV template
-  barriers now have a readiness contract and synthetic test fixture.
+- Anne's historical review remains [Revise](anne/anne-review.md); its lead-entry and CSV
+  template barriers are now implemented, and the current branch is ready for her seller review.
+- Implementation evidence and deferred items are recorded in [status.md](status.md).
 
 ## Working loop
 

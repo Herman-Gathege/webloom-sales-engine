@@ -90,6 +90,7 @@ class LeadRead(BaseModel):
     whatsapp_capable: bool
     website_status: str | None
     has_website: bool
+    website_presence: Literal["has_website", "no_website", "unknown"]
     source: str
     status: LeadStatus
     created_at: UtcDatetime
@@ -229,6 +230,17 @@ class OutreachGateResultRead(BaseModel):
     channel: Literal["email", "sms", "whatsapp"]
     allowed: bool
     compliance_status: Literal["eligible", "needs_review", "blocked", "invalid"]
+    channel_status: Literal["eligible", "needs_review", "blocked", "invalid"] | None
+    technical_available: bool
+    decision_current: bool
+    decision_type: Literal["automated_policy", "human_review", "none"]
+    policy_id: str | None
+    policy_version: str | None
+    policy_fingerprint: str | None
+    policy_approved_by: str | None
+    policy_approval_reference: str | None
+    evidence_references: list[str]
+    input_fingerprint: str | None
     reason_codes: list[str]
     explanation: str
     evaluated_at: UtcDatetime

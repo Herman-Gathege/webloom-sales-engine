@@ -25,6 +25,18 @@ at least one phone or email are required; the API still validates every field an
 normal compliance evaluation. The Import screen explains the canonical CSV columns and
 downloads a template generated from the backend importer itself.
 
+## Campaigns
+
+`/campaigns` implements the Sprint 5 seller slice: explicit selection of up to 200 leads,
+eligibility/skip preview, one-shot SMS draft generation and reversible archive. Generated
+drafts are read-only and labelled **Not sent**. There is no approval, scheduling or sending
+surface, and saved segments are not part of this release.
+
+The campaign selector reuses Lead Desk filters, including normalized website state. Activity
+details show seller-relevant fields directly while long technical values are collapsed and
+wrapped. Each campaign stores its explicit lead IDs plus the active filter context used to
+select them. The Import page includes a compact three-step Wadi guide.
+
 ## Node version — read this first
 
 **Use Node 22.** Vite 8 will not run on Node 21: it fails with a missing `rolldown`
@@ -91,8 +103,8 @@ exceptions or opt-outs.
 Mutation controls are deliberately disabled while sample fixtures are shown so a local demo
 cannot look like a persisted decision.
 
-The UI does not queue or send. The individual and bulk outreach-check API exists for the future
-Sprint 5–6 action boundary. Read
+The campaign UI performs live outreach checks during preview and generation but does not queue,
+approve or send. Read
 [`docs/delivery/sprint-3-solidification.md`](../docs/delivery/sprint-3-solidification.md) for
 the status meanings and current gaps, and
 [`docs/compliance/outreach-sop.md`](../docs/compliance/outreach-sop.md) for the operator

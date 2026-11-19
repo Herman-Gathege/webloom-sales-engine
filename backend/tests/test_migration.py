@@ -21,6 +21,10 @@ TABLES = {
     "offers",
     "suppressions",
     "users",
+    "campaigns",
+    "campaign_leads",
+    "outreaches",
+    "campaign_events",
 }
 
 
@@ -84,6 +88,7 @@ def test_migration_up_and_down_on_a_clean_database(migration_database_url: str) 
             "whatsapp_capable",
             "website_status",
             "has_website",
+            "website_presence",
             "source",
             "status",
             "created_at",
@@ -108,6 +113,7 @@ def test_migration_up_and_down_on_a_clean_database(migration_database_url: str) 
         assert {constraint["name"] for constraint in inspector.get_check_constraints("leads")} >= {
             "ck_leads_business_name_not_blank",
             "ck_leads_source_not_blank",
+            "ck_leads_website_presence_valid",
         }
 
         indexes = {index["name"] for index in inspector.get_indexes("activities")}
@@ -148,6 +154,47 @@ def test_migration_up_and_down_on_a_clean_database(migration_database_url: str) 
             column["name"]
             for column in inspector.get_columns("lead_compliance_evaluation")
         }
+        assert {
+            "id",
+            "name",
+            "goal",
+            "offer_id",
+            "template_id",
+            "channel",
+            "owner_id",
+            "selected_count",
+            "offer_snapshot",
+            "template_snapshot",
+            "selection_context",
+            "input_fingerprint",
+            "generated_at",
+            "archived_at",
+        } <= {column["name"] for column in inspector.get_columns("campaigns")}
+        assert {
+            "campaign_id",
+            "lead_id",
+            "outcome",
+            "skip_code",
+            "skip_label",
+            "eligibility_snapshot",
+        } <= {column["name"] for column in inspector.get_columns("campaign_leads")}
+        assert {
+            "campaign_id",
+            "lead_id",
+            "channel",
+            "state",
+            "rendered_body",
+            "sms_encoding",
+            "sms_segments",
+        } <= {column["name"] for column in inspector.get_columns("outreaches")}
+        assert "uq_campaign_lead" in {
+            constraint["name"]
+            for constraint in inspector.get_unique_constraints("campaign_leads")
+        }
+        assert "uq_outreach_campaign_lead_channel" in {
+            constraint["name"]
+            for constraint in inspector.get_unique_constraints("outreaches")
+        }
 
         foreign_keys = inspector.get_foreign_keys("activities")
         assert len(foreign_keys) == 1
@@ -175,6 +222,58 @@ def test_the_test_database_name_is_guarded() -> None:
             os.environ.pop("TEST_DATABASE_URL", None)
         else:
             os.environ["TEST_DATABASE_URL"] = previous
+
+
+def test_website_presence_backfill_is_truthful(
+    migration_database_url: str,
+) -> None:
+    run_migrations(migration_database_url, "upgrade", "0005")
+    engine = create_engine(migration_database_url)
+    ids = [uuid.uuid4() for _ in range(3)]
+    try:
+        with engine.begin() as connection:
+            for lead_id, status, has_website in (
+                (ids[0], "has a website", True),
+                (ids[1], "no website listed", False),
+                (ids[2], "website not checked", False),
+            ):
+                connection.execute(
+                    text(
+                        """
+                        INSERT INTO leads
+                            (id, business_name, phone, source, status,
+                             website_status, has_website)
+                        VALUES
+                            (:id, :name, :phone, 'google_maps', 'new',
+                             :website_status, :has_website)
+                        """
+                    ),
+                    {
+                        "id": lead_id,
+                        "name": f"Synthetic Website {lead_id}",
+                        "phone": f"+254700{str(lead_id.int)[-6:]}",
+                        "website_status": status,
+                        "has_website": has_website,
+                    },
+                )
+    finally:
+        engine.dispose()
+
+    run_migrations(migration_database_url, "upgrade", "head")
+    engine = create_engine(migration_database_url)
+    try:
+        with engine.connect() as connection:
+            states = connection.execute(
+                text(
+                    "SELECT website_presence FROM leads WHERE id = ANY(:ids) "
+                    "ORDER BY website_presence"
+                ),
+                {"ids": ids},
+            ).scalars().all()
+    finally:
+        engine.dispose()
+
+    assert states == ["has_website", "no_website", "unknown"]
 
 
 def test_the_compliance_migration_backfills_every_existing_lead(

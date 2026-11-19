@@ -23,6 +23,7 @@ from app.models import (
     LeadChannelEligibility,
     LeadProvenance,
     LeadStatus,
+    classify_website_presence,
 )
 from app.services.compliance_evaluator import ComplianceEvaluator
 
@@ -145,6 +146,9 @@ def build_sample_leads() -> list[Lead]:
             whatsapp_capable=whatsapp_capable,
             website_status=website_status,
             has_website=has_website,
+            website_presence=classify_website_presence(
+                website_status, has_website
+            ).value,
             source=SOURCE,
             # Nothing in Sprint 1 moves a lead off "new" — nothing sends yet.
             status=LeadStatus.NEW,

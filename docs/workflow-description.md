@@ -25,13 +25,13 @@ flowchart LR
 
     classDef built fill:#eff5e0,stroke:#084734,color:#0b1f18;
     classDef future fill:#ffffff,stroke:#9aa9a0,color:#3d5148,stroke-dasharray:5 4;
-    class A,B,C,D,E,F built;
-    class G,H,I,J,K,L future;
+    class A,B,C,D,E,F,G built;
+    class H,I,J,K,L future;
 ```
 
-**Sprint 4 adds the commercial building blocks:** offers and reusable email/SMS templates.
-It does not connect those blocks into a campaign. The implemented boundary remains the
-outreach-readiness gate.
+**Sprint 5 connects the commercial building blocks:** offers and reusable email/SMS templates
+now feed an explicitly selected campaign, a fresh eligibility preview and immutable
+“Not sent” drafts. The implemented boundary stops before approval and delivery.
 
 ## Stage contract
 
@@ -44,7 +44,7 @@ outreach-readiness gate.
 | **4. Exceptions** | Built | Records human decisions, holds, reviewer identity and terminal suppression | Genuine exceptions and any manual override | A current human review or approved policy supports that channel | Public contact details alone are treated as permission, or a decision is stale |
 | **5. Readiness gate** | Built | Re-evaluates the lead and checks the selected channel immediately | Whether to prepare a future campaign | The channel is currently eligible | Any evidence, contact, purpose or suppression check fails |
 | **6. Catalogue** | Sprint 4 | Stores offers, prices, pitch angles, email/SMS templates and validated variables | What is sold, how it is described and whether copy is active | Offer and template are active and valid | Copy has unknown variables, raw contact data or no `{{opt_out}}` |
-| **7. Campaign + draft** | Sprint 5 | Builds a segment, snapshots the offer/template and renders one draft per eligible lead | Audience and campaign intent | Each draft has complete variables and a recorded skip reason where needed | A lead fails the fresh gate |
+| **7. Campaign + draft** | Sprint 5 | Explicitly selects leads, snapshots the offer/template and renders one immutable draft per eligible lead | Audience and campaign intent | Each draft has complete variables and a recorded skip reason where needed; drafts remain **Not sent** | A lead fails the fresh gate |
 | **8. Approval + delivery** | Sprint 6 | Requires approval, checks again at send time and hands an event to FikaTu | The exact message and audience | Current approval and current eligibility agree | Approval is stale, a lead is suppressed, or delivery is technically unavailable |
 | **9. Reply + handoff** | Sprint 7 | Records replies, classifies objections and stops automation at human ownership | How to qualify and who takes over | A seller owns the conversation | A person has taken over or the contact opts out |
 | **10. Outcome + learning** | Sprint 8 | Records deals and compares source, sector, offer and variant performance | What the outcome means and what to try next | Outcome data is complete | Results are used to bypass human approval or compliance |
@@ -129,8 +129,8 @@ acceptance, legal basis, message approval and the relationship.
 |---|---|---|
 | Sales data | Lead Desk, activity history, CSV import, provenance, search, filters, pagination | Lead editing, ownership, lifecycle automation |
 | Compliance | Central versioned policy, independent channel results, exception reviews, stale-input detection, suppression, outreach checks and audit events | Final legal policy content, automatic opt-out capture, send-time enforcement |
-| Commercial data | Offers, multi-currency prices, email/SMS templates, variants and variable validation | Campaign selection, rendered drafts, template version history |
-| Outreach | Readiness evidence only | Approval queue, sending, FikaTu events, delivery status, retries |
+| Commercial data | Offers, multi-currency prices, email/SMS templates, variants, campaign selection and immutable rendered drafts | Template version history and approval-editable versions |
+| Outreach | Readiness evidence and immutable draft preparation | Approval queue, sending, FikaTu events, delivery status, retries |
 | Learning | None yet | Replies, qualification, deals, reporting and targeting feedback |
 
 ## Non-negotiable rules
@@ -148,11 +148,9 @@ acceptance, legal basis, message approval and the relationship.
 
 ```text
 CSV → lead + provenance → approved policy / exception review → outreach-readiness gate
-                                                            └── stops here
-
-Sprint 4 catalogue:
-offer + template → available for Sprint 5
-                  └── no campaign or send path
+     → active offer + SMS template → explicit campaign → fresh gate
+     → immutable “Not sent” drafts
+     └── stops here; no approval or send path
 ```
 
 Detailed operating rules remain in [Compliance](compliance/README.md). Delivery
@@ -164,6 +162,6 @@ research and current FikaTu gaps remain in
 - [Visual workflow](workflow.html) — the compact public orientation page.
 - [Full Wadi documentation](full-wadi-documentation.md) — project status, architecture and roadmap.
 - [Sprint 4 contract](delivery/sprint-4-offers-templates.md) — the closed catalogue slice.
-- [Sprint 5 contract](delivery/sprint-5-campaigns-drafts.md) — the active slice.
+- [Sprint 5 contract](delivery/sprint-5-campaigns-drafts.md) — the implemented campaign/draft slice.
 - [Sprint 5 homework](homework/sprint-5/README.md) — Herman implements; Mark, Sharon and Anne
   review.

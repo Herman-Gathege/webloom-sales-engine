@@ -14,3 +14,4 @@ make us revisit it.
 | ID | Decision |
 |---|---|
 | [ADR-001](adr-001-reuse-fikatu-stack.md) | Reuse the FikaTu stack and layering for the Sales Engine |
+| [ADR-002](adr-002-sprint-5-campaign-lifecycle.md) | Immutable one-shot Sprint 5 campaign drafts and reversible archive |

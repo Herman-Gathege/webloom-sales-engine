@@ -15,7 +15,7 @@ OFFERS = (
         "slug": "starter-website",
         "description": "A focused first website for a business establishing its online presence.",
         "price_min": Decimal("40000.00"),
-        "price_max": Decimal("40000.00"),
+        "price_max": None,
         "currency": "KES",
         "pitch_angle": "A clear, useful website without an unnecessary rebuild.",
     },

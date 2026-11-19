@@ -27,6 +27,33 @@ class LeadStatus(str, enum.Enum):
     OPTED_OUT = "opted_out"
 
 
+class WebsitePresence(str, enum.Enum):
+    HAS_WEBSITE = "has_website"
+    NO_WEBSITE = "no_website"
+    UNKNOWN = "unknown"
+
+
+NO_WEBSITE_RESEARCH_MARKERS = (
+    "no website",
+    "new listing",
+    "facebook page only",
+    "instagram only",
+)
+
+
+def classify_website_presence(
+    website_status: str | None,
+    has_website: bool,
+) -> WebsitePresence:
+    """Normalize research into a truthful, campaign-safe website state."""
+    if has_website:
+        return WebsitePresence.HAS_WEBSITE
+    value = (website_status or "").strip().lower()
+    if any(marker in value for marker in NO_WEBSITE_RESEARCH_MARKERS):
+        return WebsitePresence.NO_WEBSITE
+    return WebsitePresence.UNKNOWN
+
+
 # A varchar plus a check constraint rather than a native Postgres enum: adding a
 # status in a later block is then an ordinary migration, not an ALTER TYPE dance.
 lead_status_type = Enum(
@@ -62,6 +89,9 @@ class Lead(Base):
     website_status: Mapped[str | None] = mapped_column(Text)
     has_website: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=text("false")
+    )
+    website_presence: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="unknown", server_default="unknown"
     )
     source: Mapped[str] = mapped_column(String(64), nullable=False)
     status: Mapped[LeadStatus] = mapped_column(
@@ -121,6 +151,10 @@ class Lead(Base):
     __table_args__ = (
         CheckConstraint("business_name <> ''", name="business_name_not_blank"),
         CheckConstraint("source <> ''", name="source_not_blank"),
+        CheckConstraint(
+            "website_presence IN ('has_website', 'no_website', 'unknown')",
+            name="website_presence_valid",
+        ),
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debugging aid

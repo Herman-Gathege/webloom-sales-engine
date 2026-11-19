@@ -26,6 +26,7 @@ from app.models import (
     LeadChannelEligibility,
     LeadProvenance,
     LeadStatus,
+    classify_website_presence,
 )
 from app.repositories import LeadRepository
 from app.services.compliance_evaluator import ComplianceEvaluator
@@ -812,6 +813,9 @@ class LeadImportService:
                 whatsapp_capable=mapped.whatsapp_capable,
                 website_status=mapped.website_status,
                 has_website=mapped.has_website,
+                website_presence=classify_website_presence(
+                    mapped.website_status, mapped.has_website
+                ).value,
                 source=mapped.source,
                 status=LeadStatus.NEW,
                 created_at=created_at,

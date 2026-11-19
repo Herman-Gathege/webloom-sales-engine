@@ -140,7 +140,7 @@ export function LeadList() {
       sector: sector || undefined,
       area: area || undefined,
       source: source || undefined,
-      website: (website || undefined) as "yes" | "no" | undefined,
+      website: (website || undefined) as "yes" | "no" | "unknown" | undefined,
       status: (status || undefined) as LeadStatus | undefined,
       compliance_status: (complianceStatus || undefined) as ComplianceStatus | undefined,
       data_quality_status: (dataQuality || undefined) as DataQualityStatus | undefined,
@@ -397,6 +397,7 @@ export function LeadList() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={ANY}>Any website</SelectItem>
+                  <SelectItem value="unknown">Not checked / unknown</SelectItem>
                   <SelectItem value="no">No website</SelectItem>
                   <SelectItem value="yes">Has website</SelectItem>
                 </SelectContent>

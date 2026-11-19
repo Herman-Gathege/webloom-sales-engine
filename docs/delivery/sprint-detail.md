@@ -204,7 +204,7 @@ Tasks: copy variants (Anne, 8h) · review against brand voice (Herman, 4h). **To
 
 ---
 
-## Sprint 5 — campaigns and drafts ← active
+## Sprint 5 — campaigns and drafts — implemented, awaiting review
 
 **Implementation:** Herman only. **Reviewers:** Mark (architecture), Sharon (backend/tests),
 Anne (seller workflow/copy). A campaign produces one personalised draft per eligible lead.
@@ -213,51 +213,18 @@ Anne (seller workflow/copy). A campaign produces one personalised draft per elig
 The individual names in the original task lists are retained as historical backlog planning, not
 parallel assignments. Mark, Sharon and Anne do not open implementation branches this sprint.
 
-The [Sprint 5 review](sprint-5-campaigns-drafts.md) is the current contract draft. It defines
-the smaller first slice and the decisions that must be accepted before implementation.
+The [Sprint 5 contract](sprint-5-campaigns-drafts.md) defines the smaller first slice and the
+locked decisions implemented on the Sprint 5 branch.
 
-### Campaign creation
-*Owner: Mark · Reviewer: Sharon · ~5 pts*
-As Anne, I want to create a campaign from an offer, a segment, a template, and a cadence, so a batch of outreach is a deliberate act.
+> **Current Sprint 5 contract:** the older campaign, segment, cadence, status-flow and editable
+> draft notes below/around this section are superseded by
+> [sprint-5-campaigns-drafts.md](sprint-5-campaigns-drafts.md) and
+> [sprint-5-readiness.md](sprint-5-readiness.md).
 
-- [ ] A campaign requires an offer, a channel, a template, an owner, and a goal
-- [ ] Leads are attached by segment or by explicit selection, with a preview count before saving
-- [ ] Inactive offers and inactive templates, including templates under inactive offers, cannot
-      be selected
-- [ ] A campaign cannot include leads that have opted out
-- [ ] Campaign preview shows effective channel eligibility, purpose, and technical-contact skips
-- [ ] Campaign status moves through `draft`, `active`, `paused`, `completed`
-
-Tasks: campaign model and migration (Sharon, 6h) · create and preview endpoints (Mark, 8h) · campaign
-creation UI (Herman, 6h). **Total 20h.**
-
-### Saved segments
-*Owner: Herman · Reviewer: Sharon · ~3 pts*
-As Anne, I want to save a filter as a named segment, so I can reuse "opticians with no website" without retyping it.
-
-- [ ] A segment stores a named filter definition
-- [ ] Segments can be previewed with a live count
-- [ ] Segments can be used as a campaign source
-
-Tasks: segment model and endpoints (Sharon, 5h) · segment builder UI (Herman, 5h) · tests (Sharon, 2h).
-**Total 12h.**
-
-### Personalised draft generation
-*Owner: Sharon · Reviewer: Mark · ~8 pts*
-As Anne, I want a personalised draft per lead generated from the template, so I review messages instead of writing them.
-
-- [ ] Generating drafts for a campaign produces exactly one draft per eligible lead
-- [ ] Rendered text matches the seed message for the seed leads, byte for byte
-- [ ] Leads missing a required variable are skipped and listed with the reason
-- [ ] Opted-out and call-only leads are excluded according to channel rules
-- [ ] Only a current approved policy or a complete current human `eligible` decision for the
-      selected channel can produce a sendable draft
-- [ ] Generation is idempotent: running it twice does not duplicate drafts
-- [ ] Each draft snapshots the rendered body, offer/template content and eligibility basis so
-      later catalogue edits cannot change history
-
-Tasks: rendering service with tests (Sharon, 12h) · eligibility rules (Sharon, 6h) · generation job and
-endpoint (Sharon, 8h) · generation UI with progress and skip report (Herman, 6h). **Total 32h.**
+Sprint 5 now implements explicit selection of 1–200 leads, SMS-only seller UI, reusable
+eligibility preview, catalogue drift detection, one-shot draft generation and reversible
+archive. Saved segments, cadence, approval, scheduling and sending are outside this slice.
+Drafts are immutable and read-only until the Sprint 6 approval workflow.
 
 ---
 

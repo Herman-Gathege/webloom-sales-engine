@@ -672,9 +672,8 @@
         <aside class="status-card">
           <strong>Where we are</strong>
           <p>
-            Sprints 1–4 are closed. Sprint 5 campaigns and drafts are active with Herman
-            implementing and Mark, Sharon and Anne reviewing. Approval and sending are not built
-            yet.
+            Sprints 1–4 are closed. Sprint 5 campaign preparation and immutable drafts are
+            implemented and awaiting review. Approval, scheduling and sending are not built yet.
           </p>
         </aside>
       </section>
@@ -685,7 +684,7 @@
         <li><small>Built</small>Compliance evaluation</li>
         <li><small>Built</small>Policy decisions and exception review</li>
         <li><small>Built</small>Outreach gate</li>
-        <li class="future"><small>Next</small>Campaign and send</li>
+        <li><small>Built</small>Campaign drafts</li>
       </ol>
 
       <section id="system" class="grid-2" aria-label="Current system architecture">
@@ -694,11 +693,11 @@
           <h2>One clear seam between sales and delivery</h2>
           <p>The team sees one application. The backend owns decisions and PostgreSQL evidence.</p>
           <div class="stack">
-            <div class="node built"><strong>React workspace</strong>Lead Desk · compliance · Catalog</div>
+            <div class="node built"><strong>React workspace</strong>Lead Desk · compliance · Catalogue · Campaigns</div>
             <div class="arrow-down">↓ API and role checks ↓</div>
-            <div class="node built"><strong>Wadi backend</strong>Lead rules · readiness gate · offers · templates</div>
+            <div class="node built"><strong>Wadi backend</strong>Lead rules · readiness gate · offers · campaign drafts</div>
             <div class="arrow-down">↓ durable records ↓</div>
-            <div class="node built"><strong>PostgreSQL</strong>Leads · provenance · decisions · users · catalogue</div>
+            <div class="node built"><strong>PostgreSQL</strong>Leads · provenance · decisions · campaigns · draft snapshots</div>
             <div class="arrow-down">future boundary</div>
             <div class="node future"><strong>FikaTu</strong>Approved delivery, providers, retries and status</div>
           </div>
@@ -734,8 +733,8 @@
         <h2>From a reviewed pipeline to a learning sales loop</h2>
         <div class="roadmap">
           <div class="sprint done"><strong>S1–4</strong><span>Lead desk, compliance, auth, catalogue</span></div>
-          <div class="sprint current"><strong>S5</strong><span>Campaigns and drafts</span></div>
-          <div class="sprint future"><strong>S6</strong><span>Approval and FikaTu</span></div>
+          <div class="sprint done"><strong>S5</strong><span>Campaigns and drafts</span></div>
+          <div class="sprint current"><strong>S6</strong><span>Approval and FikaTu</span></div>
           <div class="sprint future"><strong>S7</strong><span>Replies and handoff</span></div>
           <div class="sprint future"><strong>S8–9</strong><span>Learning, pilot, hardening</span></div>
         </div>

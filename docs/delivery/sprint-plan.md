@@ -35,7 +35,7 @@ and #30; the contract is [`sprint-4-offers-templates.md`](sprint-4-offers-templa
 the evidence and limitation register are in
 [`docs/homework/sprint-4/status.md`](../homework/sprint-4/status.md).
 
-**Sprint 5 is active.** The contract is
+**Sprint 5 is implemented and awaiting team review.** The contract is
 [`sprint-5-campaigns-drafts.md`](sprint-5-campaigns-drafts.md), the branch is
 `sprint/5-campaigns-drafts`, and Herman is the sole implementation owner. Mark, Sharon and Anne
 provide review-only homework.
@@ -83,10 +83,11 @@ services later) and message templates with variants — all editable without a c
 [Closed with accepted deviations](sprint-4-offers-templates.md). *Owner: Sharon · Reviewer:
 Mark · ~11 pts.*
 
-**Sprint 5 — Campaigns and drafts. ← active.** A campaign is a batch of leads, one
-offer and one template. It produces one personalised draft per currently eligible lead and
-skips the ones it cannot fill. [Read the Sprint 5 review](sprint-5-campaigns-drafts.md).
-*Implementation: Herman only · Reviews: Mark, Sharon and Anne · ~16 pts.*
+**Sprint 5 — Campaigns and drafts. Implemented, awaiting review.** A campaign explicitly selects 1–200 leads for
+one active SMS offer/template, previews current eligibility, and generates immutable “Not sent”
+drafts for eligible leads. Saved segments, approval and sending are outside this slice.
+[Read the Sprint 5 contract](sprint-5-campaigns-drafts.md).
+*Implementation: Herman only · Reviews: Mark, Sharon and Anne.*
 
 **Sprint 6 — Approve, then send.** A human review queue, then delivery through FikaTu.
 Nothing sends without approval. Channels for now: **SMS through Africa's Talking (sandbox)**
@@ -148,11 +149,9 @@ before anyone builds it.
 
 Flagged, not invented. Settle each before the sprint it affects.
 
-1. Where does the 13-screen inventory land now? Sprint 2, Sprint 3 and Sprint 4 closed without
-   it. It must be settled in the Sprint 5 contract before campaign screens are implemented.
-2. Is outcome capture the end of Sprint 7 or the start of Sprint 8? It produces the data
+1. Is outcome capture the end of Sprint 7 or the start of Sprint 8? It produces the data
    Sprint 8 reports on.
-3. Does Sprint 9 split into "run the pilot" and "harden and deploy"?
+2. Does Sprint 9 split into "run the pilot" and "harden and deploy"?
 
 ## How this plan changes
 

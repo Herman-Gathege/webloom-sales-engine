@@ -96,7 +96,7 @@ def list_leads(
     sector: str | None = Query(None, max_length=255),
     area: str | None = Query(None, max_length=255),
     source: str | None = Query(None, max_length=64),
-    website: Literal["yes", "no"] | None = Query(None),
+    website: Literal["yes", "no", "unknown"] | None = Query(None),
     lead_status: LeadStatus | None = Query(None, alias="status"),
     compliance_status: Literal[
         "eligible", "needs_review", "blocked", "invalid"

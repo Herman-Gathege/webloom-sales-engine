@@ -9,8 +9,8 @@ Websites are the offer we start with, not the limit of what this can sell.
 
 ## Status
 
-Pre-MVP. **Sprints 1–4 are closed; Sprint 5 is active with Herman as the sole implementation
-owner.**
+Pre-MVP. **Sprints 1–4 are closed; Sprint 5 campaign preparation and draft generation are
+implemented and awaiting team review.**
 Start with the [visual workflow](docs/workflow.html) and
 [full Wadi guide](docs/full-wadi-documentation.md) for the current system, boundaries and
 roadmap.
@@ -24,7 +24,8 @@ roadmap.
   Yellow Pages Kenya research source.
 - [`docker-compose.yml`](docker-compose.yml) — one command starts all three.
 
-There is no sending yet. Sprint 5 now owns campaigns and draft generation.
+There is no approval or sending yet. Sprint 5 prepares immutable **Not sent** drafts from
+explicitly selected SMS leads and supports reversible campaign archive.
 
 ## Run it
 
@@ -123,7 +124,7 @@ implement it; a human reviews the result.** The short version is in
 | [Sprint 3 scope](docs/delivery/sprint-3-auth.md) | Login, roles, bootstrap, and what this sprint does not do |
 | [Sprint 3 solidification](docs/delivery/sprint-3-solidification.md) | CSV import outcomes, automatic eligibility, Lead Desk filters, and the current outreach boundary |
 | [Sprint 4 exit review](docs/homework/sprint-4/status.md) | Catalogue evidence, fixed closeout gaps and accepted carry-forward limitations |
-| [Sprint 5 contract](docs/delivery/sprint-5-campaigns-drafts.md) | Active campaign/draft slice, locked decisions and ownership |
+| [Sprint 5 contract](docs/delivery/sprint-5-campaigns-drafts.md) | Implemented campaign/draft slice, locked decisions and ownership |
 | [Sprint 5 homework](docs/homework/sprint-5/README.md) | Herman implementation card plus review-only cards for Mark, Sharon and Anne |
 | [Sprint 3 exit review](docs/homework/sprint-3/status.md) | Tests, accepted deviations and the closeout decision |
 | [Sprint 2 exit](docs/homework/sprint-2/status.md) · [Sprint 1 record](docs/homework/sprint-1/status.md) | How the first two sprints closed, with evidence |
@@ -143,6 +144,6 @@ matches FikaTu so the two systems share one set of conventions.
 
 ## Not built yet
 
-Campaigns, drafts, approval, sending, replies, and reporting — Sprints 5 to 9 in the
+Approval, sending, replies, and reporting — Sprints 6 to 9 in the
 [sprint plan](docs/delivery/sprint-plan.md). The CI workflow is present, and `main` requires
 its Backend/Frontend checks.

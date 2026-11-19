@@ -29,6 +29,7 @@ layer to get out of step.
 | `whatsapp_capable` | boolean | False for landlines. Per-lead, never per-campaign — the source list marks all six landlines `Call only`. |
 | `website_status` | string or null | The raw research string, kept verbatim, e.g. `"3,713 reviews - no website listed"`. The source list has 37 distinct values and we are not normalising it yet. |
 | `has_website` | boolean | The "you have nothing online" pitch depends on this, so it is a real column, not a string match at read time. |
+| `website_presence` | enum | `has_website`, `no_website` or `unknown`. Campaign targeting uses this normalized state; `unknown` is never treated as confirmed absence. |
 | `source` | string | Where the lead came from, e.g. `"google_maps"`, `"referral"`. A plain string in Sprint 1. Never blank — the learning analysis compares sources, and today all 52 leads come from one source. |
 | `status` | string enum | One of the eleven values below. Every seeded lead is `"new"`. |
 | `created_at` | datetime | ISO 8601, UTC. |
@@ -110,6 +111,13 @@ intended purpose, contact context, reviewer, and rationale. It returns the full 
 `POST /api/v1/leads/{id}/suppressions` records a terminal `all_marketing`, `email`, `sms`, or
 `whatsapp` restriction and returns the full Lead Detail. There is intentionally no removal
 endpoint. Exact semantics are in the [compliance implementation notes](../compliance/implementation-notes.md).
+
+### Campaign endpoints
+
+Sprint 5 exposes `/api/v1/campaigns` for explicit lead selection, eligibility preview,
+one-shot draft generation and reversible archive. Request and response types live in
+`backend/app/schemas/campaign.py` and `frontend/src/api/campaign.ts`. Drafts are immutable,
+read-only and never imply approval or delivery.
 
 ### Errors
 

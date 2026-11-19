@@ -43,6 +43,10 @@ describe("LeadDetail", () => {
     expect(screen.getByText("Synthetic research fixture")).toBeTruthy();
     expect(screen.getByText("30000000-0000-4000-8000-000000000001")).toBeTruthy();
     expect(screen.getAllByLabelText("Activity details").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Technical details").length).toBeGreaterThan(0);
+    expect(
+      screen.getByText("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"),
+    ).toBeTruthy();
     expect(screen.getAllByText("eligible").length).toBeGreaterThan(0);
     expect(screen.getAllByText("suppressed").length).toBeGreaterThan(0);
     expect(screen.getByText("Automatic eligibility result")).toBeTruthy();

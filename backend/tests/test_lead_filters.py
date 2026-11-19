@@ -227,3 +227,32 @@ def test_filter_options_are_real_database_values(
         "invalid",
     ]
     assert body["import_batches"][0]["filename"] == "synthetic-options.csv"
+
+
+def test_website_filter_distinguishes_unknown_from_no_website(
+    client: TestClient, session: Session, make_lead
+) -> None:
+    unknown = make_lead(
+        business_name="Synthetic Unknown Website",
+        website_status="website not checked",
+        has_website=False,
+        website_presence="unknown",
+    )
+    no_website = make_lead(
+        business_name="Synthetic Confirmed No Website",
+        website_status="no website listed",
+        has_website=False,
+        website_presence="no_website",
+    )
+    session.add_all([unknown, no_website])
+    session.flush()
+
+    unknown_rows = client.get("/api/v1/leads", params={"website": "unknown"}).json()
+    no_rows = client.get("/api/v1/leads", params={"website": "no"}).json()
+
+    assert [row["business_name"] for row in unknown_rows["items"]] == [
+        "Synthetic Unknown Website"
+    ]
+    assert [row["business_name"] for row in no_rows["items"]] == [
+        "Synthetic Confirmed No Website"
+    ]

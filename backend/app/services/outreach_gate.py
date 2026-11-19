@@ -16,6 +16,17 @@ class OutreachGateResult:
     channel: str
     allowed: bool
     compliance_status: str
+    channel_status: str | None
+    technical_available: bool
+    decision_current: bool
+    decision_type: str
+    policy_id: str | None
+    policy_version: str | None
+    policy_fingerprint: str | None
+    policy_approved_by: str | None
+    policy_approval_reference: str | None
+    evidence_references: list[str]
+    input_fingerprint: str | None
     reason_codes: list[str]
     explanation: str
     evaluated_at: datetime
@@ -43,13 +54,19 @@ class OutreachGateService:
         return result
 
     def check_many(
-        self, lead_ids: list[uuid.UUID], channel: str, *, actor: str
+        self,
+        lead_ids: list[uuid.UUID],
+        channel: str,
+        *,
+        actor: str,
+        commit: bool = True,
     ) -> list[OutreachGateResult]:
         results = [
             self._check(lead_id, channel, actor=actor)
             for lead_id in lead_ids
         ]
-        self.repository.commit()
+        if commit:
+            self.repository.commit()
         return results
 
     def _check(
@@ -98,6 +115,67 @@ class OutreachGateService:
             channel=channel,
             allowed=allowed,
             compliance_status=evaluation.status,
+            channel_status=(
+                str(channel_result.get("status"))
+                if channel_result is not None and channel_result.get("status")
+                else None
+            ),
+            technical_available=bool(
+                channel_result.get("technical_available", False)
+                if channel_result is not None
+                else False
+            ),
+            decision_current=bool(
+                channel_result.get("decision_current", False)
+                if channel_result is not None
+                else False
+            ),
+            decision_type=str(
+                channel_result.get("decision_type", "none")
+                if channel_result is not None
+                else "none"
+            ),
+            policy_id=(
+                str(channel_result["policy_id"])
+                if channel_result is not None and channel_result.get("policy_id")
+                else None
+            ),
+            policy_version=(
+                str(channel_result["policy_version"])
+                if channel_result is not None and channel_result.get("policy_version")
+                else None
+            ),
+            policy_fingerprint=(
+                str(channel_result["policy_fingerprint"])
+                if channel_result is not None
+                and channel_result.get("policy_fingerprint")
+                else None
+            ),
+            policy_approved_by=(
+                str(channel_result["policy_approved_by"])
+                if channel_result is not None
+                and channel_result.get("policy_approved_by")
+                else None
+            ),
+            policy_approval_reference=(
+                str(channel_result["policy_approval_reference"])
+                if channel_result is not None
+                and channel_result.get("policy_approval_reference")
+                else None
+            ),
+            evidence_references=[
+                str(value)
+                for value in (
+                    channel_result.get("evidence_references", [])
+                    if channel_result is not None
+                    else []
+                )
+            ],
+            input_fingerprint=(
+                str(channel_result["input_fingerprint"])
+                if channel_result is not None and channel_result.get("input_fingerprint")
+                else None
+            ),
             reason_codes=reason_codes,
             explanation=explanation,
             evaluated_at=evaluation.evaluated_at,

@@ -71,9 +71,11 @@ class LeadRepository:
         if source:
             conditions.append(Lead.source == source)
         if website == "yes":
-            conditions.append(Lead.has_website.is_(True))
+            conditions.append(Lead.website_presence == "has_website")
         elif website == "no":
-            conditions.append(Lead.has_website.is_(False))
+            conditions.append(Lead.website_presence == "no_website")
+        elif website == "unknown":
+            conditions.append(Lead.website_presence == "unknown")
         if lead_status:
             conditions.append(Lead.status == lead_status)
         if compliance_status:

@@ -60,6 +60,7 @@ and the written `Source` is the fallback for collection method.
 | `WhatsApp capable` | `whatsapp_capable` | `Yes` → true, `Call only` → false. Any other value is reported and worked out from the number instead. |
 | `Website status` | `website_status` | The raw string, verbatim, exactly as Sprint 1's contract promises. |
 | `Website status` | `has_website` | `no website` / `New listing` / `Facebook page only` / `Instagram only` → false; `has a website` / `http` / `www.` → true; anything else is reported and left false. |
+| `Website status` | `website_presence` | Normalized as `has_website`, `no_website` or `unknown`; unknown research is never treated as confirmed absence. |
 | `Source` | `source` plus provenance `source_name` | `Google Maps listing` → `source=google_maps` while the supplied text is preserved as `source_name`. An unknown value is slugified and reported. Empty is a refusal. |
 | `Sector` | `sector` | Trimmed and whitespace-collapsed. There is no controlled vocabulary this sprint — Sprint 1's contract defers it — so no sector value is reported or rewritten. |
 | `Area` | `area` | Trimmed and whitespace-collapsed; empty becomes `null`. |

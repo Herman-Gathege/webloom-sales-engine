@@ -3,11 +3,12 @@
 The sales backend: Lead and Activity tables, import batches, provenance, automatic durable
 compliance evaluation, a central approved-policy file, exception-level channel review,
 terminal suppression, reversible migrations, a repeatable synthetic seed, read/review
-endpoints, the CSV importer, and — since Sprint 3 — authentication with `admin` and `sales`
-roles. It is the piece that replaces the frontend's **"Sample data"** banner with real leads.
+endpoints, the CSV importer, the Sprint 4 catalogue, Sprint 5 campaign/draft preparation, and
+authentication with `admin` and `sales` roles. It is the piece that replaces the frontend's
+**"Sample data"** banner with real leads.
 
-Deliberately **not** here yet: sending, campaigns, exports, background jobs, and FikaTu
-delivery. The containers live at the repo root — see
+Deliberately **not** here yet: approval, sending, reply capture, scheduling, exports,
+background jobs, and FikaTu delivery. The containers live at the repo root — see
 [`docker/README.md`](../docker/README.md).
 
 ## Layout
@@ -155,7 +156,7 @@ Install the initial commercial catalogue separately:
 docker compose exec api python -m app.catalog_seed
 ```
 
-It creates Starter Website at KES 40,000, three other initial offers and safe starter
+It creates Starter Website from KES 40,000, three other initial offers and safe starter
 SMS/email templates. Rerunning it preserves existing records.
 
 ## The API
@@ -167,13 +168,28 @@ Lead preparation:
 - `GET /api/v1/leads/import-template` downloads a UTF-8 CSV generated from the importer's exact
   columns, with fictional examples.
 
+Campaign preparation:
+
+- `POST /api/v1/campaigns/preview` rechecks selected leads and returns eligible and skipped
+  counts with seller-facing reasons.
+- `POST /api/v1/campaigns` creates an explicit SMS campaign with catalogue, lead-selection and
+  filter-context snapshots.
+- `GET /api/v1/campaigns` and `GET /api/v1/campaigns/{id}` list and inspect campaigns.
+- `PATCH /api/v1/campaigns/{id}` edits an ungenerated campaign.
+- `POST /api/v1/campaigns/{id}/generate` performs the one-shot eligibility recheck and creates
+  immutable draft records labelled **Not sent**.
+- `POST /api/v1/campaigns/{id}/archive` and `/restore` implement reversible archival.
+
+Both `admin` and `sales` may prepare campaigns. The creator or an admin controls mutation;
+there is no approval, send or FikaTu path in Sprint 5.
+
 ### `GET /api/v1/leads?limit=50&offset=0`
 
 One page of leads, newest first (`created_at` descending, with the id as a tie-breaker so a
 page boundary can never repeat or skip a lead).
 
 Filters are applied before `total` and pagination: `q`, `sector`, `area`, `source`,
-`website=yes|no`, `status`, `compliance_status`, `data_quality_status`,
+`website=yes|no|unknown`, `status`, `compliance_status`, `data_quality_status`,
 `provenance=available|missing|incomplete`, `outreach_ready`, `exception_review`,
 `has_suppression`, `batch_id`, and
 `sort=newest|oldest|business_name|compliance_status`. Assignment and temperature filters are
@@ -197,6 +213,7 @@ not present because those fields do not exist.
       "whatsapp_capable": false,
       "website_status": "no phone number on the listing",
       "has_website": false,
+      "website_presence": "unknown",
       "source": "google_maps",
       "status": "new",
       "created_at": "2026-09-23T09:07:00Z",
@@ -379,14 +396,15 @@ by itself.
 - **Nothing moves a lead off `new`.** Nothing sends yet, so status is always `new` in this
   sprint; the long-term rule that status is derived from evidence is not implemented.
 - **No send path yet.** Campaign approval, dispatch, queue cancellation, FikaTu retries, and
-  delivery-result auditing arrive in Sprints 5–6. The send-time safeguards are documented as
+  delivery-result auditing arrive in Sprint 6. The send-time safeguards are documented as
   blocking acceptance gates rather than falsely claimed as implemented here.
-- **Catalogue copy is partial.** The seed has one SMS and one email starter variant; the
-  remaining A/B, social-only, channel-length and final opt-out copy pack is Sprint 5 work.
+- **Catalogue copy is partial.** The seed has one SMS and one email starter variant. Social-only
+  targeting and copy remain deferred until structured social-presence research exists.
 - **Catalogue history is limited.** Template edits have no version history and catalogue CUD
   actions do not write a cross-product audit feed. Sprint 5 snapshots rendered drafts; full
   catalogue history remains later work.
 - **`activities` is not `activity_events`.** This is the per-lead timeline the detail screen
   shows; the scope spec's `activity_events` is the wider audit feed for a later sprint.
 - **Not the final schema.** The contract is a small subset of the scope spec's data model —
-  no campaigns, outreaches, replies, or deals.
+  campaigns and immutable draft outreaches exist, while replies, approvals, deals and delivery
+  records do not.

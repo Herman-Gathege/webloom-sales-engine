@@ -74,6 +74,7 @@ export interface Lead {
   /** The raw research string, kept verbatim. Free text. */
   website_status: string | null;
   has_website: boolean;
+  website_presence: "has_website" | "no_website" | "unknown";
   /** Where the lead came from, e.g. "google_maps". */
   source: string;
   status: LeadStatus;
@@ -113,7 +114,7 @@ export interface LeadListParams {
   sector?: string;
   area?: string;
   source?: string;
-  website?: "yes" | "no";
+  website?: "yes" | "no" | "unknown";
   status?: LeadStatus;
   compliance_status?: ComplianceStatus;
   data_quality_status?: DataQualityStatus;
@@ -315,6 +316,17 @@ export interface OutreachCheckResult {
   channel: Channel;
   allowed: boolean;
   compliance_status: ComplianceStatus;
+  channel_status: ComplianceStatus | null;
+  technical_available: boolean;
+  decision_current: boolean;
+  decision_type: ChannelDecisionType;
+  policy_id: string | null;
+  policy_version: string | null;
+  policy_fingerprint: string | null;
+  policy_approved_by: string | null;
+  policy_approval_reference: string | null;
+  evidence_references: string[];
+  input_fingerprint: string | null;
   reason_codes: string[];
   explanation: string;
   evaluated_at: string;

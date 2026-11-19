@@ -14,6 +14,7 @@ def test_catalog_seed_installs_website_packages_and_templates(session: Session) 
     offers = session.scalars(select(Offer).order_by(Offer.slug)).all()
     starter = next(offer for offer in offers if offer.slug == "starter-website")
     assert starter.price_min == Decimal("40000.00")
+    assert starter.price_max is None
     assert starter.currency == "KES"
     assert len(session.scalars(select(MessageTemplate)).all()) >= 2
 
