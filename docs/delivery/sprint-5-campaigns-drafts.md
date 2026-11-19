@@ -10,6 +10,10 @@ Reviewers do not open parallel implementation work.
 This contract turns the Sprint 5 backlog into a practical vertical slice. It does not replace
 [the sprint detail](sprint-detail.md).
 
+Anne's seller review found that campaign testing was blocked by missing lead-preparation tools.
+The resolved blockers, repeatable fixture and the acceptance requirements still owed by the
+campaign implementation are tracked in [Sprint 5 seller readiness](sprint-5-readiness.md).
+
 ## Goal
 
 Create a deliberate campaign from an active offer and active template, select eligible leads,
@@ -95,6 +99,28 @@ human eligibility decision.
 - WhatsApp delivery;
 - analytics.
 
+## Seller-readiness requirements
+
+Anne's seller review adds these conditions to the campaign implementation:
+
+- confirm high-impact generation and provide reversible archiving for a mistaken campaign;
+- translate skip outcomes into seller language and show counts per reason;
+- target `has website`, `no website` and `not checked` separately, and do not infer social
+  presence from an empty field;
+- label every generated draft **Not sent**;
+- show SMS characters, GSM-7/Unicode encoding and segment count;
+- explain that campaign goal means the intended business outcome;
+- show website research dates and treat stale or missing research as unverified;
+- identify Webloom, a real sender and a registered sender ID before approval;
+- assign a human owner for replies and opt-out recording;
+- keep Starter Website price wording unresolved until the business owner confirms it;
+- require a human business-name/branch check before approval;
+- leave night/Sunday timing restrictions to Sprint 6.
+
+The full requirement and open-decision register is
+[Sprint 5 readiness](sprint-5-readiness.md). Lead preparation, the downloadable CSV template and
+the synthetic campaign fixture are documented there.
+
 ## Ownership and hand-off
 
 | Person | Sprint responsibility |
@@ -109,5 +135,8 @@ hand-offs on `sprint/5-campaigns-drafts`.
 
 ## Readiness verdict
 
-Sprint 5 is ready to implement. The branch was cut from merged Sprint 4 main, the first vertical
-slice is bounded, and approval/sending remain outside the sprint.
+Lead preparation is ready: sellers can add one lead or download an importer-compatible CSV
+template. Sprint 5 is **ready with known limitations** for a seller walkthrough once the
+campaign implementation is present. Campaign archiving, sender identity, reply ownership and
+Starter Website price wording remain open business decisions; approval and sending stay outside
+the sprint.

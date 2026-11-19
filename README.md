@@ -52,7 +52,9 @@ Then open:
 
 | What | URL |
 |---|---|
-| The app | <http://localhost:5174> |
+| Product landing page | <http://localhost:5174> |
+| Customer workflow | <http://localhost:5174/workflow> |
+| Team orientation after sign-in | <http://localhost:5174/internal> |
 | The API directly | <http://localhost:8001> — deliberately not 8000, which is taken on at least one machine |
 
 Click **Leads**, open one, and you should see real rows from PostgreSQL with their activity

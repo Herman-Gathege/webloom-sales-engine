@@ -22,7 +22,7 @@ export function PublicNav() {
           </span>
         </Link>
         <Link
-          to="/"
+          to="/workflow"
           className="inline-flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-primary hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
         >
           <ArrowLeft className="size-4" />

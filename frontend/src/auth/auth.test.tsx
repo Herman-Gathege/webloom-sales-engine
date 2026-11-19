@@ -58,17 +58,89 @@ describe("authentication", () => {
     mocks.getToken.mockReturnValue(null);
   });
 
-  it("shows the public Wadi workflow at the root before login", () => {
+  it("shows the customer-facing Wadi landing page at the root before login", () => {
     renderAt("/");
 
-    expect(screen.getByTitle("How Wadi works").getAttribute("src")).toBe("/workflow.html");
+    expect(
+      screen.getByRole("heading", {
+        name: "Find the right prospects. Build better conversations.",
+      }),
+    ).toBeTruthy();
+    expect(screen.getAllByRole("link", { name: "Get started" })).toHaveLength(3);
+    for (const link of screen.getAllByRole("link", { name: "Get started" })) {
+      expect(link.getAttribute("href")).toBe("/login");
+    }
+    expect(
+      screen.getByRole("link", { name: "Explore the workflow" }).getAttribute("href"),
+    ).toBe("/workflow");
+    expect(screen.queryByTitle("How Wadi works")).toBeNull();
+  });
+
+  it("serves the customer workflow page without authentication", () => {
+    renderAt("/workflow");
+
+    expect(screen.getByRole("heading", { name: "How Wadi works" })).toBeTruthy();
+  });
+
+  it("redirects the legacy workflow URL to the customer workflow page", () => {
+    renderAt("/workflow.html");
+
+    expect(screen.getByRole("heading", { name: "How Wadi works" })).toBeTruthy();
+  });
+
+  it("sends an authenticated teammate from the public landing page to the lead desk", async () => {
+    mocks.getToken.mockReturnValue("token");
+    mocks.fetchMe.mockResolvedValue(salesUser);
+
+    renderAt("/");
+
+    expect(await screen.findByRole("heading", { name: "Leads" }, { timeout: 5000 })).toBeTruthy();
+  });
+
+  it("sends a temporary-password teammate from the public landing page to password setup", async () => {
+    mocks.getToken.mockReturnValue("token");
+    mocks.fetchMe.mockResolvedValue({ ...salesUser, must_change_password: true });
+
+    renderAt("/");
+
+    expect(
+      await screen.findByRole("heading", { name: "Choose your password" }, { timeout: 5000 }),
+    ).toBeTruthy();
+  });
+
+  it("keeps the /app compatibility route inside the authenticated application", async () => {
+    mocks.getToken.mockReturnValue("token");
+    mocks.fetchMe.mockResolvedValue(salesUser);
+
+    renderAt("/app");
+
+    expect(await screen.findByRole("heading", { name: "Leads" }, { timeout: 5000 })).toBeTruthy();
+  });
+
+  it("protects the internal orientation page", async () => {
+    renderAt("/internal");
+
+    expect(await screen.findByRole("heading", { name: "Sign in" }, { timeout: 5000 })).toBeTruthy();
+  });
+
+  it("lets a signed-in teammate open the internal orientation page", async () => {
+    mocks.getToken.mockReturnValue("token");
+    mocks.fetchMe.mockResolvedValue(salesUser);
+
+    renderAt("/internal");
+
+    expect(
+      await screen.findByRole("heading", { name: "Internal orientation" }, { timeout: 5000 }),
+    ).toBeTruthy();
   });
 
   it("sends an anonymous visitor to the login page", async () => {
     renderAt("/leads");
 
     expect(await screen.findByRole("heading", { name: "Sign in" }, { timeout: 5000 })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "How Wadi works" }).getAttribute("href")).toBe("/");
+    expect(screen.getByRole("link", { name: "How Wadi works" }).getAttribute("href")).toBe(
+      "/workflow",
+    );
   });
 
   it("signs in and lands on the lead desk", async () => {

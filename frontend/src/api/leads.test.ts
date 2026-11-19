@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { sampleLeads } from "./fixtures";
 import {
   ApiError,
+  createLead,
+  downloadImportTemplate,
   getLead,
   getLeadFilterOptions,
   listLeads,
@@ -188,6 +190,79 @@ describe("compliance mutations", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       `/api/v1/leads/${sampleLeads[0].id}/suppressions`,
       expect.objectContaining({ method: "POST" }),
+    );
+  });
+});
+
+describe("lead readiness API helpers", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("creates a manual lead without falling back to sample data", async () => {
+    const created = {
+      ...sampleLeader(),
+      id: "00000000-0000-4000-8000-000000000099",
+      business_name: "Synthetic Manual Optician",
+      phone: "+254712345678",
+      source: "manual_entry",
+      provenance: {
+        import_batch_id: null,
+        row_number: null,
+        source_name: "Manual entry",
+        source_url: null,
+        collection_date: "2026-11-19",
+        collection_method: "Manual seller entry",
+        intended_purpose: "Business outreach",
+        contact_type: "generic_business" as const,
+        contact_name: null,
+      },
+      eligibility: [],
+      suppressions: [],
+      activity: [],
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(created), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await createLead({
+      business_name: "Synthetic Manual Optician",
+      sector: "Opticians and eyewear",
+      area: "Westlands",
+      phone: "+254712345678",
+      email: null,
+      whatsapp_capable: true,
+      website_status: "no website listed",
+      has_website: false,
+      source: "Manual entry",
+    });
+
+    expect(result.business_name).toBe("Synthetic Manual Optician");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/leads",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("downloads the canonical CSV template as a blob", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response("Business,Phone,Source\n", {
+        status: 200,
+        headers: { "Content-Type": "text/csv; charset=utf-8" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const blob = await downloadImportTemplate();
+
+    expect(await blob.text()).toContain("Business,Phone,Source");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/leads/import-template",
+      expect.objectContaining({ headers: expect.any(Headers) }),
     );
   });
 });

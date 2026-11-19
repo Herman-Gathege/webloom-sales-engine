@@ -16,3 +16,4 @@ would pass on the machine that has it and fail in CI.
 | `import_missing_column.csv` | The header is missing a column we read, so the file is refused |
 | `import_header_only.csv` | 0 data rows: 0 accepted, 0 rejected |
 | `import_not_utf8.csv` | Not valid UTF-8, so the file is refused |
+| `campaign_readiness.csv` | Eight synthetic leads covering channel, website, social-only and policy-readiness variation for the Sprint 5 seller walkthrough. |

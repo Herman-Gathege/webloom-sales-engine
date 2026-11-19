@@ -29,6 +29,7 @@ from app.schemas import (
     EligibilityReviewRequest,
     ImportReviewRowRead,
     ImportSummary,
+    LeadCreate,
     LeadDetailRead,
     LeadFilterOptionsRead,
     LeadListRead,
@@ -46,11 +47,14 @@ from app.services import (
     ComplianceTargetError,
     EligibilityDecision,
     ImportFileError,
+    LeadConflictError,
     LeadImportService,
     LeadNotFoundError,
     LeadService,
+    LeadValidationError,
     OutreachGateService,
     SuppressionDecision,
+    import_template_csv,
     refused_rows_csv,
 )
 from app.services.lead_service import DEFAULT_LIMIT
@@ -133,6 +137,56 @@ def list_leads(
         total=page.total,
         limit=page.limit,
         offset=page.offset,
+    )
+
+
+@router.post(
+    "",
+    response_model=LeadDetailRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create one researched lead manually",
+    responses={
+        409: {"description": "A lead with this phone number already exists."},
+        422: {"description": "A required or contact value is invalid."},
+    },
+)
+def create_lead(
+    request: LeadCreate,
+    current_user: User = Depends(get_current_user),
+    service: LeadService = Depends(get_lead_service),
+) -> LeadDetailRead:
+    try:
+        lead = service.create_lead(request, actor=current_user.email)
+    except LeadConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from None
+    except LeadValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from None
+    return LeadDetailRead.model_validate(lead)
+
+
+@router.get(
+    "/import-template",
+    summary="Download the CSV template accepted by the importer",
+    response_class=Response,
+    responses={
+        200: {
+            "description": "A UTF-8 CSV with the exact importer columns and synthetic rows.",
+            "content": {"text/csv": {"schema": {"type": "string"}}},
+        }
+    },
+)
+def import_template() -> Response:
+    return Response(
+        content=import_template_csv(),
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": 'attachment; filename="wadi-lead-import-template.csv"',
+        },
     )
 
 

@@ -17,6 +17,7 @@ Then open the document that matches what you are about to do.
 | one lead's journey, with human and automation boundaries | [workflow description](workflow-description.md) |
 | the whole plan: nine sprints, and who leads each | [sprint plan](delivery/sprint-plan.md) |
 | the current sprint contract and ownership | [Sprint 5 campaigns and drafts](delivery/sprint-5-campaigns-drafts.md) |
+| lead preparation, seller requirements and synthetic campaign test data | [Sprint 5 readiness](delivery/sprint-5-readiness.md) |
 | who implements and who reviews Sprint 5 | [Sprint 5 homework](homework/sprint-5/README.md) |
 | the closed Sprint 4 catalogue and its accepted deviations | [Sprint 4 offers and templates](delivery/sprint-4-offers-templates.md) · [exit review](homework/sprint-4/status.md) |
 | the CSV-to-outreach compliance flow, statuses, filters, and current boundary | [Sprint 3 solidification](delivery/sprint-3-solidification.md) |
@@ -36,7 +37,7 @@ Then open the document that matches what you are about to do.
 
 ```
 docs/
-├── workflow.html             public visual orientation and app landing page
+├── workflow.html             canonical visual workflow documentation
 ├── workflow-description.md   the canonical stage-by-stage journey
 ├── full-wadi-documentation.md  the complete project snapshot
 ├── superpowers/specs/   the scope spec — the gate

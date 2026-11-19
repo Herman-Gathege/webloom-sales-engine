@@ -13,7 +13,8 @@ Read in this order:
 1. [Visual workflow](../../workflow.html)
 2. [Sprint 4 exit review](../sprint-4/status.md)
 3. [Sprint 5 contract](../../delivery/sprint-5-campaigns-drafts.md)
-4. [Full Wadi guide](../../full-wadi-documentation.md), sections 3, 4 and 11
+4. [Sprint 5 seller readiness](../../delivery/sprint-5-readiness.md)
+5. [Full Wadi guide](../../full-wadi-documentation.md), sections 3, 4 and 11
 
 The short version:
 
@@ -23,6 +24,8 @@ The short version:
 - Sprint 5 does not approve or send messages.
 - Herman writes the implementation. Mark checks architecture, Sharon checks backend correctness,
   and Anne checks the seller experience and copy.
+- Anne's latest review is [Revise](anne/anne-review.md); the lead-entry and CSV template
+  barriers now have a readiness contract and synthetic test fixture.
 
 ## Working loop
 

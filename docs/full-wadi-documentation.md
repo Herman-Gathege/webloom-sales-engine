@@ -92,8 +92,8 @@ There is deliberately no send path. A readiness result does not approve a messag
 | Area | Status now |
 |---|---|
 | Authentication and `admin`/`sales` roles | Built |
-| Lead list, detail, activity and responsive Lead Desk | Built |
-| CSV import with row-level refusals | Built |
+| Lead list, detail, activity, manual single-lead entry and responsive Lead Desk | Built |
+| CSV import with row-level refusals and downloadable canonical template | Built |
 | Provenance, duplicate and terminal suppression handling | Built |
 | Durable compliance evaluations and stale-input detection | Built |
 | Central policy, exception review and outreach-readiness check | Built; approved SMS policy enabled for Yellow Pages Kenya generic business contacts |
@@ -118,8 +118,8 @@ flowchart LR
 
 | Role | Current access |
 |---|---|
-| `admin` | Lead Desk, import, compliance review, user list, offer/template writes |
-| `sales` | Lead Desk, import, compliance review, active offer/template reads |
+| `admin` | Lead Desk, manual lead entry, import, compliance review, user list, offer/template writes |
+| `sales` | Lead Desk, manual lead entry, import, compliance review, active offer/template reads |
 
 Both roles can see contact details because both work the lead desk. There is no public user,
 customer portal or separate sales-manager role yet.
@@ -278,6 +278,8 @@ These are real and must not be mistaken for completed work:
 8. All four local bootstrap users are Admins; final Admin/Sales allocation is a team decision.
 9. The 13-screen product inventory is not formally signed off.
 10. Business, Custom and FikaTu offer prices remain open.
+11. Starter Website wording still needs confirmation as “from KES 40,000” or exactly
+    KES 40,000 before outreach copy can promise it.
 11. Sprint 4 is closed; its limitation register and accepted carry-forward work are in the
     [exit review](homework/sprint-4/status.md).
 12. Central automatic eligibility is enabled for the approved SMS rule only. Every new source,
@@ -338,8 +340,10 @@ npm run lint && npm test && npm run build
 
 Useful local URLs:
 
-- App before login: <http://localhost:5174/>
-- Direct public workflow: <http://localhost:5174/workflow.html>
+- Product landing page: <http://localhost:5174/>
+- Customer workflow: <http://localhost:5174/workflow>
+- Team orientation (requires sign-in): <http://localhost:5174/internal>
+- Legacy workflow URL (redirects): <http://localhost:5174/workflow.html>
 - API documentation: <http://localhost:8001/docs>
 
 The exact current test counts, commit and manual acceptance status belong in the Sprint 4 PR
