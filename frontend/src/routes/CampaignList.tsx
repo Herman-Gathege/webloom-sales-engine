@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { listCampaigns, type CampaignSummary } from "@/api/campaign";
+import { Scout } from "@/components/Scout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -82,9 +83,26 @@ export function CampaignList() {
             <p className="text-sm text-muted-foreground">Loading campaigns…</p>
           )}
           {campaigns?.length === 0 && (
-            <p className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
-              No campaigns yet. Create one from the Lead Desk filters and select its leads.
-            </p>
+            <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
+              <div className="flex items-start gap-3">
+                <Scout size={40} />
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground">No campaigns yet.</p>
+                  <p className="mt-1">
+                    A campaign gathers the leads you want to reach and prepares one draft per
+                    eligible lead. Before creating one, import some leads and check their outreach
+                    eligibility from the Lead Desk.
+                  </p>
+                  <p className="mt-1">
+                    Next step:{" "}
+                    <Link to="/campaigns/new" className="text-primary font-medium">
+                      Create your first campaign
+                    </Link>
+                    .
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
           {campaigns && campaigns.length > 0 && (
             <div className="grid gap-3 md:grid-cols-2">

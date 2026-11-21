@@ -117,7 +117,7 @@ describe("CampaignDetail", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Generate drafts" }));
     expect(screen.getByText(/cannot be edited or regenerated/i)).toBeTruthy();
-    expect(screen.getByText(/Not sent/i)).toBeTruthy();
+    expect(screen.getAllByText(/Not sent/i).length).toBeGreaterThanOrEqual(1);
     fireEvent.click(screen.getAllByRole("button", { name: "Generate drafts" }).at(-1)!);
 
     await waitFor(() => expect(mocks.generateCampaign).toHaveBeenCalledWith("campaign-1"));

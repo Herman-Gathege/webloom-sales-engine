@@ -96,6 +96,7 @@ const lead = {
 
 describe("CampaignCreate", () => {
   beforeEach(() => {
+    sessionStorage.removeItem("wadi.campaign-trail-dismissed");
     mocks.listOffers.mockReset().mockResolvedValue([offer]);
     mocks.listTemplates.mockReset().mockResolvedValue([template]);
     mocks.getLeadFilterOptions.mockReset().mockResolvedValue({
@@ -175,5 +176,33 @@ describe("CampaignCreate", () => {
         }),
       ),
     );
+  });
+
+  it("shows the campaign creation trail and the draft safety notice", async () => {
+    render(
+      <MemoryRouter initialEntries={["/campaigns/new"]}>
+        <CampaignCreate />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText("Campaign guide");
+    expect(screen.getAllByText("Define the offer and template").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Select leads").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Preview and create drafts").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/Campaign drafts are not sent automatically/i)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Dismiss guide" })).toBeTruthy();
+  });
+
+  it("dismisses the campaign guide for the session", async () => {
+    render(
+      <MemoryRouter initialEntries={["/campaigns/new"]}>
+        <CampaignCreate />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText("Campaign guide");
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss guide" }));
+
+    expect(screen.queryByText("Campaign guide")).toBeNull();
   });
 });

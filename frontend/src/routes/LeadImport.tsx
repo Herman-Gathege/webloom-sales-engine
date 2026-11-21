@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { downloadImportTemplate, importLeads, rejectedRowsCsv } from "@/api/leads";
 import type { ImportSummary } from "@/api/types";
 import { Scout } from "@/components/Scout";
+import { TrailStop, CompleteTrailMark } from "@/components/guidance/Trail";
 import { ComplianceStatusBadge } from "@/components/compliance/ComplianceStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -59,81 +59,6 @@ function fileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-interface TrailStopProps {
-  number: number;
-  title: string;
-  description: string;
-  complete: boolean;
-  current: boolean;
-}
-
-function TrailStop({
-  number,
-  title,
-  description,
-  complete,
-  current,
-}: TrailStopProps) {
-  return (
-    <li
-      aria-current={current ? "step" : undefined}
-      className={[
-        "flex gap-3 rounded-xl border p-3 transition-[border-color,background-color,box-shadow] duration-300",
-        complete
-          ? "border-emerald-200 bg-emerald-50/80"
-          : current
-            ? "border-primary/40 bg-background shadow-sm"
-            : "border-border bg-background",
-      ].join(" ")}
-    >
-      <span
-        className={[
-          "grid size-8 shrink-0 place-items-center rounded-full text-xs font-semibold transition-colors duration-300",
-          complete
-            ? "bg-emerald-600 text-white"
-            : current
-              ? "bg-primary text-primary-foreground ring-4 ring-primary/10"
-              : "bg-secondary text-secondary-foreground",
-        ].join(" ")}
-      >
-        {complete ? <Check className="size-4" aria-hidden="true" /> : number}
-      </span>
-      <span className="min-w-0">
-        <span className="font-semibold leading-snug text-primary">{title}</span>
-        <span className="mt-1 block text-sm leading-snug text-muted-foreground">
-          {description}
-        </span>
-      </span>
-    </li>
-  );
-}
-
-function CompleteTrailMark() {
-  return (
-    <div aria-hidden="true" className="mt-3 flex items-center gap-1.5">
-      {[0, 1, 2].map((stop) => (
-        <span key={stop} className="flex items-center gap-1.5">
-          <span
-            className="grid size-5 place-items-center rounded-full bg-emerald-600 text-white motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:fade-in-0 motion-safe:duration-300"
-            style={{ animationDelay: `${stop * 80}ms` }}
-          >
-            <Check className="size-3" strokeWidth={3} />
-          </span>
-          {stop < 2 && (
-            <span
-              className="h-0.5 w-5 origin-left bg-emerald-400 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-left-1 motion-safe:duration-300"
-              style={{ animationDelay: `${stop * 80 + 40}ms` }}
-            />
-          )}
-        </span>
-      ))}
-      <span className="ml-1 text-xs font-medium text-emerald-800">
-        Map · Trail · Scout
-      </span>
-    </div>
-  );
 }
 
 export function LeadImport() {
@@ -292,8 +217,8 @@ export function LeadImport() {
                   </>
                 ) : (
                   <>
-                    <span className="block font-medium text-foreground">Start at the trailhead.</span>
-                    <span className="text-muted-foreground">First, take the map.</span>
+                    {/* <span className="block font-medium text-foreground">First, download the template below.</span> */}
+                    <span className="text-muted-foreground">Hello, let's get started!</span>
                   </>
                 )}
               </div>
@@ -321,7 +246,7 @@ export function LeadImport() {
                 description={
                   file
                     ? "Trail marked. Your list is ready."
-                    : "Add the researched rows to the template."
+                    : "Update your template with the required data, then upload it below."
                 }
                 complete={file !== null}
                 current={trailReady && !file}
@@ -334,7 +259,7 @@ export function LeadImport() {
                     ? "Reading every row now."
                     : file
                       ? "Import when you are ready."
-                      : "Upload the completed UTF-8 CSV."
+                      : "Upload the completed template as a UTF-8 CSV."
                 }
                 complete={phase === "done"}
                 current={file !== null && !busy}
@@ -488,7 +413,10 @@ export function LeadImport() {
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
           >
-            <Input
+            {/* A native input, not the styled Input: the component's w-full/h-9
+                classes override sr-only's 1px box, which made this element
+                full-width and pushed the whole page into horizontal scroll. */}
+            <input
               ref={fileInputRef}
               type="file"
               accept=".csv,text/csv"
@@ -528,11 +456,11 @@ export function LeadImport() {
                   <FileUp className="size-6" aria-hidden="true" />
                 </span>
                 <p className="mt-3 font-medium">
-                  {dragging ? "Drop it here. Wadi will take it from here." : "Drop your CSV at the trailhead"}
+                  {dragging ? "Drop it here. Wadi will take it from here." : "Ready to import your leads?"}
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                {/* <p className="mt-1 text-sm text-muted-foreground">
                   UTF-8 CSV up to the import limit
-                </p>
+                </p> */}
                 <Button
                   type="button"
                   variant="outline"

@@ -20,6 +20,9 @@ import type {
   LeadListParams,
   LeadStatus,
 } from "@/api/types";
+import { Scout } from "@/components/Scout";
+import { TrailStop } from "@/components/guidance/Trail";
+// import { Doodle } from "@/components/guidance/Doodle";
 import { ComplianceStatusBadge } from "@/components/compliance/ComplianceStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +34,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { AlertTriangle } from "lucide-react";
 
 const PAGE_SIZE = 25;
 
@@ -48,6 +52,27 @@ const EMPTY_FORM: FormState = {
   template_id: "",
 };
 
+const CAMPAIGN_TRAIL_DISMISSED_KEY = "wadi.campaign-trail-dismissed";
+
+const TRAIL_STOPS = [
+  {
+    number: 1,
+    title: "Define the offer and template",
+    description: "The offer and message template shape what this campaign says.",
+  },
+  {
+    number: 2,
+    title: "Select leads",
+    description: "Pick up to 200 leads. Wadi checks eligibility and suppression for each.",
+  },
+  {
+    number: 3,
+    title: "Preview and create drafts",
+    description:
+      "See eligible and skipped leads, then generate one immutable draft per eligible lead.",
+  },
+];
+
 export function CampaignCreate() {
   const { id } = useParams<{ id: string }>();
   const editing = Boolean(id);
@@ -63,6 +88,22 @@ export function CampaignCreate() {
   const [saving, setSaving] = useState(false);
   const [previewing, setPreviewing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [guideDismissed, setGuideDismissed] = useState(() => {
+    try {
+      return sessionStorage.getItem(CAMPAIGN_TRAIL_DISMISSED_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  function dismissGuide() {
+    setGuideDismissed(true);
+    try {
+      sessionStorage.setItem(CAMPAIGN_TRAIL_DISMISSED_KEY, "true");
+    } catch {
+      // Storage unavailable; the in-session dismissal still applies.
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -206,6 +247,65 @@ export function CampaignCreate() {
       <Button asChild variant="ghost" size="sm" className="-ml-2">
         <Link to="/campaigns">← Back to campaigns</Link>
       </Button>
+
+      {!guideDismissed && (
+        <Card className="border-primary/50">
+          <CardHeader className="flex-row items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-primary">Campaign guide</CardTitle>
+              <CardDescription>
+                Three steps to prepare a campaign draft. Nothing is sent here.
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" onClick={dismissGuide}>
+              Dismiss guide
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-start gap-3">
+              <Scout size={44} />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  Wadi prepares SMS drafts for a person to review before anything is approved.
+                </p>
+              </div>
+            </div>
+            <ol className="grid gap-2 text-sm" aria-label="Campaign creation trail">
+              {TRAIL_STOPS.map((stop) => (
+                <TrailStop
+                  key={String(stop.number)}
+                  {...stop}
+                  complete={false}
+                  current={false}
+                />
+              ))}
+            </ol>
+            {/* <div className="mx-auto">
+              <Doodle
+                variant="dotted-path"
+                size={140}
+                animate={false}
+                className="text-muted-foreground/40"
+              />
+            </div> */}
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="border-amber-200 bg-amber-50">
+        <CardContent className="flex items-start gap-3 p-4">
+          <AlertTriangle className="size-5 shrink-0 text-amber-800" aria-hidden="true" />
+          <div className="min-w-0">
+            <p className="font-semibold text-amber-900">
+              Campaign drafts are not sent automatically.
+            </p>
+            <p className="mt-1 text-sm text-amber-800">
+              Generating a campaign prepares drafts only. Each draft is labelled{" "}
+              <strong>Not sent</strong> and cannot be delivered until a person approves it.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

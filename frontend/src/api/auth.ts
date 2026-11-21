@@ -59,3 +59,33 @@ export async function changePassword(
 export async function listUsers(): Promise<AuthUser[]> {
   return apiRequest<AuthUser[]>("/users");
 }
+
+export interface TemporaryPasswordResponse {
+  user: AuthUser;
+  temporary_password: string;
+}
+
+export async function createUser(email: string, role: Role): Promise<TemporaryPasswordResponse> {
+  return apiRequest<TemporaryPasswordResponse>("/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, role }),
+  });
+}
+
+export async function updateUser(
+  id: string,
+  payload: { email?: string; role?: Role; is_active?: boolean },
+): Promise<AuthUser> {
+  return apiRequest<AuthUser>(`/users/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function resetUserPassword(id: string): Promise<TemporaryPasswordResponse> {
+  return apiRequest<TemporaryPasswordResponse>(`/users/${id}/reset-password`, {
+    method: "POST",
+  });
+}

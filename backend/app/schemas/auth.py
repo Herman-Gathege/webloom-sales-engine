@@ -39,6 +39,34 @@ class UserRead(BaseModel):
     created_at: UtcDatetime
 
 
+class UserCreate(BaseModel):
+    email: str = Field(min_length=3, max_length=255)
+    role: UserRole = UserRole.SALES
+
+    @field_validator("email")
+    @classmethod
+    def normalise_email(cls, value: str) -> str:
+        return _normalise_email(value)
+
+
+class UserUpdate(BaseModel):
+    email: str | None = Field(default=None, min_length=3, max_length=255)
+    role: UserRole | None = None
+    is_active: bool | None = None
+
+    @field_validator("email")
+    @classmethod
+    def normalise_email(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return _normalise_email(value)
+
+
+class TemporaryPasswordResponse(BaseModel):
+    user: UserRead
+    temporary_password: str
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

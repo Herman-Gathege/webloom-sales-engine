@@ -1,4 +1,4 @@
-import { Archive, ArrowLeft, Pencil, RotateCcw, WandSparkles } from "lucide-react";
+import { AlertTriangle, Archive, ArrowLeft, Pencil, RotateCcw, WandSparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -193,12 +193,19 @@ export function CampaignDetail() {
       </Dialog>
 
       {campaign.status === "draft" && (
-        <Card>
-          <CardContent className="pt-5">
-            <p className="text-sm text-muted-foreground">
-              Preview is performed on the create/edit screen. Generation will recheck eligibility.
-              Nothing is approved or sent.
-            </p>
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="flex items-start gap-3 p-4">
+            <AlertTriangle className="size-5 shrink-0 text-amber-800" aria-hidden="true" />
+            <div className="min-w-0">
+              <p className="font-semibold text-amber-900">
+                Campaign drafts are not sent automatically.
+              </p>
+              <p className="mt-1 text-sm text-amber-800">
+                Preview is performed on the create/edit screen. Generation will recheck eligibility
+                and prepare one immutable draft per eligible lead. Each draft is labelled{" "}
+                <strong>Not sent</strong> and cannot be delivered until a person approves it.
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}

@@ -1,18 +1,10 @@
-import {
-  ArrowRight,
-  Building2,
-  CheckCircle2,
-  ClipboardCheck,
-  Eye,
-  MessageSquare,
-  Search,
-  ShieldCheck,
-  Target,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, ClipboardCheck, Eye, MessageSquare, Search, ShieldCheck, Target, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { MarketingFooter, MarketingNav } from "@/components/layout/MarketingNav";
+import { Scout } from "@/components/Scout";
+import { type ScoutMood } from "@/components/Scout";
+import { DoodleReveal } from "@/components/guidance/Doodle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,24 +38,52 @@ const benefits = [
 
 const workflow = [
   {
-    title: "Find prospects",
-    description: "Bring researched businesses into a structured workspace.",
+    title: "Bring in prospects",
+    description: "Import researched businesses as leads and keep their source context.",
     icon: Search,
   },
   {
     title: "Organise lead information",
-    description: "Keep contact details, source context and research together.",
+    description: "Keep contact details, source context and research together on the Lead Desk.",
     icon: ClipboardCheck,
   },
   {
-    title: "Prepare outreach",
-    description: "Use your offers and approved message templates to prepare the next step.",
+    title: "Check outreach eligibility",
+    description: "Wadi reviews each lead against outreach policy and suppression before it's used.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Select offers and templates",
+    description: "Choose an offer and a message template that shape what the campaign says.",
     icon: MessageSquare,
   },
   {
-    title: "Track conversations",
-    description: "Keep follow-ups and human handoffs visible to the team.",
+    title: "Prepare campaign drafts",
+    description: "Generate one immutable draft per eligible lead. Nothing is sent until approved.",
     icon: Eye,
+  },
+];
+
+const problems = [
+  {
+    title: "Scattered prospect information",
+    description:
+      "Business details, contact routes and research live across notes, emails and memory instead of one place.",
+  },
+  {
+    title: "Inconsistent follow-ups",
+    description:
+      "It's hard to tell who was contacted, what was promised and who still needs a conversation.",
+  },
+  {
+    title: "Poor visibility",
+    description:
+      "The team can't see lead status or who owns the next step, so worthwhile leads go cold.",
+  },
+  {
+    title: "Hard to spot promising opportunities",
+    description:
+      "Without eligibility and source context, it's unclear which prospects are worth pursuing.",
   },
 ];
 
@@ -170,6 +190,25 @@ function ProductPreview() {
   );
 }
 
+function ScoutNote({
+  mood,
+  message,
+  size = 44,
+  className,
+}: {
+  mood: ScoutMood;
+  message: string;
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <div className={["flex items-start gap-3", className].filter(Boolean).join(" ")}>
+      <Scout mood={mood} size={size} />
+      <p className="text-sm leading-relaxed text-muted-foreground">{message}</p>
+    </div>
+  );
+}
+
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
@@ -182,10 +221,11 @@ export function LandingPage() {
       <MarketingNav />
 
       <main id="main-content">
+        {/* Hero */}
         <section className="relative overflow-hidden">
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[34rem] bg-[radial-gradient(circle_at_82%_18%,rgba(180,214,101,0.28),transparent_34rem)]" />
           <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 pt-12 pb-14 sm:px-6 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:pt-20 lg:pb-20">
-            <div>
+            <div className="space-y-6">
               <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary">
                 Built for structured business development
               </Badge>
@@ -198,7 +238,8 @@ export function LandingPage() {
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
                 Wadi helps your team organise business prospects, understand their potential and
-                manage outreach from one workspace.
+                manage outreach from one workspace and prepare responsible conversations, not
+                send them automatically.
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg" className="min-h-12 px-6 text-base">
@@ -217,25 +258,154 @@ export function LandingPage() {
               </p>
             </div>
 
-            <ProductPreview />
+            <div className="relative">
+            <ScoutNote
+              mood="idle"
+              message="Hi! I'm Wadi. I'll point out the useful bits as you look around."
+            />
+            <DoodleReveal
+              variant="curved-arrow"
+              size={96}
+              className="absolute -right-8 -bottom-8 text-primary/60"
+              direction="right"
+            />
+              <ProductPreview />
+              <DoodleReveal
+                variant="curved-arrow"
+                size={96}
+                className="absolute -right-8 -bottom-8 text-primary/60"
+                direction="right"
+              />
+            </div>
           </div>
         </section>
 
-        <section id="product" className="border-y border-border bg-card/70 py-16 sm:py-20">
+        {/* The problem */}
+        <section id="the-problem" className="border-y border-border bg-card/70 py-16 sm:py-20">
           <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
-                A clearer way to work
+                The problem
               </p>
               <h2 className="mt-3 text-3xl sm:text-4xl">
-                One workspace from prospect research to the next follow-up.
+                Prospect work is scattered, and follow-ups slip through the cracks.
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Wadi keeps the useful context close to the work, so the team spends less time
-                reconstructing information and more time moving worthwhile conversations forward.
+                Research, contacts and promises live in different places, so the team spends more
+                time reconstructing information than moving conversations forward.
               </p>
             </div>
-            <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {problems.map((problem) => (
+                <Card key={problem.title} className="bg-background/80">
+                  <CardContent className="p-5">
+                    <h3 className="text-base font-semibold">{problem.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {problem.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <ScoutNote
+              mood="idle"
+              message="Contacts, promises and research scattered across tools — this is the mess Wadi clears up."
+              className="mt-10"
+            />
+          </div>
+        </section>
+
+        {/* The solution */}
+        <section id="the-solution" className="py-16 sm:py-20">
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                The solution
+              </p>
+              <h2 className="mt-3 text-3xl sm:text-4xl">
+                One structured workspace for your prospects.
+              </h2>
+              <p className="mt-4 text-muted-foreground">
+                Wadi brings researched businesses, contact routes and source context together so
+                the team can prioritise leads and prepare outreach that's ready for a person to
+                review and send.
+              </p>
+            </div>
+            <ScoutNote
+              mood="success"
+              message="A single place for every lead — no more scattered lists."
+              className="mt-10"
+            />
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section id="how-it-works" className="border-y border-border py-16 sm:py-20">
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div className="max-w-2xl">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                  How it works
+                </p>
+                <h2 className="mt-3 text-3xl sm:text-4xl">
+                  From imported lead to prepared draft.
+                </h2>
+                <p className="mt-4 text-muted-foreground">
+                  Wadi follows the same path every time: bring in prospects, organise them, check
+                  eligibility, choose an offer and template, then prepare drafts for review.
+                </p>
+              </div>
+              <Link
+                to="/workflow"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
+              >
+                See the full workflow
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
+            <ol className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-5" aria-label="Wadi workflow">
+              {workflow.map(({ title, description, icon: Icon }, index) => (
+                <li key={title} className="rounded-xl border border-border bg-card p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold tracking-[0.14em] text-muted-foreground">
+                      0{index + 1}
+                    </span>
+                    <Icon className="size-5 text-primary" aria-hidden="true" />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {description}
+                  </p>
+                </li>
+              ))}
+            </ol>
+            {/* <div className="mt-10 flex justify-center">
+              <DoodleReveal
+                variant="dotted-path"
+                size={200}
+                className="text-muted-foreground/30"
+              />
+            </div> */}
+            <ScoutNote
+              mood="idle"
+              message="Each stage prepares the next — nothing is approved or sent until a person says so."
+              className="mt-10"
+            />
+          </div>
+        </section>
+
+        {/* Benefits */}
+        <section id="benefits" className="py-16 sm:py-20">
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                What you get
+              </p>
+              <h2 className="mt-3 text-3xl sm:text-4xl">
+                Clearer priorities, shared visibility, responsible outreach.
+              </h2>
+            </div>
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {benefits.map(({ title, description, icon: Icon }) => (
                 <Card key={title} className="bg-background/80">
                   <CardContent className="p-5">
@@ -250,43 +420,22 @@ export function LandingPage() {
                 </Card>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section id="how-it-works" className="py-16 sm:py-20">
-          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <div className="max-w-2xl">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
-                  How it works
-                </p>
-                <h2 className="mt-3 text-3xl sm:text-4xl">A simple path from research to follow-up.</h2>
-              </div>
-              <Link
-                to="/workflow"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
-              >
-                See the full workflow
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
+            <div className="mt-12 relative">
+              {/* <DoodleReveal
+                variant="hand-drawn-circle"
+                size={60}
+                className="absolute -top-4 -left-4 text-emerald-700"
+              /> */}
+              <ScoutNote
+                mood="success"
+                message="The team works from the same picture of every lead."
+                className="mt-10"
+              />
             </div>
-            <ol className="mt-9 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-              {workflow.map(({ title, description, icon: Icon }, index) => (
-                <li key={title} className="rounded-xl border border-border bg-card p-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold tracking-[0.14em] text-muted-foreground">
-                      0{index + 1}
-                    </span>
-                    <Icon className="size-5 text-primary" aria-hidden="true" />
-                  </div>
-                  <h3 className="mt-5 text-lg font-semibold">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
-                </li>
-              ))}
-            </ol>
           </div>
         </section>
 
+        {/* Trust and responsibility */}
         <section className="px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
           <div className="mx-auto grid w-full max-w-6xl gap-8 rounded-2xl bg-[var(--wadi-brand-deep)] px-6 py-10 text-white sm:px-9 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
@@ -311,6 +460,7 @@ export function LandingPage() {
           </div>
         </section>
 
+        {/* Final CTA */}
         <section className="border-t border-border py-16 sm:py-20">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
@@ -323,12 +473,17 @@ export function LandingPage() {
               Organise the research, prepare the conversation and keep the team aligned around
               what happens next.
             </p>
-            <Button asChild size="lg" className="mt-7 min-h-12 px-7 text-base">
-              <Link to="/login">
-                Get started
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </Button>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button asChild size="lg" className="min-h-12 px-7 text-base">
+                <Link to="/login">
+                  Get started
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="min-h-12 px-7 text-base">
+                <Link to="/workflow">Explore the workflow</Link>
+              </Button>
+            </div>
           </div>
         </section>
       </main>

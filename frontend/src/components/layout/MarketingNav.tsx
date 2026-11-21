@@ -29,14 +29,20 @@ export function MarketingNav() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Product navigation">
-          <a href="/#product" className="text-sm font-medium text-foreground/75 hover:text-primary">
-            Product
-          </a>
-          <Link to="/workflow" className="text-sm font-medium text-foreground/75 hover:text-primary">
+        <nav
+          className="hidden items-center gap-7 md:flex"
+          aria-label="Main navigation"
+        >
+          <Link
+            to="/workflow"
+            className="text-sm font-medium text-foreground/75 hover:text-primary"
+          >
             How it works
           </Link>
-          <Link to="/login" className="text-sm font-medium text-foreground/75 hover:text-primary">
+          <Link
+            to="/login"
+            className="text-sm font-medium text-foreground/75 hover:text-primary"
+          >
             Sign in
           </Link>
           <Link
@@ -67,13 +73,18 @@ export function MarketingNav() {
           className="border-t border-border bg-background px-4 py-4 md:hidden"
         >
           <div className="mx-auto flex max-w-6xl flex-col">
-            <a href="/#product" onClick={closeNavigation} className="rounded-lg px-3 py-3 text-sm font-medium">
-              Product
-            </a>
-            <Link to="/workflow" onClick={closeNavigation} className="rounded-lg px-3 py-3 text-sm font-medium">
+            <Link
+              to="/workflow"
+              onClick={closeNavigation}
+              className="rounded-lg px-3 py-3 text-sm font-medium"
+            >
               How it works
             </Link>
-            <Link to="/login" onClick={closeNavigation} className="rounded-lg px-3 py-3 text-sm font-medium">
+            <Link
+              to="/login"
+              onClick={closeNavigation}
+              className="rounded-lg px-3 py-3 text-sm font-medium"
+            >
               Sign in
             </Link>
             <Link
@@ -106,14 +117,26 @@ export function MarketingFooter() {
             </span>
           </div>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-            A prospect and outreach workspace by Webloom + Innovations.
+            A prospect and outreach workspace by{" "}
+            <a
+              href="https://webloomtechkenya.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-primary"
+            >
+              webloomtechkenya.com
+            </a>
+            .
           </p>
         </div>
-        <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm" aria-label="Footer navigation">
-          <a href="/#product" className="text-foreground/75 hover:text-primary">
-            Product
-          </a>
-          <Link to="/workflow" className="text-foreground/75 hover:text-primary">
+        <nav
+          className="flex flex-wrap gap-x-6 gap-y-3 text-sm"
+          aria-label="Footer navigation"
+        >
+          <Link
+            to="/workflow"
+            className="text-foreground/75 hover:text-primary"
+          >
             How it works
           </Link>
           <Link to="/login" className="text-foreground/75 hover:text-primary">

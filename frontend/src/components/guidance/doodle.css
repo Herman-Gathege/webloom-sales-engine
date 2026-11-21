@@ -1,0 +1,26 @@
+@keyframes doodle-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.doodle {
+  stroke: currentColor;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+
+.doodle--animate {
+  stroke-dasharray: var(--doodle-length, 1);
+  stroke-dashoffset: var(--doodle-length, 1);
+  animation: doodle-draw var(--doodle-duration, 0.7s) ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doodle--animate {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
