@@ -1,5 +1,7 @@
 import {
   BookOpen,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   LogOut,
   Megaphone,
@@ -11,13 +13,15 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { useAuth } from "@/auth/context";
 import { CrewList, CrewRail } from "@/components/Crew";
 import { Scout } from "@/components/Scout";
 import { cn } from "@/lib/utils";
+
+const SIDEBAR_COLLAPSED_KEY = "wadi.sidebar-collapsed";
 
 interface NavItem {
   to: string;
@@ -41,7 +45,7 @@ const NAV_ITEMS: NavItem[] = [
 /** Screens that exist in the plan but deliberately not in this sprint. */
 const LATER_ITEMS = ["Replies", "Pipeline"];
 
-function NavItems({ onNavigate }: { onNavigate?: () => void }) {
+function NavItems({ onNavigate, collapsed }: { onNavigate?: () => void; collapsed: boolean }) {
   const { user } = useAuth();
   const items = NAV_ITEMS.filter((item) => !item.adminOnly || user?.role === "admin");
 
@@ -53,6 +57,8 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
           to={to}
           end={end}
           onClick={onNavigate}
+          title={collapsed ? label : undefined}
+          aria-label={collapsed ? label : undefined}
           className={({ isActive }) =>
             cn(
               "relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -70,8 +76,15 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
                   isActive ? "opacity-100" : "opacity-0",
                 )}
               />
-              <Icon className="size-4" />
-              {label}
+              <div
+                className={cn(
+                  "flex items-center gap-2.5 w-full min-w-0",
+                  collapsed ? "justify-center" : undefined,
+                )}
+              >
+                <Icon className="size-4 shrink-0" />
+                {!collapsed && <span className="truncate">{label}</span>}
+              </div>
             </>
           )}
         </NavLink>
@@ -80,20 +93,27 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function Account({ onNavigate }: { onNavigate?: () => void }) {
+function Account({ onNavigate, collapsed }: { onNavigate?: () => void; collapsed: boolean }) {
   const { user, logout } = useAuth();
   if (!user) return null;
 
   return (
-    <div className="flex items-center gap-2 px-5 pb-3">
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[11px] text-sidebar-foreground/75" title={user.email}>
-          {user.email}
-        </p>
-        <p className="text-[10px] uppercase tracking-[0.16em] text-sidebar-foreground/35">
-          {user.role}
-        </p>
-      </div>
+    <div
+      className={cn(
+        "flex items-center gap-2 px-3 pb-3",
+        collapsed ? "justify-center" : undefined,
+      )}
+    >
+      {!collapsed && (
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[11px] text-sidebar-foreground/75" title={user.email}>
+            {user.email}
+          </p>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-sidebar-foreground/35">
+            {user.role}
+          </p>
+        </div>
+      )}
       <button
         type="button"
         aria-label="Sign out"
@@ -109,7 +129,8 @@ function Account({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function LaterSprints({ className }: { className?: string }) {
+function LaterSprints({ className, collapsed }: { className?: string; collapsed: boolean }) {
+  if (collapsed) return null;
   return (
     <div className={cn("px-6", className)}>
       <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/35">
@@ -132,6 +153,24 @@ export function AppLayout() {
   const menuOpen = openedAt === location.pathname;
   const closeMenu = () => setOpenedAt(null);
 
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = useCallback(() => {
+    const next = !collapsed;
+    setCollapsed(next);
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+    } catch {
+      // Storage unavailable; the in-session toggle still applies.
+    }
+  }, [collapsed]);
+
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (event: KeyboardEvent) => {
@@ -149,32 +188,53 @@ export function AppLayout() {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       {/* Desktop rail: only from 1024px up. Below that, the drawer takes over. */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:sticky lg:top-0 lg:flex lg:h-screen lg:overflow-y-auto">
-        <div className="px-6 py-6">
-          <div
-            className="text-[26px] leading-none tracking-tight text-white"
-            style={{ fontFamily: "var(--wadi-display)" }}
+      <aside
+        className={cn(
+          "hidden shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:sticky lg:top-0 lg:flex lg:h-screen lg:overflow-y-auto",
+          collapsed ? "w-16" : "w-60",
+          "transition-[width] duration-300 ease-out",
+        )}
+      >
+        <div className={cn("px-3 py-6", !collapsed && "px-6")}>
+          {!collapsed && (
+            <>
+              <div
+                className="text-[26px] leading-none tracking-tight text-white"
+                style={{ fontFamily: "var(--wadi-display)" }}
+              >
+                wadi
+              </div>
+              <div className="mt-1.5 text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/45">
+                sales scout
+              </div>
+            </>
+          )}
+          <button
+            type="button"
+            aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
+            aria-expanded={!collapsed}
+            onClick={toggleSidebar}
+            className="mt-6 grid size-9 place-items-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-white/10 hover:text-white"
           >
-            wadi
-          </div>
-          <div className="mt-1.5 text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/45">
-            sales scout
-          </div>
+            {collapsed ? <ChevronLeft size={4} /> : <ChevronRight size={4} />}
+          </button>
         </div>
 
-        <NavItems />
-        <LaterSprints className="mt-8" />
+        <NavItems onNavigate={closeMenu} collapsed={collapsed} />
+        <LaterSprints className="mt-8" collapsed={collapsed} />
 
         <div className="mt-auto">
-          <Account />
+          <Account onNavigate={closeMenu} collapsed={collapsed} />
           <CrewRail />
-          <div className="flex items-end gap-3 border-t border-sidebar-border px-5 py-4">
-            <Scout size={78} />
-            <p className="pb-1 text-[11px] leading-snug text-sidebar-foreground/45">
-              Reading the ground.
-              <br />
-              Following the water.
-            </p>
+          <div className="flex items-end gap-3 border-t border-sidebar-border px-3 py-4">
+            <Scout size={collapsed ? 36 : 78} />
+            {!collapsed && (
+              <p className="pb-1 text-[11px] leading-snug text-sidebar-foreground/45">
+                Reading the ground.
+                <br />
+                Following the water.
+              </p>
+            )}
           </div>
         </div>
       </aside>
@@ -254,8 +314,8 @@ export function AppLayout() {
               </button>
             </div>
 
-            <NavItems onNavigate={() => closeMenu()} />
-            <LaterSprints className="mt-6" />
+            <NavItems onNavigate={() => closeMenu()} collapsed={false} />
+            <LaterSprints className="mt-6" collapsed={false} />
 
             <div className="mt-6">
               <div className="px-6 text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/35">
@@ -267,7 +327,7 @@ export function AppLayout() {
             </div>
 
             <div className="mt-auto">
-              <Account onNavigate={() => setOpenedAt(null)} />
+              <Account onNavigate={() => setOpenedAt(null)} collapsed={false} />
             </div>
 
             <div className="flex items-end gap-3 border-t border-sidebar-border px-5 py-4">

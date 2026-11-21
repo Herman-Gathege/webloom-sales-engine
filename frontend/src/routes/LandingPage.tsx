@@ -236,12 +236,27 @@ export function LandingPage() {
                 Find the right prospects.
                 <span className="block text-primary">Build better conversations.</span>
               </h1>
+              <div className="mt-3 text-center">
+                <DoodleReveal
+                  variant="scribble-underline"
+                  size={250}
+                  className="text-primary/45"
+                />
+              </div>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
                 Wadi helps your team organise business prospects, understand their potential and
                 manage outreach from one workspace and prepare responsible conversations, not
                 send them automatically.
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <div className="mx-auto mb-2">
+                  <DoodleReveal
+                    variant="directional-arrow"
+                    direction="down"
+                    size={34}
+                    className="text-primary/50"
+                  />
+                </div>
                 <Button asChild size="lg" className="min-h-12 px-6 text-base">
                   <Link to="/login">
                     Get started
@@ -290,6 +305,13 @@ export function LandingPage() {
               <h2 className="mt-3 text-3xl sm:text-4xl">
                 Prospect work is scattered, and follow-ups slip through the cracks.
               </h2>
+              <div className="mt-3 text-center">
+                <DoodleReveal
+                  variant="scribble-underline"
+                  size={220}
+                  className="text-primary/40"
+                />
+              </div>
               <p className="mt-4 text-muted-foreground">
                 Research, contacts and promises live in different places, so the team spends more
                 time reconstructing information than moving conversations forward.
@@ -325,6 +347,13 @@ export function LandingPage() {
               <h2 className="mt-3 text-3xl sm:text-4xl">
                 One structured workspace for your prospects.
               </h2>
+              <div className="mt-3 text-center">
+                <DoodleReveal
+                  variant="scribble-underline"
+                  size={220}
+                  className="text-primary/40"
+                />
+              </div>
               <p className="mt-4 text-muted-foreground">
                 Wadi brings researched businesses, contact routes and source context together so
                 the team can prioritise leads and prepare outreach that's ready for a person to
@@ -362,6 +391,14 @@ export function LandingPage() {
                 See the full workflow
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
+            </div>
+            <div className="mt-8 text-center">
+              <DoodleReveal
+                variant="dotted-path"
+                size={220}
+                className="text-muted-foreground/25"
+                animate={false}
+              />
             </div>
             <ol className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-5" aria-label="Wadi workflow">
               {workflow.map(({ title, description, icon: Icon }, index) => (

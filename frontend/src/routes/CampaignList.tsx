@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { listCampaigns, type CampaignSummary } from "@/api/campaign";
+import { DoodleReveal } from "@/components/guidance/Doodle";
 import { Scout } from "@/components/Scout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,12 +63,20 @@ export function CampaignList() {
               Prepare SMS drafts from explicitly selected leads. Drafts are never sent here.
             </CardDescription>
           </div>
-          <Button asChild size="sm">
-            <Link to="/campaigns/new">
-              <Plus className="size-4" aria-hidden="true" />
-              New campaign
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <DoodleReveal
+              variant="directional-arrow"
+              direction="right"
+              size={18}
+              className="text-muted-foreground/40 shrink-0"
+            />
+            <Button asChild size="sm">
+              <Link to="/campaigns/new">
+                <Plus className="size-4" aria-hidden="true" />
+                New campaign
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <label className="flex items-center gap-2 text-sm">

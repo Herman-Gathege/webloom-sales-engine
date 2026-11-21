@@ -135,8 +135,7 @@ export function WorkflowPage() {
                   <DoodleReveal
                     variant="dotted-path"
                     size={48}
-                    className="mx-auto text-muted-foreground/20"
-                    animate={false}
+                    className="mx-auto text-muted-foreground/30"
                   />
                 )}
               </li>
@@ -173,6 +172,14 @@ export function WorkflowPage() {
           </div>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <div className="mx-auto mb-2">
+              <DoodleReveal
+                variant="directional-arrow"
+                direction="down"
+                size={30}
+                className="text-primary/50"
+              />
+            </div>
             <Button asChild size="lg" className="min-h-12">
               <Link to="/login">
                 Get started

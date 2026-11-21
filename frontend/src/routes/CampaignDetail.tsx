@@ -12,6 +12,7 @@ import {
   type CampaignSkip,
 } from "@/api/campaign";
 import { useAuth } from "@/auth/context";
+import { DoodleReveal } from "@/components/guidance/Doodle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -108,6 +109,13 @@ export function CampaignDetail() {
                     <Link to={`/campaigns/${campaign.id}/edit`}><Pencil className="size-4" />Edit</Link>
                   </Button>
                   <Button size="sm" onClick={() => setConfirmGenerate(true)} disabled={busy}>
+                    <DoodleReveal
+                      variant="directional-arrow"
+                      direction="right"
+                      size={16}
+                      className="mr-1 text-muted-foreground/50 shrink-0"
+                      animate={false}
+                    />
                     <WandSparkles className="size-4" />Generate drafts
                   </Button>
                 </>

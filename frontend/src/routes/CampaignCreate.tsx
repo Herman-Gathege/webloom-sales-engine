@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -22,7 +22,7 @@ import type {
 } from "@/api/types";
 import { Scout } from "@/components/Scout";
 import { TrailStop } from "@/components/guidance/Trail";
-// import { Doodle } from "@/components/guidance/Doodle";
+import { DoodleReveal } from "@/components/guidance/Doodle";
 import { ComplianceStatusBadge } from "@/components/compliance/ComplianceStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 25;
 
@@ -53,6 +54,7 @@ const EMPTY_FORM: FormState = {
 };
 
 const CAMPAIGN_TRAIL_DISMISSED_KEY = "wadi.campaign-trail-dismissed";
+const CAMPAIGN_GUIDE_COLLAPSED_KEY = "wadi.campaign-guide-collapsed";
 
 const TRAIL_STOPS = [
   {
@@ -95,6 +97,47 @@ export function CampaignCreate() {
       return false;
     }
   });
+
+  const [guideCollapsed, setGuideCollapsed] = useState(() => {
+    try {
+      return sessionStorage.getItem(CAMPAIGN_GUIDE_COLLAPSED_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const [fieldError, setFieldError] = useState<{ field: string; message: string } | null>(
+    null,
+  );
+
+  const nameRef = useRef<HTMLInputElement>(null);
+  const goalRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+  const leadListRef = useRef<HTMLDivElement>(null);
+
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const media =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : null;
+    if (!media) return;
+    setReducedMotion(media.matches);
+    const handler = () => setReducedMotion(media.matches);
+    media.addEventListener("change", handler);
+    return () => media.removeEventListener("change", handler);
+  }, []);
+
+  function toggleGuide() {
+    const next = !guideCollapsed;
+    setGuideCollapsed(next);
+    try {
+      sessionStorage.setItem(CAMPAIGN_GUIDE_COLLAPSED_KEY, String(next));
+    } catch {
+      // Storage unavailable; the in-session toggle still applies.
+    }
+  }
 
   function dismissGuide() {
     setGuideDismissed(true);
@@ -171,6 +214,7 @@ export function CampaignCreate() {
   function updateForm(changes: Partial<FormState>) {
     setForm((current) => ({ ...current, ...changes }));
     setPreview(null);
+    setFieldError(null);
   }
 
   function toggleLead(leadId: string) {
@@ -199,18 +243,49 @@ export function CampaignCreate() {
     [],
   );
 
+  function scrollTo(element: HTMLElement | null, focusTarget?: HTMLElement | null) {
+    if (!element) return;
+    element.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+    if (focusTarget) focusTarget.focus({ preventScroll: true });
+  }
+
+  function focusFieldError(
+    field: string,
+    message: string,
+    focusTarget?: HTMLElement | null,
+  ) {
+    setFieldError({ field, message });
+    setError(null);
+    if (field === "leads") {
+      scrollTo(leadListRef.current);
+      return;
+    }
+    const input =
+      field === "name" ? nameRef.current : field === "goal" ? goalRef.current : null;
+    scrollTo(formRef.current, focusTarget ?? input);
+  }
+
   async function runPreview() {
     setError(null);
+    setFieldError(null);
     if (!form.name.trim() || !form.goal.trim()) {
-      setError("Enter a campaign name and goal.");
+      const field = !form.name.trim() ? "name" : "goal";
+      focusFieldError(
+        field,
+        "Enter a campaign name and goal.",
+        field === "name" ? nameRef.current : goalRef.current,
+      );
       return;
     }
     if (!form.offer_id || !form.template_id) {
-      setError("Choose an active offer and SMS template.");
+      focusFieldError(
+        "offer",
+        "Choose an active offer and SMS template.",
+      );
       return;
     }
     if (selectedIds.length === 0) {
-      setError("Select at least one lead.");
+      focusFieldError("leads", "Select at least one lead.");
       return;
     }
     setPreviewing(true);
@@ -224,8 +299,10 @@ export function CampaignCreate() {
   }
 
   async function save() {
+    setFieldError(null);
     if (!preview) {
       setError("Preview the campaign before saving it.");
+      scrollTo(formRef.current);
       return;
     }
     setSaving(true);
@@ -237,6 +314,7 @@ export function CampaignCreate() {
       navigate(`/campaigns/${result.id}`, { replace: true });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save the campaign.");
+      scrollTo(formRef.current);
     } finally {
       setSaving(false);
     }
@@ -257,38 +335,74 @@ export function CampaignCreate() {
                 Three steps to prepare a campaign draft. Nothing is sent here.
               </CardDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={dismissGuide}>
-              Dismiss guide
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Scout size={44} />
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">
-                  Wadi prepares SMS drafts for a person to review before anything is approved.
-                </p>
-              </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={dismissGuide}>
+                Dismiss guide
+              </Button>
+              <button
+                type="button"
+                aria-label={
+                  guideCollapsed ? "Expand campaign guide" : "Collapse campaign guide"
+                }
+                aria-expanded={!guideCollapsed}
+                onClick={toggleGuide}
+                className="grid size-8 place-items-center rounded-md text-primary hover:bg-primary/10 transition-colors"
+              >
+                {guideCollapsed ? <ChevronDown size={4} /> : <ChevronUp size={4} />}
+              </button>
             </div>
-            <ol className="grid gap-2 text-sm" aria-label="Campaign creation trail">
-              {TRAIL_STOPS.map((stop) => (
-                <TrailStop
-                  key={String(stop.number)}
-                  {...stop}
-                  complete={false}
-                  current={false}
-                />
-              ))}
-            </ol>
-            {/* <div className="mx-auto">
-              <Doodle
-                variant="dotted-path"
-                size={140}
-                animate={false}
-                className="text-muted-foreground/40"
-              />
-            </div> */}
-          </CardContent>
+          </CardHeader>
+          <div
+            aria-hidden={guideCollapsed}
+            className={cn(
+              "transition-[max-height] duration-300 ease-out overflow-hidden",
+              guideCollapsed ? "max-h-0" : "max-h-[560px]",
+            )}
+          >
+            <CardContent className="space-y-3">
+              <div className="flex items-start gap-3">
+                <Scout size={44} />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">
+                    Wadi prepares SMS drafts for a person to review before anything is approved.
+                  </p>
+                </div>
+              </div>
+              <ol className="grid gap-2 text-sm" aria-label="Campaign creation trail">
+                {TRAIL_STOPS.map((stop) => (
+                  <TrailStop
+                    key={String(stop.number)}
+                    {...stop}
+                    complete={false}
+                    current={false}
+                  />
+                ))}
+              </ol>
+            </CardContent>
+          </div>
+          {guideCollapsed && (
+            <CardContent className="pt-3">
+              <div className="flex items-start gap-3">
+                <Scout size={36} />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">
+                    Guide collapsed — not dismissed.
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Expand it again to walk through the three campaign steps. Nothing is sent
+                    until a person approves a draft.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={toggleGuide}
+                    className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                  >
+                    <ChevronUp size={3} aria-hidden="true" /> Expand guide
+                  </button>
+                </div>
+              </div>
+            </CardContent>
+          )}
         </Card>
       )}
 
@@ -307,7 +421,7 @@ export function CampaignCreate() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card ref={formRef}>
         <CardHeader>
           <CardTitle>{editing ? "Edit campaign" : "New campaign"}</CardTitle>
           <CardDescription>
@@ -320,14 +434,25 @@ export function CampaignCreate() {
             <label className="space-y-1.5 text-sm">
               <span className="font-medium">Campaign name</span>
               <Input
+                ref={nameRef}
+                aria-invalid={fieldError?.field === "name"}
+                aria-describedby={fieldError?.field === "name" ? "campaign-name-error" : undefined}
                 value={form.name}
                 onChange={(event) => updateForm({ name: event.target.value })}
                 placeholder="Westlands no-website outreach"
               />
+              {fieldError?.field === "name" && (
+                <p id="campaign-name-error" role="alert" className="mt-1 text-sm text-destructive">
+                  {fieldError.message}
+                </p>
+              )}
             </label>
             <label className="space-y-1.5 text-sm">
               <span className="font-medium">Goal</span>
               <Input
+                ref={goalRef}
+                aria-invalid={fieldError?.field === "goal"}
+                aria-describedby={fieldError?.field === "goal" ? "campaign-goal-error" : undefined}
                 value={form.goal}
                 onChange={(event) => updateForm({ goal: event.target.value })}
                 placeholder="Book five discovery calls this month"
@@ -335,6 +460,11 @@ export function CampaignCreate() {
               <span className="block text-xs font-normal text-muted-foreground">
                 Describe the business outcome, not the message body.
               </span>
+              {fieldError?.field === "goal" && (
+                <p id="campaign-goal-error" role="alert" className="mt-1 text-sm text-destructive">
+                  {fieldError.message}
+                </p>
+              )}
             </label>
             <label className="space-y-1.5 text-sm">
               <span className="font-medium">Offer</span>
@@ -388,6 +518,7 @@ export function CampaignCreate() {
           }}
           onFiltersChange={updateSelectionContext}
           initialContext={selectionContext}
+          containerRef={leadListRef}
         />
       ) : (
         <p className="text-sm text-muted-foreground">Loading campaign selection…</p>
@@ -422,12 +553,14 @@ function LeadSelector({
   onClear,
   onFiltersChange,
   initialContext,
+  containerRef,
 }: {
   selectedIds: string[];
   onToggle: (leadId: string) => void;
   onClear: () => void;
   onFiltersChange: (context: CampaignSelectionContext) => void;
   initialContext: CampaignSelectionContext;
+  containerRef?: RefObject<HTMLDivElement | null> | null;
 }) {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [total, setTotal] = useState(0);
@@ -587,15 +720,28 @@ function LeadSelector({
   ]);
 
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const allVisibleSelected =
+    leads.length > 0 && leads.every((lead) => selectedIds.includes(lead.id));
+
+  function selectAllVisible() {
+    leads.forEach((lead) => {
+      if (!selectedIds.includes(lead.id)) onToggle(lead.id);
+    });
+  }
 
   return (
-    <Card>
+    <Card ref={containerRef as RefObject<HTMLDivElement> | undefined}>
       <CardHeader className="flex-row items-start justify-between gap-3">
         <div>
-          <CardTitle>Select leads</CardTitle>
-          <CardDescription>Filters narrow the list; each campaign stores explicit selections.</CardDescription>
+          <CardTitle>Choose leads for this campaign</CardTitle>
+          <CardDescription>
+            Pick the leads this campaign will reach. Wadi checks each lead's eligibility and
+            suppression before drafts are prepared.
+          </CardDescription>
         </div>
-        <Badge variant="secondary">{selectedIds.length} selected</Badge>
+        <Badge variant="secondary">
+          {selectedIds.length} of {total} leads chosen
+        </Badge>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -778,12 +924,28 @@ function LeadSelector({
           </select>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs text-muted-foreground">{total} matching leads</p>
-          {selectedIds.length > 0 && (
-            <Button type="button" variant="link" size="sm" className="h-auto p-0" onClick={onClear}>
-              Clear selections
-            </Button>
-          )}
+          <p className="text-xs text-muted-foreground">
+            {selectedIds.length} of {total} leads chosen
+          </p>
+          <div className="flex items-center gap-2">
+            {leads.length > 0 &&
+              !allVisibleSelected &&
+              selectedIds.length < 200 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={selectAllVisible}
+                >
+                  Select all on this page
+                </Button>
+              )}
+            {selectedIds.length > 0 && (
+              <Button type="button" variant="link" size="sm" className="h-auto p-0" onClick={onClear}>
+                Clear selections
+              </Button>
+            )}
+          </div>
         </div>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {loading ? (
@@ -794,20 +956,36 @@ function LeadSelector({
           </p>
         ) : (
           <div className="space-y-2">
+            <div className="text-center mb-2">
+              <DoodleReveal
+                variant="dotted-path"
+                size={140}
+                className="text-muted-foreground/30"
+              />
+            </div>
             {leads.map((lead) => {
               const selected = selectedIds.includes(lead.id);
               return (
                 <label
                   key={lead.id}
-                  className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent"
+                  className={cn(
+                    "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-[border-color,background-color] duration-200",
+                    selected
+                      ? "border-primary bg-primary/50"
+                      : "border-border bg-card hover:bg-accent",
+                  )}
                 >
                   <input
                     type="checkbox"
-                    className="mt-1"
+                    className="mt-1 shrink-0"
                     checked={selected}
                     disabled={!selected && selectedIds.length >= 200}
                     onChange={() => onToggle(lead.id)}
+                    aria-label={lead.business_name}
                   />
+                  {selected && (
+                    <Check className="size-5 shrink-0 text-primary mt-0.5" aria-hidden="true" />
+                  )}
                   <span className="min-w-0 flex-1">
                     <span className="block font-medium">{lead.business_name}</span>
                     <span className="mt-1 block text-xs text-muted-foreground">
